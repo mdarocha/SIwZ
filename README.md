@@ -1,7 +1,7 @@
 # SIwZ
 
 Prerequisites:
--docker
--mongoDB(on docker)
--dotnet
--aspnet-runtime
+ - docker
+ - mongoDB(on docker)
+ - dotnet
+ - aspnet-runtime
