@@ -46,9 +46,13 @@ namespace Server
             }
 
             app.UseHttpsRedirection();
-
+            
             app.UseRouting();
+            
+            app.UseAuthorization();
 
+            app.UseCors(builder => builder.WithOrigins("*").AllowAnyHeader().AllowAnyMethod());
+            
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
     }

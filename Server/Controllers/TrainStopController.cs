@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Server.Models;
@@ -8,6 +9,11 @@ using Server.Services;
 
 namespace Server.Controllers
 {
+
+    public class dlskjldsfkj
+    {
+        public string City { get; set; }
+    }
     
     [Route("/api/[controller]")]
     [ApiController]
@@ -20,13 +26,14 @@ namespace Server.Controllers
             _trainStopService = service;
         }
 
-        [HttpGet(nameof(Get))]
+        [HttpGet]
+        [Route("Get")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public ActionResult<List<TrainStop>> Get() =>
             _trainStopService.Get();
 
-        [HttpGet(nameof(GetStop))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [HttpGet]
+        [Route("GetStop")]
         public ActionResult<TrainStop> GetStop(string id)
         {
             var ts = _trainStopService.Get(id);
@@ -37,14 +44,16 @@ namespace Server.Controllers
             return ts;
         }
 
-        [HttpPost(nameof(Create))]
-        [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public ActionResult<TrainStop> Create([FromBody]String city)
+        [HttpPost]
+        [Route("Chuj")]
+        public ActionResult<TrainStop> Create([FromBody] dlskjldsfkj city)
         {
-            var ts = new TrainStop(city);
-            return new CreatedAtRouteResult("TrainStop", new {id = ts.Id}, ts);
+//            var ts = new TrainStop(city);
+//            return new CreatedAtRouteResult("TrainStop", new {id = ts.Id}, ts);
+            Debug.Print("dupa");
+            return new TrainStop($"A man has fallen in a river in {city.City}");
         }
+        
     }
 }
 
