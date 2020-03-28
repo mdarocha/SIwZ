@@ -38,6 +38,18 @@ namespace Server.Controllers
             return ts;
         }
 
+        [HttpGet]
+        [Route("GetStops")]
+        public ActionResult<List<TrainStop>> GetStops(string city, string name)
+        {
+            var ts = _trainStopService.Get(city, name);
+            
+            if (ts == null)
+                return new NotFoundResult();
+            
+            return ts;
+        }
+
         [HttpPost]
         [Route("Create")]
         public ActionResult<TrainStop> Create([FromBody] TrainStop trainStop)

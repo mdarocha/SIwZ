@@ -14,5 +14,9 @@ namespace Server.Models
         [BsonElement("City")]
         [BsonRepresentation(BsonType.String)]
         public string City { get; set; }
+
+        [BsonElement("Name")]
+        [BsonRepresentation((BsonType.String))]
+        public string Name { get; set; }
     }
 }
