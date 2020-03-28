@@ -22,8 +22,13 @@ namespace Server.Services
         public TrainStop Get(string id) =>
             _trainStops.Find<TrainStop>(trainStop => trainStop.Id == id).FirstOrDefault();
 
-        //TODO
-        // void?
+        public List<TrainStop> Get(string city, string name)
+        {
+            if (city != null && name != null)
+                return _trainStops.Find<TrainStop>(ts => ts.Name == name && ts.City == city).ToList();
+            return _trainStops.Find<TrainStop>(ts => ts.Name == name || ts.City == city).ToList();
+        }
+
         public TrainStop Create(TrainStop trainStop)
         {
             _trainStops.InsertOne(trainStop);
