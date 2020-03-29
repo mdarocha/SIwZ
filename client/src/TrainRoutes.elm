@@ -1,19 +1,18 @@
 module TrainRoutes exposing (Model, Msg, init, update, view)
 
+import Bootstrap.Alert as Alert
+import Bootstrap.Button as Button
+import Bootstrap.Form as Form
+import Bootstrap.Form.Input as Input
+import Bootstrap.Grid as Grid
+import Bootstrap.Spinner as Spinner
+import Bootstrap.Table as Table
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Decode as Decode
 import Json.Encode as Encode
-import Bootstrap.Grid as Grid
-import Bootstrap.Table as Table
-import Bootstrap.Alert as Alert
-import Bootstrap.Spinner as Spinner
-import Bootstrap.Form.Input as Input
-import Bootstrap.Form as Form
-import Bootstrap.Button as Button
-
 import Session exposing (..)
 
 
@@ -142,9 +141,11 @@ update msg model =
                 Submit ->
                     if isValidInput model.stopToAdd then
                         ( model, addStop model.session.api model.stopToAdd )
+
                     else
                         let
-                            newStopToAdd = TrainStop "" "" ""
+                            newStopToAdd =
+                                TrainStop "" "" ""
                         in
                         ( { model | stopToAdd = newStopToAdd, stopAddError = Just "Nieprawidłowy przystanek" }, Cmd.none )
 
@@ -154,15 +155,16 @@ isValidInput stop =
     not (String.isEmpty stop.name || String.isEmpty stop.city)
 
 
+
 -- VIEW
 
 
 view : Model -> Html Msg
 view model =
-    div [ class "mt-3" ] [
-        Grid.row [] [ Grid.col [] [ viewStopsList model.stopList ] ],
-        Grid.row [] [ Grid.col [] [ viewInputStop model.stopToAdd model.stopAddError ] ]
-    ]
+    div [ class "mt-3" ]
+        [ Grid.row [] [ Grid.col [] [ viewStopsList model.stopList ] ]
+        , Grid.row [] [ Grid.col [] [ viewInputStop model.stopToAdd model.stopAddError ] ]
+        ]
 
 
 viewStopsList : TrainStops -> Html Msg
@@ -178,10 +180,11 @@ viewStopsList model =
             Success stops ->
                 Table.table
                     { options = [ Table.striped, Table.hover, Table.bordered ]
-                    , thead = Table.simpleThead
-                        [ Table.th [] [ text "Nazwa" ]
-                        , Table.th [] [ text "Miasto" ]
-                        ]
+                    , thead =
+                        Table.simpleThead
+                            [ Table.th [] [ text "Nazwa" ]
+                            , Table.th [] [ text "Miasto" ]
+                            ]
                     , tbody = Table.tbody [] (List.map (\s -> Table.tr [] [ Table.td [] [ text s.name ], Table.td [] [ text s.city ] ]) stops)
                     }
         ]
@@ -192,13 +195,14 @@ viewInputStop stopToAdd error =
     div [ class "mt-1" ]
         [ Form.form []
             [ Form.row []
-                [ Form.col [] [ formInput "name" "Nazwa"  stopToAdd.name NameUpdate ]
+                [ Form.col [] [ formInput "name" "Nazwa" stopToAdd.name NameUpdate ]
                 , Form.col [] [ formInput "city" "Miasto" stopToAdd.city CityUpdate ]
                 ]
             , Form.row [] [ Form.col [] [ Button.button [ Button.primary, Button.onClick (StopFormUpdate Submit) ] [ text "Dodaj" ] ] ]
             , formError error
             ]
         ]
+
 
 formInput : String -> String -> String -> (String -> StopToAddUpdate) -> Html Msg
 formInput id title value updateMsg =
@@ -207,13 +211,17 @@ formInput id title value updateMsg =
         , Input.text [ Input.id id, Input.value value, Input.attrs [ onInput (\v -> StopFormUpdate (updateMsg v)) ] ]
         ]
 
+
 formError : Maybe Error -> Html Msg
 formError error =
     case error of
         Just errorText ->
             Form.row [] [ Form.col [] [ Alert.simpleDanger [] [ text errorText ] ] ]
+
         Nothing ->
             div [] []
+
+
 
 -- HTTP
 

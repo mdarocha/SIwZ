@@ -1,15 +1,15 @@
 module Main exposing (..)
 
+import Bootstrap.Grid as Grid
+import Bootstrap.Navbar as Navbar
 import Browser
 import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (class)
-import Url
-import Bootstrap.Grid as Grid
-import Bootstrap.Navbar as Navbar
-
 import Session exposing (..)
 import TrainRoutes
+import Url
+
 
 main : Program String Model Msg
 main =
@@ -87,12 +87,14 @@ view model =
         ]
     }
 
+
 viewContent : Model -> Html Msg
 viewContent model =
     case model of
         TrainRoutes trainModel ->
             TrainRoutes.view trainModel
                 |> Html.map TrainRoutesUpdate
+
 
 viewHeader : Html Msg
 viewHeader =
