@@ -3,8 +3,10 @@ module Main exposing (..)
 import Browser
 import Browser.Navigation as Nav
 import Html exposing (..)
+import Html.Attributes exposing (class)
 import Url
 import Bootstrap.Grid as Grid
+import Bootstrap.Navbar as Navbar
 
 import Session exposing (..)
 import TrainRoutes
@@ -78,7 +80,10 @@ view : Model -> Browser.Document Msg
 view model =
     { title = "Trains"
     , body =
-        [ Grid.container [] [ viewContent model ]
+        [ Grid.container []
+            [ viewHeader
+            , viewContent model
+            ]
         ]
     }
 
@@ -88,3 +93,7 @@ viewContent model =
         TrainRoutes trainModel ->
             TrainRoutes.view trainModel
                 |> Html.map TrainRoutesUpdate
+
+viewHeader : Html Msg
+viewHeader =
+    h2 [ class "text-center mt-2 mb-2 w-100" ] [ text "SIwZ trains" ]
