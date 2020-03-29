@@ -3,11 +3,11 @@ module Main exposing (..)
 import Browser
 import Browser.Navigation as Nav
 import Html exposing (..)
+import Url
+import Bootstrap.Grid as Grid
 
 import Session exposing (..)
 import TrainRoutes
-import Url
-
 
 main : Program String Model Msg
 main =
@@ -78,11 +78,13 @@ view : Model -> Browser.Document Msg
 view model =
     { title = "Trains"
     , body =
-        [ div []
-            [ case model of
-                TrainRoutes trainModel ->
-                    TrainRoutes.view trainModel
-                        |> Html.map TrainRoutesUpdate
-            ]
+        [ Grid.container [] [ viewContent model ]
         ]
     }
+
+viewContent : Model -> Html Msg
+viewContent model =
+    case model of
+        TrainRoutes trainModel ->
+            TrainRoutes.view trainModel
+                |> Html.map TrainRoutesUpdate
