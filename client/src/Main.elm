@@ -3,11 +3,7 @@ module Main exposing (..)
 import Browser
 import Browser.Navigation as Nav
 import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput)
-import Http
-import Json.Decode as JsonDecode
-import Json.Encode as JsonEncode
+
 import Session exposing (..)
 import TrainRoutes
 import Url
