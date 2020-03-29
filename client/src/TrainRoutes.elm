@@ -13,7 +13,6 @@ import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Decode as Decode
 import Json.Encode as Encode
-import Session exposing (..)
 
 
 
@@ -38,7 +37,7 @@ type TrainStops
 
 
 type alias Model =
-    { session : Session
+    { api : String
     , stopList : TrainStops
     , stopToAdd : TrainStop
     , stopAddError : Maybe Error
@@ -65,10 +64,10 @@ type Msg
 -- INIT
 
 
-init : Session -> ( Model, Cmd Msg )
-init session =
-    ( Model session Loading (TrainStop "" "" "") Nothing
-    , getStops session.api
+init : String -> ( Model, Cmd Msg )
+init api =
+    ( Model api Loading (TrainStop "" "" "") Nothing
+    , getStops api
     )
 
 
@@ -140,7 +139,7 @@ update msg model =
 
                 Submit ->
                     if isValidInput model.stopToAdd then
-                        ( model, addStop model.session.api model.stopToAdd )
+                        ( model, addStop model.api model.stopToAdd )
 
                     else
                         let
@@ -179,7 +178,7 @@ viewStopsList model =
 
             Success stops ->
                 Table.table
-                    { options = [ Table.striped, Table.hover, Table.bordered ]
+                    { options = [ Table.striped, Table.hover, Table.bordered, Table.responsive ]
                     , thead =
                         Table.simpleThead
                             [ Table.th [] [ text "Nazwa" ]

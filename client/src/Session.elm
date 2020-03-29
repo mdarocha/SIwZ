@@ -1,6 +1,7 @@
 module Session exposing (Session)
 
 import Browser.Navigation as Nav
+import Url
 
 
 type alias Session =
