@@ -1,4 +1,4 @@
-name: .NET Core
+name: SIwZ CI
 
 on:
   push:
@@ -23,3 +23,16 @@ jobs:
       run: dotnet build --configuration Release --no-restore
     - name: Test
       run: dotnet test --no-restore --verbosity normal
+
+  build-client:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: cd client
+        run: cd client/
+      - name: Setup elm
+        uses: jorelali/setup-elm@v1
+        with:
+          elm-version: 0.19.1
+      - name: Build elm
+        run: elm make src/Main.elm --output index.js
