@@ -34,5 +34,7 @@ jobs:
         uses: jorelali/setup-elm@v1
         with:
           elm-version: 0.19.1
+      - name: ls
+        run: ls -al
       - name: Build elm
         run: elm make src/Main.elm --output index.js
