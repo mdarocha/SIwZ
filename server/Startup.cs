@@ -30,6 +30,8 @@ namespace server
             services.AddSingleton<IMongoClient>(new MongoClient("mongodb://localhost:27017"));
 
             services.AddSingleton<TrainStopService>();
+
+            services.AddSingleton<RouteService>();
             
             services.AddControllers();
         }
