@@ -15,8 +15,10 @@
     </head>
     <body>
         <script>
-            let api_url = __env.API_URL;
-            if(!api_url) {
+            let api_url = null;
+            if(window.__env && __env.api_url) {
+                api_url = __env.API_URL;
+            } else {
                 api_url = "http://localhost:5000/api/";
             }
 
