@@ -20,5 +20,3 @@ db.TrainStops.insertMany([
         city: "Rzeszow"
     }]
 );
-
-db.TrainStops.save();
