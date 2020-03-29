@@ -8,3 +8,4 @@ RUN npm run publish
 FROM socialengine/nginx-spa
 COPY --from=build /app/index.html /app
 COPY --from=build /app/index.js   /app
+COPY --from=build /app/public     /app/public
