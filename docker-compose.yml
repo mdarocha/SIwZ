@@ -16,6 +16,9 @@ services:
     database:
         image: mongo:latest
         restart: always
+        volumes:
+            - ./database:/docker-entrypoint-initdb.d/
+            - database:/data/db
 
     database-web:
         depends_on:
@@ -26,8 +29,6 @@ services:
         environment:
             - ME_CONFIG_MONGODB_SERVER=database
         restart: always
-        volumes:
-            - database:/data/db
 
     postwoman:
         depends_on:

@@ -11,11 +11,11 @@ namespace Server.Models
         [BsonRepresentation(BsonType.ObjectId)]
         public string Id { get; set; }
 
-        [BsonElement("City")]
+        [BsonElement("city")]
         [BsonRepresentation(BsonType.String)]
         public string City { get; set; }
 
-        [BsonElement("Name")]
+        [BsonElement("name")]
         [BsonRepresentation((BsonType.String))]
         public string Name { get; set; }
     }
