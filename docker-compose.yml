@@ -29,5 +29,10 @@ services:
         volumes:
             - database:/data/db
 
+    postwoman:
+        depends_on:
+            - server
+        image: liyasthomas/postwoman
+
 volumes:
     database:
