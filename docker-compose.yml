@@ -22,7 +22,7 @@ services:
             - database
         image: mongo-express
         ports:
-          - 8081:8081
+            - 8081:8081
         environment:
             - ME_CONFIG_MONGODB_SERVER=database
         restart: always
@@ -33,6 +33,7 @@ services:
         depends_on:
             - server
         image: liyasthomas/postwoman
-
+        ports:
+            - 3000:3000
 volumes:
     database:
