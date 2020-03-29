@@ -27,7 +27,8 @@ namespace server
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<IMongoClient>(new MongoClient("mongodb://localhost:27017"));
+            var dbConnection = Environment.GetEnvironmentVariable("TRAINS_DB") ?? "mongodb://localhost:27017";
+            services.AddSingleton<IMongoClient>(new MongoClient(dbConnection));
 
             services.AddSingleton<TrainStopService>();
             
