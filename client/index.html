@@ -6,6 +6,8 @@
         <script src="index.js"></script>
     </head>
     <body>
-        <script>var app = Elm.Main.init();</script>
+        <script>var app = Elm.Main.init({
+                flags: "http://localhost:5000/api/"
+            });</script>
     </body>
 </html>
