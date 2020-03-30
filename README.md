@@ -1,9 +1,6 @@
 # SIwZ
+![](https://github.com/zygmuntdzwigon/SIwZ/workflows/SIwZ%20CI/badge.svg)
 
-## Running frontend project
-1. Make sure you have `nodejs` and `npm`
-2. `cd client`
-3. `npm install`
-4. `npm run serve` or `npm run make`
-
-Remember to run `npm run lint` before commiting
+## Running
+1. Have `docker`
+2. `docker-compose up`
