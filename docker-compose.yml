@@ -32,7 +32,7 @@ services:
             - ./database:/docker-entrypoint-initdb.d/
             - database:/data/db
 
-    database-web:
+    database-panel:
         depends_on:
             - database
         image: mongo-express
