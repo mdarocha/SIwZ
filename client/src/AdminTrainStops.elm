@@ -1,4 +1,4 @@
-module TrainRoutes exposing (Model, Msg, init, update, view)
+module AdminTrainStops exposing (Model, Msg, init, update, view)
 
 import Bootstrap.Alert as Alert
 import Bootstrap.Button as Button
