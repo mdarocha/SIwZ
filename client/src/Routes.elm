@@ -1,17 +1,23 @@
 module Routes exposing (Route(..), fromUrl)
 
 import Url exposing (Url)
-import Url.Parser exposing ((</>), Parser, int, map, oneOf, s, string)
+import Url.Parser exposing ((</>), Parser, int, map, oneOf, s, string, top)
 
 
 type Route
-    = AdminTrainRoutes
+    = AdminTrainStops
+    | AboutRoute
+    | SearchRoute
+    | Root
 
 
 parser : Parser (Route -> a) a
 parser =
     oneOf
-        [ map AdminTrainRoutes (s "admin" </> s "routes")
+        [ map Root top
+        , map SearchRoute (s "search")
+        , map AboutRoute (s "about")
+        , map AdminTrainStops (s "admin" </> s "stops")
         ]
 
 
