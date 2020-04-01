@@ -1,0 +1,25 @@
+name: Docker Registry Build
+
+on:
+    push:
+        - master
+
+jobs:
+    docker:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - name: Publish server
+              uses: elgohr/Publish-Docker-Github-Action@master
+              with:
+                name: zygmuntdzwigon/SIwZ/server
+                username: ${{ github.actor }}
+                password: ${{ secrets.GITHUB_TOKEN }}
+                context: ./server
+            - name: Publish client
+              uses: elgohr/Publish-Docker-Github-Action@master
+              with:
+                name: zygmuntdzwigon/SIwZ/client
+                username: ${{ github.actor }}
+                password: ${{ secrets.GITHUB_TOKEN }}
+                context: ./client
