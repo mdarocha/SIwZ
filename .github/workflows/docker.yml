@@ -11,16 +11,14 @@ jobs:
         steps:
             - uses: actions/checkout@v2
             - name: Publish server
-              uses: elgohr/Publish-Docker-Github-Action@master
+              uses: matootie/github-docker@v2.2.2
               with:
-                name: zygmuntdzwigon/SIwZ/server
-                username: ${{ github.actor }}
-                password: ${{ secrets.GITHUB_TOKEN }}
+                accessToken: ${{ secrets.GITHUB_TOKEN }}
                 context: ./server
+                imageName: server
             - name: Publish client
-              uses: elgohr/Publish-Docker-Github-Action@master
+              uses: matootie/github-docker@v2.2.2
               with:
-                name: zygmuntdzwigon/SIwZ/client
-                username: ${{ github.actor }}
-                password: ${{ secrets.GITHUB_TOKEN }}
+                accessToken: ${{ secrets.GITHUB_TOKEN }}
                 context: ./client
+                imageName: client
