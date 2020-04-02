@@ -1,25 +1,25 @@
 using System.Collections.Generic;
-using MongoDB.Driver;
+using System.Linq;
 using Server.Models;
+using server.PostgreSQL;
 
 namespace Server.Services
 {
     public class RouteService
     {
-        private readonly IMongoCollection<Route> _routes;
+        private readonly TrainSystemContext _context;
 
-        public RouteService(IMongoClient client)
+        public RouteService(TrainSystemContext context)
         {
-            var database = client.GetDatabase("TrainSystem");
-            _routes = database.GetCollection<Route>("Routes");
+            _context = context;
         }
 
         public List<Route> Get() =>
-            _routes.Find(route => true).ToList();
+            _context.Routes.Where(route => true).ToList();
 
         public Route Create(Route route)
         {
-            _routes.InsertOne(route);
+            _context.Routes.Add(route);
             return route;
         }
     }

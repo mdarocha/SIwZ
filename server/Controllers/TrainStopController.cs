@@ -47,15 +47,7 @@ namespace Server.Controllers
             
             return ts;
         }
-
-        [HttpPost]
-        [Route("Create")]
-        public ActionResult<TrainStop> Create([FromBody] TrainStop trainStop)
-        {
-            var ts = _trainStopService.Create(trainStop);
-            
-            return Ok(ts);
-        }
+        
     }
 }
 

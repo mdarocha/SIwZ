@@ -4,7 +4,7 @@ using Server.Services;
 
 namespace Server.Controllers.Admin
 {
-    [Route("/api/admin/[controller]")]
+    [Route("/api/[controller]")]
     [ApiController]
     public class AdminTrainStopController : ControllerBase
     {

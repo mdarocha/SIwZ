@@ -5,7 +5,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MongoDB.Driver" Version="2.10.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.0-preview.2.20120.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.0-preview.2.20120.8" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.0-preview.2.20120.8" />
   </ItemGroup>
 
 
