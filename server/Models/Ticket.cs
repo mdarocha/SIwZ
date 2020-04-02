@@ -1,25 +1,44 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Server.Models
 {
     public class Ticket
     {
+        [Key]
         public int Id { set; get; }
-
-        public Ride RideId { set; get; }
-
+        
+        [ForeignKey("RideId")]
+        [Required]
+        public virtual Ride RideId { set; get; }
+        
+        [Required]
         public int Price { set; get; }
 
-        public Discount DiscountId { set; get; } //fk to discount
+        [ForeignKey("DiscountId")]
+        [Required]
+        public virtual Discount DiscountId { set; get; } //fk to discount
 
-        public User UserId { set; get; }
+        [ForeignKey("UserId")]
+        [Required]
+        public virtual User UserId { set; get; }
 
-        public TrainStop From { set; get; } //fk to train stop
+        [ForeignKey("From")]
+        [Required]
+        public virtual TrainStop From { set; get; } //fk to train stop
 
-        public TrainStop To { set; get; } //fk to train stop
+        [ForeignKey("To")]
+        [Required]
+        public virtual TrainStop To { set; get; } //fk to train stop
 
-        public Train TrainId { set; get; }
+        [ForeignKey("TrainId")]
+        [Required]
+        public virtual Train TrainId { set; get; }
 
+        [Required]
         public int WagonNr { set; get; }
 
+        [Required]
         public int SeatNr { set; get; }
     }
 }
