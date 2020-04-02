@@ -10,14 +10,12 @@ namespace Server.Models
         [Key]
         public int Id { set; get; }
 
-        [ForeignKey("RouteId")]
-        public virtual Route RouteId { set; get; }
+        public virtual Route Route { set; get; }
 
         [Required]
         public DateTime StartTime { set; get; }
 
-        [ForeignKey("TrainId")]
-        public Train TrainId { set; get; }
+        public Train Train { set; get; }
 
         [Required]
         public int FreeTickets { set; get; }

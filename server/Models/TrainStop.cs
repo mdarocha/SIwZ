@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Server.Models
@@ -12,5 +14,6 @@ namespace Server.Models
         
         [Required]
         public string Name { get; set; }
+       
     }
 }

@@ -8,32 +8,26 @@ namespace Server.Models
         [Key]
         public int Id { set; get; }
         
-        [ForeignKey("RideId")]
         [Required]
-        public virtual Ride RideId { set; get; }
+        public virtual Ride Ride { set; get; }
         
         [Required]
         public int Price { set; get; }
 
-        [ForeignKey("DiscountId")]
         [Required]
-        public virtual Discount DiscountId { set; get; } //fk to discount
+        public virtual Discount Discount { set; get; }
 
-        [ForeignKey("UserId")]
         [Required]
-        public virtual User UserId { set; get; }
+        public virtual User User { set; get; }
 
-        [ForeignKey("From")]
         [Required]
-        public virtual TrainStop From { set; get; } //fk to train stop
+        public virtual TrainStop From { set; get; }
 
-        [ForeignKey("To")]
         [Required]
-        public virtual TrainStop To { set; get; } //fk to train stop
+        public virtual TrainStop To { set; get; }
 
-        [ForeignKey("TrainId")]
         [Required]
-        public virtual Train TrainId { set; get; }
+        public virtual Train Train { set; get; }
 
         [Required]
         public int WagonNr { set; get; }
