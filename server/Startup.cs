@@ -22,7 +22,7 @@ namespace server
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddEntityFrameworkNpgsql().AddDbContext<TrainSystemContext>(opt =>
-                opt.UseNpgsql(Configuration.GetConnectionString("TrainSystemConnection")));
+                opt.UseNpgsql("Host=localhost;Database=TrainSystem;Username=admin;Password=admin1"));
             
             services.AddTransient<TrainStopService>();
 
