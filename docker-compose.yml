@@ -1,26 +1,52 @@
 version: "3.0"
 services:
-  server:
-    build:
-      context: ./server
-    ports:
-      - 5000:5000
-      - 5001:5001
-    restart: always
-  database:
-    image: mongo:latest
-    #environment:
-    #  MONGO_INITDB_ROOT_USERNAME: root
-    #  MONGO_INITDB_ROOT_PASSWORD: rootpassword
-    ports:
-      - 27017:27017
-    restart: always
-  database-web:
-    image: mongo-express
-    #environment:
-    #  ME_CONFIG_MONGODB_ADMINUSERNAME: root
-    #  ME_CONFIG_MONGODB_ADMINPASSWORD: example
-    ports:
-      - 8081:8081
-    restart: always
+    server:
+        depends_on:
+            - database
+        build:
+            context: ./server
+        ports:
+            - 5000:5000
+        restart: always
+        environment:
+            - TRAINS_DB=mongodb://database:27017
+            - ASPNETCORE_URLS=http://+:5000
+            - ASPNETCORE_ENVIRONMENT=Production
 
+    client:
+        depends_on:
+            - server
+        build:
+            context: ./client
+        restart: always
+        environment:
+            - API_URL=http://localhost:5000/api/
+            - CONFIG_VARS=API_URL
+        ports:
+            - 8000:80
+
+    database:
+        image: mongo:latest
+        restart: always
+        volumes:
+            - ./database:/docker-entrypoint-initdb.d/
+            - database:/data/db
+
+    database-panel:
+        depends_on:
+            - database
+        image: mongo-express
+        ports:
+            - 8081:8081
+        environment:
+            - ME_CONFIG_MONGODB_SERVER=database
+        restart: always
+
+    postwoman:
+        depends_on:
+            - server
+        image: liyasthomas/postwoman
+        ports:
+            - 3000:3000
+volumes:
+    database:

@@ -1,0 +1,24 @@
+name: Docker Registry Build
+
+on:
+    push:
+        branches:
+            - master
+
+jobs:
+    docker:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+            - name: Publish server
+              uses: matootie/github-docker@v2.2.2
+              with:
+                accessToken: ${{ secrets.GITHUB_TOKEN }}
+                context: ./server
+                imageName: server
+            - name: Publish client
+              uses: matootie/github-docker@v2.2.2
+              with:
+                accessToken: ${{ secrets.GITHUB_TOKEN }}
+                context: ./client
+                imageName: client
