@@ -1,12 +1,5 @@
-module Session exposing (Session)
-
-import Bootstrap.Navbar as Navbar
-import Browser.Navigation as Nav
-import Url
+module Session exposing (Data)
 
 
-type alias Session =
-    { api : String
-    , nav : Nav.Key
-    , navbarState : Navbar.State
-    }
+type alias Data =
+    { api : String }
