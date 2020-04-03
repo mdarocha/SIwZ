@@ -42,7 +42,8 @@ namespace server.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Type = table.Column<string>(nullable: false),
+                    Name = table.Column<string>(nullable: false),
+                    Type = table.Column<int>(nullable: false),
                     Seats = table.Column<int>(nullable: false),
                     Wagons = table.Column<int>(nullable: false)
                 },
@@ -55,7 +56,8 @@ namespace server.Migrations
                 name: "TrainStops",
                 columns: table => new
                 {
-                    Id = table.Column<string>(nullable: false),
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     City = table.Column<string>(nullable: false),
                     Name = table.Column<string>(nullable: false)
                 },
@@ -109,6 +111,34 @@ namespace server.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "StopsToRoutes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    RouteId = table.Column<int>(nullable: true),
+                    TrainStopId = table.Column<int>(nullable: true),
+                    StopNo = table.Column<int>(nullable: false),
+                    ArrivalTime = table.Column<DateTime>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StopsToRoutes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_StopsToRoutes_Routes_RouteId",
+                        column: x => x.RouteId,
+                        principalTable: "Routes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_StopsToRoutes_TrainStops_TrainStopId",
+                        column: x => x.TrainStopId,
+                        principalTable: "TrainStops",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Tickets",
                 columns: table => new
                 {
@@ -118,8 +148,8 @@ namespace server.Migrations
                     Price = table.Column<int>(nullable: false),
                     DiscountId = table.Column<int>(nullable: false),
                     UserId = table.Column<int>(nullable: false),
-                    FromId = table.Column<string>(nullable: false),
-                    ToId = table.Column<string>(nullable: false),
+                    FromId = table.Column<int>(nullable: false),
+                    ToId = table.Column<int>(nullable: false),
                     TrainId = table.Column<int>(nullable: false),
                     WagonNr = table.Column<int>(nullable: false),
                     SeatNr = table.Column<int>(nullable: false)
@@ -165,6 +195,42 @@ namespace server.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.InsertData(
+                table: "Routes",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { 1, "Rzeszow-Wroclaw" },
+                    { 2, "Krakow-Warszawa" },
+                    { 3, "Plaszow-Airport" },
+                    { 4, "Rzeszow-Warsaw" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "TrainStops",
+                columns: new[] { "Id", "City", "Name" },
+                values: new object[,]
+                {
+                    { 1, "Cracow", "Main train station" },
+                    { 2, "Cracow", "Plaszow" },
+                    { 3, "Cracow", "Airport" },
+                    { 4, "Warsaw", "Main train station" },
+                    { 5, "Rzeszow", "Main train station" },
+                    { 6, "Wrocalw", "Main train station" },
+                    { 7, "Katowice", "Main train station" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Trains",
+                columns: new[] { "Id", "Name", "Seats", "Type", "Wagons" },
+                values: new object[,]
+                {
+                    { 1, "ICC1", 60, 0, 5 },
+                    { 2, "ICC2", 40, 0, 10 },
+                    { 3, "REG1", 30, 1, 5 },
+                    { 4, "REG2", 40, 1, 5 }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Rides_RouteId",
                 table: "Rides",
@@ -174,6 +240,16 @@ namespace server.Migrations
                 name: "IX_Rides_TrainId",
                 table: "Rides",
                 column: "TrainId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StopsToRoutes_RouteId",
+                table: "StopsToRoutes",
+                column: "RouteId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_StopsToRoutes_TrainStopId",
+                table: "StopsToRoutes",
+                column: "TrainStopId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tickets_DiscountId",
@@ -208,6 +284,9 @@ namespace server.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "StopsToRoutes");
+
             migrationBuilder.DropTable(
                 name: "Tickets");
 

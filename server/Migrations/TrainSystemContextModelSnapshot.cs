@@ -27,8 +27,8 @@ namespace server.Migrations
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("Type")
-                        .HasColumnType("character varying(1)")
-                        .HasMaxLength(1);
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<int>("Value")
                         .HasColumnType("integer");
@@ -39,6 +39,22 @@ namespace server.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Discounts");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Type = "ExampleFlat",
+                            Value = 2,
+                            ValueType = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Type = "ExamplePercentage",
+                            Value = 5,
+                            ValueType = 0
+                        });
                 });
 
             modelBuilder.Entity("Server.Models.Ride", b =>
@@ -83,6 +99,28 @@ namespace server.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Routes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Rzeszow-Wroclaw"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Krakow-Warszawa"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Plaszow-Airport"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Rzeszow-Warsaw"
+                        });
                 });
 
             modelBuilder.Entity("Server.Models.StopToRoute", b =>
@@ -101,8 +139,8 @@ namespace server.Migrations
                     b.Property<int>("StopNo")
                         .HasColumnType("integer");
 
-                    b.Property<string>("TrainStopId")
-                        .HasColumnType("text");
+                    b.Property<int?>("TrainStopId")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -123,9 +161,8 @@ namespace server.Migrations
                     b.Property<int>("DiscountId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("FromId")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("FromId")
+                        .HasColumnType("integer");
 
                     b.Property<int>("Price")
                         .HasColumnType("integer");
@@ -136,9 +173,8 @@ namespace server.Migrations
                     b.Property<int>("SeatNr")
                         .HasColumnType("integer");
 
-                    b.Property<string>("ToId")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("ToId")
+                        .HasColumnType("integer");
 
                     b.Property<int>("TrainId")
                         .HasColumnType("integer");
@@ -173,12 +209,15 @@ namespace server.Migrations
                         .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<int>("Seats")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
 
                     b.Property<int>("Wagons")
                         .HasColumnType("integer");
@@ -186,12 +225,48 @@ namespace server.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Trains");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "ICC1",
+                            Seats = 60,
+                            Type = 0,
+                            Wagons = 5
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "ICC2",
+                            Seats = 40,
+                            Type = 0,
+                            Wagons = 10
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "REG1",
+                            Seats = 30,
+                            Type = 1,
+                            Wagons = 5
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "REG2",
+                            Seats = 40,
+                            Type = 1,
+                            Wagons = 5
+                        });
                 });
 
             modelBuilder.Entity("Server.Models.TrainStop", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("City")
                         .IsRequired()
@@ -204,6 +279,50 @@ namespace server.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("TrainStops");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            City = "Cracow",
+                            Name = "Main train station"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            City = "Cracow",
+                            Name = "Plaszow"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            City = "Cracow",
+                            Name = "Airport"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            City = "Warsaw",
+                            Name = "Main train station"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            City = "Rzeszow",
+                            Name = "Main train station"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            City = "Wrocalw",
+                            Name = "Main train station"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            City = "Katowice",
+                            Name = "Main train station"
+                        });
                 });
 
             modelBuilder.Entity("Server.Models.User", b =>
