@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -21,12 +22,15 @@ namespace server
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var dbConnection = Environment.GetEnvironmentVariable("TRAINS_DB") ?? "Host=localhost:5432;Database=TrainSystem;Username=admin;Password=admin1";
             services.AddEntityFrameworkNpgsql().AddDbContext<TrainSystemContext>(opt =>
-                opt.UseNpgsql("Host=localhost;Database=TrainSystem;Username=admin;Password=admin1"));
+                opt.UseNpgsql(dbConnection));
             
             services.AddTransient<TrainStopService>();
 
             services.AddTransient<RouteService>();
+
+            services.AddTransient<DiscountService>();
             
             services.AddControllers();
         }
