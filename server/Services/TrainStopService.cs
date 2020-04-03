@@ -1,37 +1,33 @@
-using System;
 using Server.Models;
-using MongoDB.Driver;
 using System.Collections.Generic;
 using System.Linq;
+using server.PostgreSQL;
 
 namespace Server.Services
 {
     public class TrainStopService
     {
-        private readonly IMongoCollection<TrainStop> _trainStops;
+        private readonly TrainSystemContext _context;
 
-        public TrainStopService(IMongoClient client)
+        public TrainStopService(TrainSystemContext context)
         {
-            var dataBase = client.GetDatabase("TrainSystem");
-            _trainStops = dataBase.GetCollection<TrainStop>("TrainStops");
+            _context = context;
         }
 
-        public List<TrainStop> Get() =>
-            _trainStops.Find(trainStop => true).ToList();
+        public List<TrainStop> Get() => _context.TrainStops.Where(ts => true).ToList();
 
-        public TrainStop Get(string id) =>
-            _trainStops.Find<TrainStop>(trainStop => trainStop.Id == id).FirstOrDefault();
+        public TrainStop Get(string id) => _context.TrainStops.Find(id);
 
         public List<TrainStop> Get(string city, string name)
         {
             if (city != null && name != null)
-                return _trainStops.Find<TrainStop>(ts => ts.Name == name && ts.City == city).ToList();
-            return _trainStops.Find<TrainStop>(ts => ts.Name == name || ts.City == city).ToList();
+                return _context.TrainStops.Where(ts => ts.Name == name && ts.City == city).ToList();
+            return _context.TrainStops.Where(ts => ts.Name == name || ts.City == city).ToList();
         }
 
         public TrainStop Create(TrainStop trainStop)
         {
-            _trainStops.InsertOne(trainStop);
+            _context.TrainStops.Add(trainStop);
             return trainStop;
         }
     }
