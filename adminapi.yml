@@ -1,10 +1,10 @@
 swagger: '2.0'
 info:
-  title: TrainSystem API
-  description: TrainSystem API for SIwZ project.
+  title: TrainSystem Admin API
+  description: TrainSystem Admin API for SIwZ project.
   version: 1.0.0
 host: "localhost:5000"
-basePath: /api
+basePath: /api/admin
 schemes:
   - http
   
@@ -17,7 +17,7 @@ parameters:
     description: Numeric ID of related object
 
 paths:
-  /admin/stops:
+  /stops:
     get:
       tags:
         - Admin/Stops
@@ -36,7 +36,7 @@ paths:
           description: OK
         400:
           description: Wrong request data
-  /admin/stops/{id}:
+  /stops/{id}:
     parameters:
       - $ref: '#/parameters/id'
     get:
@@ -62,7 +62,7 @@ paths:
       responses:
         200:
           description: OK
-  /admin/trains:
+  /trains:
     get:
       tags:
         - Admin/Trains
@@ -77,7 +77,7 @@ paths:
       responses:
         200:
           description: OK
-  /admin/trains/{id}:
+  /trains/{id}:
     parameters:
       - $ref: '#/parameters'
     get:
@@ -101,7 +101,7 @@ paths:
       responses:
         200:
           description: OK
-  /admin/routes:
+  /routes:
     get:
       tags:
         - Admin/Routes
@@ -116,7 +116,7 @@ paths:
       responses:
         200:
           description: OK
-  /admin/routes/{id}:
+  /routes/{id}:
     parameters: 
     - $ref: '#/parameters/id'
     get:
@@ -140,7 +140,7 @@ paths:
       responses:
         200:
           description: OK
-  /admin/discounts:
+  /discounts:
     get:
       tags:
         - Admin/Discounts
@@ -149,11 +149,13 @@ paths:
         200:
           description: OK
     post:
+      tags:
+        - Admin/Discounts
       summary: Creates new Discount.
       responses:
         200:
           description: OK
-  /admin/discounts/{id}:
+  /discounts/{id}:
     get:
       tags:
         - Admin/Discounts
