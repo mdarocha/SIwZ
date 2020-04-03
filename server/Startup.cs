@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -22,21 +23,22 @@ namespace server
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var dbConnection = Environment.GetEnvironmentVariable("TRAINS_DB") ?? "Host=localhost:5432;Database=TrainSystem;Username=admin;Password=admin1";
+            var dbConnection = Environment.GetEnvironmentVariable("TRAINS_DB") ??
+                               "Host=localhost;Database=TrainSystem;Username=admin;Password=admin1";
             services.AddEntityFrameworkNpgsql().AddDbContext<TrainSystemContext>(opt =>
                 opt.UseNpgsql(dbConnection));
-            
+
             services.AddTransient<TrainStopService>();
 
             services.AddTransient<RouteService>();
 
             services.AddTransient<DiscountService>();
-            
+
             services.AddControllers();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, TrainSystemContext context)
         {
             if (env.IsDevelopment())
             {
@@ -44,15 +46,16 @@ namespace server
             }
 
             app.UseHttpsRedirection();
-            
+
             app.UseRouting();
-            
+
             app.UseAuthorization();
 
             app.UseCors(builder => builder.WithOrigins("*").AllowAnyHeader().AllowAnyMethod());
-            
+
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 
+            context.Database.EnsureCreated();
         }
     }
 }
