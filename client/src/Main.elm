@@ -6,6 +6,8 @@ import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Page.About as About
+import Page.AdminTrainStops as AdminTrainStops
+import Page.Home as Home
 import Routes
 import Session
 import Skeleton
@@ -23,6 +25,8 @@ type alias Model =
 type Page
     = NotFound Session.Data
     | About About.Model
+    | Home Home.Model
+    | AdminTrainStops AdminTrainStops.Model
 
 
 type Msg
@@ -31,6 +35,7 @@ type Msg
     | UrlChanged Url.Url
     | NavbarMsg Navbar.State
     | AboutMsg About.Msg
+    | AdminTrainStopsMsg AdminTrainStops.Msg
 
 
 main : Program String Model Msg
@@ -58,10 +63,16 @@ view model =
                 { title = "Nie znaleziono"
                 , body = [ text "Nie znaleziono" ]
                 }
-                model.navbarState
+                (viewNavbar model)
 
         About about ->
-            Skeleton.view never (About.view about) model.navbarState
+            Skeleton.view AboutMsg (About.view about) (viewNavbar model)
+
+        Home home ->
+            Skeleton.view never (Home.view home) (viewNavbar model)
+
+        AdminTrainStops adminTrainStops ->
+            Skeleton.view AdminTrainStopsMsg (AdminTrainStops.view adminTrainStops) (viewNavbar model)
 
 
 init : String -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
@@ -74,9 +85,9 @@ init api url key =
             Navbar.initialState NavbarMsg
 
         ( model, routeCmd ) =
-            changeRoute (Routes.fromUrl url) { nav = key, page = NotFound (Session.Data api), navbarState = navbarState }
+            changeRoute (Routes.fromUrl url) { nav = key, page = NotFound session, navbarState = navbarState }
     in
-    ( model, Cmd.batch [ routeCmd ] )
+    ( model, Cmd.batch [ routeCmd, navbarCmd ] )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -113,6 +124,14 @@ update message model =
                 _ ->
                     ( model, Cmd.none )
 
+        AdminTrainStopsMsg msg ->
+            case model.page of
+                AdminTrainStops adminTrainStops ->
+                    stepAdminTrainStops model (AdminTrainStops.update msg adminTrainStops)
+
+                _ ->
+                    ( model, Cmd.none )
+
 
 exit : Model -> Session.Data
 exit model =
@@ -121,6 +140,12 @@ exit model =
             session
 
         About m ->
+            m.session
+
+        Home m ->
+            m.session
+
+        AdminTrainStops m ->
             m.session
 
 
@@ -137,16 +162,18 @@ changeRoute route model =
             )
 
         Just Routes.AdminTrainStopsRoute ->
-            Debug.todo ""
+            stepAdminTrainStops model (AdminTrainStops.init session)
 
         Just Routes.SearchRoute ->
-            Debug.todo ""
+            ( { model | page = NotFound session }
+            , Cmd.none
+            )
 
         Just Routes.AboutRoute ->
             stepAbout model (About.init session)
 
         Just Routes.HomeRoute ->
-            Debug.todo ""
+            stepHome model (Home.init session)
 
 
 stepAbout : Model -> ( About.Model, Cmd About.Msg ) -> ( Model, Cmd Msg )
@@ -154,3 +181,68 @@ stepAbout model ( about, cmds ) =
     ( { model | page = About about }
     , Cmd.map AboutMsg cmds
     )
+
+
+stepHome : Model -> Home.Model -> ( Model, Cmd msg )
+stepHome model home =
+    ( { model | page = Home home }
+    , Cmd.none
+    )
+
+
+stepAdminTrainStops : Model -> ( AdminTrainStops.Model, Cmd AdminTrainStops.Msg ) -> ( Model, Cmd Msg )
+stepAdminTrainStops model ( adminTrainStops, cmds ) =
+    ( { model | page = AdminTrainStops adminTrainStops }
+    , Cmd.map AdminTrainStopsMsg cmds
+    )
+
+
+
+-- NAVBAR
+
+
+viewNavbar : Model -> Html Msg
+viewNavbar model =
+    Navbar.config NavbarMsg
+        |> Navbar.withAnimation
+        |> Navbar.dark
+        |> Navbar.brand [ href "/" ] [ text "SIwZ Trains" ]
+        |> Navbar.items
+            [ Navbar.itemLink [ href "/search", dynamicActive ( Routes.SearchRoute, model ) ] [ text "Wyszukaj połączenie" ]
+            , Navbar.itemLink [ href "/about", dynamicActive ( Routes.AboutRoute, model ) ] [ text "O nas" ]
+            , Navbar.dropdown
+                { id = "admin-dropdown"
+                , toggle = Navbar.dropdownToggle [] [ text "Panel admina" ]
+                , items =
+                    [ Navbar.dropdownItem [ href "/admin/users" ] [ text "Użytkownicy" ]
+                    , Navbar.dropdownItem [ href "/admin/train" ] [ text "Pociągi" ]
+                    , Navbar.dropdownItem [ href "/admin/stops", dynamicActive ( Routes.AdminTrainStopsRoute, model ) ] [ text "Przystanki" ]
+                    , Navbar.dropdownItem [ href "/admin/routes" ] [ text "Trasy" ]
+                    , Navbar.dropdownItem [ href "/admin/tickets" ] [ text "Bilety" ]
+                    , Navbar.dropdownItem [ href "/admin/discounts" ] [ text "Zniżki" ]
+                    ]
+                }
+            ]
+        |> Navbar.view model.navbarState
+
+
+
+-- UTILS
+
+
+dynamicActive : ( Routes.Route, Model ) -> Html.Attribute msg
+dynamicActive ( route, model ) =
+    classList [ ( "active", isActive ( route, model.page ) ) ]
+
+
+isActive : ( Routes.Route, Page ) -> Bool
+isActive ( route, page ) =
+    case ( route, page ) of
+        ( Routes.AdminTrainStopsRoute, AdminTrainStops _ ) ->
+            True
+
+        ( Routes.AboutRoute, About _ ) ->
+            True
+
+        _ ->
+            False

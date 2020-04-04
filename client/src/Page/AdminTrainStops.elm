@@ -13,6 +13,8 @@ import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Decode as Decode
 import Json.Encode as Encode
+import Session
+import Skeleton
 
 
 
@@ -37,7 +39,7 @@ type TrainStops
 
 
 type alias Model =
-    { api : String
+    { session : Session.Data
     , stopList : TrainStops
     , stopToAdd : TrainStop
     , stopAddError : Maybe Error
@@ -64,10 +66,10 @@ type Msg
 -- INIT
 
 
-init : String -> ( Model, Cmd Msg )
-init api =
-    ( Model api Loading (TrainStop "" "" "") Nothing
-    , getStops api
+init : Session.Data -> ( Model, Cmd Msg )
+init session =
+    ( Model session Loading (TrainStop "" "" "") Nothing
+    , getStops session.api
     )
 
 
@@ -139,7 +141,7 @@ update msg model =
 
                 Submit ->
                     if isValidInput model.stopToAdd then
-                        ( model, addStop model.api model.stopToAdd )
+                        ( model, addStop model.session.api model.stopToAdd )
 
                     else
                         let
@@ -158,12 +160,16 @@ isValidInput stop =
 -- VIEW
 
 
-view : Model -> Html Msg
+view : Model -> Skeleton.Details Msg
 view model =
-    div [ class "mt-3" ]
-        [ Grid.row [] [ Grid.col [] [ viewStopsList model.stopList ] ]
-        , Grid.row [] [ Grid.col [] [ viewInputStop model.stopToAdd model.stopAddError ] ]
+    { title = "Przystanki - Admin"
+    , body =
+        [ div [ class "mt-3" ]
+            [ Grid.row [] [ Grid.col [] [ viewStopsList model.stopList ] ]
+            , Grid.row [] [ Grid.col [] [ viewInputStop model.stopToAdd model.stopAddError ] ]
+            ]
         ]
+    }
 
 
 viewStopsList : TrainStops -> Html Msg
