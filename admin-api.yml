@@ -1,0 +1,377 @@
+openapi: 3.0.1
+info:
+  title: TrainSystem Admin API
+  description: TrainSystem Admin API for SIwZ project.
+  version: 1.0.0
+servers:
+- url: http://localhost:5000/api/admin
+paths:
+  /stops:
+    get:
+      tags:
+      - Stops
+      summary: Returns a list of Stops.
+      description: Get all Stops
+      responses:
+        200:
+          description: List of Stops.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Stop'
+    post:
+      tags:
+      - Stops
+      summary: Creates new Stop.
+      description: Creates new Stop from posted data.
+      responses:
+        200:
+          description: OK
+          content: {}
+        400:
+          description: Wrong request data
+          content: {}
+  /stops/{id}:
+    get:
+      tags:
+      - Stops
+      summary: Returns Stop with the given Id.
+      parameters:
+      - name: id
+        in: path
+        description: Numeric ID of related object
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: OK
+          content: {}
+        400:
+          description: Stop not found.
+          content: {}
+    delete:
+      tags:
+      - Stops
+      summary: Removes Stop with the given Id.
+      parameters:
+      - name: id
+        in: path
+        description: Numeric ID of related object
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: OK
+          content: {}
+    patch:
+      tags:
+      - Stops
+      summary: Modifies Stop with
+      parameters:
+      - name: id
+        in: path
+        description: Numeric ID of related object
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: OK
+          content: {}
+  /trains:
+    get:
+      tags:
+      - Trains
+      summary: Return list of all Trains.
+      responses:
+        200:
+          description: OK
+          content: {}
+    post:
+      tags:
+      - Trains
+      summary: Creates new Train.
+      responses:
+        200:
+          description: OK
+          content: {}
+  /trains/{id}:
+    get:
+      tags:
+      - Trains
+      summary: Returns Train with given id.
+      parameters:
+      - $ref: '#/components/parameters'
+      responses:
+        200:
+          description: OK
+          content: {}
+    delete:
+      tags:
+      - Trains
+      summary: Removes Train with the given id.
+      parameters:
+      - $ref: '#/components/parameters'
+      responses:
+        200:
+          description: OK
+          content: {}
+    patch:
+      tags:
+      - Trains
+      summary: Modifies Train with the given id.
+      parameters:
+      - $ref: '#/components/parameters'
+      responses:
+        200:
+          description: OK
+          content: {}
+  /routes:
+    get:
+      tags:
+      - Routes
+      summary: Returns list of all Routes.
+      responses:
+        200:
+          description: OK
+          content: {}
+    post:
+      tags:
+      - Routes
+      summary: Creates new Route.
+      responses:
+        200:
+          description: OK
+          content: {}
+  /routes/{id}:
+    get:
+      tags:
+      - Routes
+      summary: Returns Route with the given id.
+      parameters:
+      - name: id
+        in: path
+        description: Numeric ID of related object
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: OK
+          content: {}
+    delete:
+      tags:
+      - Routes
+      summary: Removes Route with the given id.
+      parameters:
+      - name: id
+        in: path
+        description: Numeric ID of related object
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: OK
+          content: {}
+    patch:
+      tags:
+      - Routes
+      summary: Modifies Route with the given id.
+      parameters:
+      - name: id
+        in: path
+        description: Numeric ID of related object
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: OK
+          content: {}
+  /discounts:
+    get:
+      tags:
+      - Discounts
+      summary: Returns list of all Discounts.
+      responses:
+        200:
+          description: OK
+          content: {}
+    post:
+      tags:
+      - Discounts
+      summary: Creates new Discount.
+      responses:
+        200:
+          description: OK
+          content: {}
+  /discounts/{id}:
+    get:
+      tags:
+      - Discounts
+      summary: Returns Discount with given id.
+      parameters:
+      - name: id
+        in: path
+        description: Numeric ID of related object
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: OK
+          content: {}
+    delete:
+      tags:
+      - Discounts
+      summary: Removes Discount with the given id.
+      parameters:
+      - name: id
+        in: path
+        description: Numeric ID of related object
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: OK
+          content: {}
+    patch:
+      tags:
+      - Discounts
+      summary: Modifies Discount with the given id.
+      parameters:
+      - name: id
+        in: path
+        description: Numeric ID of related object
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: OK
+          content: {}
+  /tickets:
+    get:
+      tags:
+      - Tickets
+      summary: Returns all tickets connected with user with the given Id.
+      parameters:
+      - name: userId
+        in: query
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: OK
+          content: {}
+  /tickets/{id}:
+    delete:
+      tags:
+      - Tickets
+      summary: Revokes ticket with the given id.
+      parameters:
+      - name: id
+        in: path
+        description: Numeric ID of related object
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: OK
+          content: {}
+  /rides:
+    get:
+      summary: Return all available Rides.
+      parameters:
+      - name: id
+        in: path
+        description: Numeric ID of related object
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: OK
+          content: {}
+    post:
+      summary: Creates new Ride.
+      parameters:
+      - name: id
+        in: path
+        description: Numeric ID of related object
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: OK
+          content: {}
+  /rides/{id}:
+    get:
+      summary: Returns Ride with the given id.
+      parameters:
+      - name: id
+        in: path
+        description: Numeric ID of related object
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: OK
+          content: {}
+    delete:
+      summary: Removes Ride with the given id.
+      parameters:
+      - name: id
+        in: path
+        description: Numeric ID of related object
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: OK
+          content: {}
+    patch:
+      summary: Modifies ride with the given id.
+      parameters:
+      - name: id
+        in: path
+        description: Numeric ID of related object
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          description: OK
+          content: {}
+components:
+  parameters:
+    id:
+      name: id
+      in: path
+      description: Numeric ID of related object
+      required: true
+      schema:
+        type: integer
+  schemas:
+    Stop:
+      type: object
+      properties:
+        Id:
+          type: integer
+        Name:
+          type: string
+        City:
+          type: string
+              
+    
