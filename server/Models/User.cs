@@ -9,6 +9,12 @@ namespace Server.Models
         
         [Required]
         public string Login { set; get; }
+        
+        [Required]
+        public string Name { set; get; }
+        
+        [Required]
+        public string Surname { set; get; }
 
         [Required]
         public string Password { set; get; }

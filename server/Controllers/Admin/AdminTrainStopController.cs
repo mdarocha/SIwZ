@@ -1,10 +1,12 @@
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Server.Models;
 using Server.Services;
 
 namespace Server.Controllers.Admin
 {
-    [Route("/api/[controller]")]
+    [Route("/api/admin/stops")]
     [ApiController]
     public class AdminTrainStopController : ControllerBase
     {
@@ -14,6 +16,12 @@ namespace Server.Controllers.Admin
         {
             _trainStopService = service;
         }
+        
+        [HttpGet]
+        [Route("Get")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public ActionResult<List<TrainStop>> Get() =>
+            _trainStopService.Get();
         
         [HttpPost]
         [Route("Create")]

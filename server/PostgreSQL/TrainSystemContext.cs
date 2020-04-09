@@ -49,28 +49,28 @@ namespace server.PostgreSQL
                     Id = 1, 
                     Name = "ICC1", 
                     Seats = 60, 
-                    Type = (int) Train.TrainTypes.Interstitial,
+                    Type = (int) Train.TrainTypes.Sectional,
                     Wagons = 5
                 },
                 new Train {
                     Id = 2, 
                     Name = "ICC2", 
                     Seats = 40, 
-                    Type = (int) Train.TrainTypes.Interstitial,
+                    Type = (int) Train.TrainTypes.Sectional,
                     Wagons = 10
                 },
             new Train {
                     Id = 3, 
                     Name = "REG1", 
                     Seats = 30, 
-                    Type = (int) Train.TrainTypes.NotInterstitial,
+                    Type = (int) Train.TrainTypes.OpenCoach,
                     Wagons = 5
                 },
             new Train {
                     Id = 4, 
                     Name = "REG2", 
                     Seats = 40, 
-                    Type = (int) Train.TrainTypes.NotInterstitial,
+                    Type = (int) Train.TrainTypes.OpenCoach,
                     Wagons = 5
                 }
             );

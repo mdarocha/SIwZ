@@ -6,8 +6,8 @@ namespace Server.Models
     {
         public enum TrainTypes
         {
-            Interstitial,
-            NotInterstitial
+            Sectional,
+            OpenCoach
         }
         
         [Key]

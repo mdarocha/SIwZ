@@ -27,12 +27,12 @@ namespace Server.Models
         public virtual TrainStop To { set; get; }
 
         [Required]
-        public virtual Train Train { set; get; }
+        public string TrainName { set; get; }
 
         [Required]
-        public int WagonNr { set; get; }
+        public int WagonNo { set; get; }
 
         [Required]
-        public int SeatNr { set; get; }
+        public int SeatNo { set; get; }
     }
 }

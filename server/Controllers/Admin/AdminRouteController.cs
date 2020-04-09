@@ -5,7 +5,7 @@ using Server.Services;
 namespace Server.Controllers.Admin
 {
     
-    [Route("/api/[controller]")]
+    [Route("/api/admin/routes")]
     [ApiController]
     public class AdminRouteController : ControllerBase
     {
@@ -15,7 +15,7 @@ namespace Server.Controllers.Admin
         {
             _routeService = service;
         }
-        
+
         [HttpPost]
         [Route("Create")]
         public ActionResult<Route> Create([FromBody] Route route)

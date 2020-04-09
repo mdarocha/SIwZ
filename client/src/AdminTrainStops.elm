@@ -228,7 +228,7 @@ formError error =
 getStops : String -> Cmd Msg
 getStops api =
     Http.get
-        { url = api ++ "trainstop/get"
+        { url = api ++ "admin/stops/get"
         , expect = Http.expectJson GotStops stopsDecoder
         }
 
@@ -238,7 +238,7 @@ addStop api stop =
     Http.post
         { body = Http.jsonBody (stopEncoder stop)
         , expect = Http.expectWhatever AddStop
-        , url = api ++ "trainstop/create"
+        , url = api ++ "admin/stops/create"
         }
 
 

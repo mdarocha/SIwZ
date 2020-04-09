@@ -7,7 +7,7 @@ using Server.Services;
 
 namespace Server.Controllers
 {
-    [Route("/api/[controller]")]
+    [Route("/api/stops")]
     [ApiController]
     public class TrainStopController : ControllerBase
     {
