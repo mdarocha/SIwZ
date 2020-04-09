@@ -32,12 +32,14 @@ namespace Server.Services
         public Discount Create(Discount discount)
         {
             _context.Discounts.Add(discount);
+            _context.SaveChanges();
             return discount;
         }
 
         public void Delete(Discount discount)
         {
             _context.Discounts.Remove(discount);
+            _context.SaveChanges();
         }
     }
 }

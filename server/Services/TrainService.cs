@@ -49,12 +49,14 @@ namespace Server.Services
         public Train Create(Train train)
         {
             _context.Trains.Add(train);
+            _context.SaveChanges();
             return train;
         }
 
         public void Delete(Train train)
         {
             _context.Trains.Remove(train);
+            _context.SaveChanges();
         }
         
     }

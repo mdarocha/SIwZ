@@ -20,6 +20,7 @@ namespace Server.Services
         public Route Create(Route route)
         {
             _context.Routes.Add(route);
+            _context.SaveChanges();
             return route;
         }
     }
