@@ -34,6 +34,8 @@ namespace server
 
             services.AddTransient<DiscountService>();
 
+            services.AddTransient<TrainService>();
+
             services.AddControllers();
         }
 
