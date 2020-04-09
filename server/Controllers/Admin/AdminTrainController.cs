@@ -34,7 +34,7 @@ namespace Server.Controllers.Admin
         }
         
         [HttpPost]
-        [Route("add")]
+        [Route("/add")]
         public ActionResult<Train> Add(Train train) // 
         {
             //Validation pls
@@ -43,10 +43,10 @@ namespace Server.Controllers.Admin
         }
 
         [HttpPatch]
-        [Route("")]
+        [Route("/edit")] 
         public ActionResult<Train> Edit(Train train)
         {
-            
+            _service.Edit(train);
             return Ok(); // to implement
         }
         

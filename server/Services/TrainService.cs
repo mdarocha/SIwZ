@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Mvc;
 using Server.Models;
 using server.PostgreSQL;
 
@@ -27,6 +28,22 @@ namespace Server.Services
         public List<Train> GetByType(int type) // train type is int
         {
             return _context.Trains.Where(d => d.Type.Equals(type)).ToList();
+        }
+
+        public void Edit(Train train)
+        {
+            var tr = _context.Trains.Find(train.Id);
+
+            if (tr != null)
+            {
+                tr.Name = train.Name;
+                tr.Seats = train.Seats;
+                tr.Type = train.Type;
+                tr.Wagons = train.Wagons;
+
+                _context.Trains.Update(tr);
+                _context.SaveChanges();
+            }
         }
         
         public Train Create(Train train)
