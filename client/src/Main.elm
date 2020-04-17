@@ -8,6 +8,7 @@ import Html.Attributes exposing (..)
 import Page.About as About
 import Page.AdminTrainStops as AdminTrainStops
 import Page.Home as Home
+import Page.Login as Login
 import Routes
 import Session
 import Skeleton
@@ -27,15 +28,16 @@ type Page
     | About About.Model
     | Home Home.Model
     | AdminTrainStops AdminTrainStops.Model
+    | Login Login.Model
 
 
 type Msg
-    = NoOp
-    | LinkClicked Browser.UrlRequest
+    = LinkClicked Browser.UrlRequest
     | UrlChanged Url.Url
     | NavbarMsg Navbar.State
     | AboutMsg About.Msg
     | AdminTrainStopsMsg AdminTrainStops.Msg
+    | LoginMsg Login.Msg
 
 
 main : Program String Model Msg
@@ -74,12 +76,14 @@ view model =
         AdminTrainStops adminTrainStops ->
             Skeleton.view AdminTrainStopsMsg (AdminTrainStops.view adminTrainStops) (viewNavbar model)
 
+        Login login ->
+            Skeleton.view LoginMsg (Login.view login) (viewNavbar model)
 
 init : String -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init api url key =
     let
         session =
-            Session.Data api
+            Session.Data api Nothing
 
         ( navbarState, navbarCmd ) =
             Navbar.initialState NavbarMsg
@@ -93,9 +97,6 @@ init api url key =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
     case message of
-        NoOp ->
-            ( model, Cmd.none )
-
         LinkClicked urlRequest ->
             case urlRequest of
                 Browser.Internal url ->
@@ -132,6 +133,12 @@ update message model =
                 _ ->
                     ( model, Cmd.none )
 
+        LoginMsg msg ->
+            case model.page of
+                Login login ->
+                    stepLogin model (Login.update msg login)
+                _ ->
+                    ( model, Cmd.none )
 
 exit : Model -> Session.Data
 exit model =
@@ -148,6 +155,8 @@ exit model =
         AdminTrainStops m ->
             m.session
 
+        Login m ->
+            m.session
 
 changeRoute : Maybe Routes.Route -> Model -> ( Model, Cmd Msg )
 changeRoute route model =
@@ -173,20 +182,15 @@ changeRoute route model =
             stepAbout model (About.init session)
 
         Just Routes.HomeRoute ->
-            stepHome model (Home.init session)
+            ( model, Nav.pushUrl model.nav "/search" )
 
+        Just Routes.LoginRoute ->
+            stepLogin model (Login.init session)
 
 stepAbout : Model -> ( About.Model, Cmd About.Msg ) -> ( Model, Cmd Msg )
 stepAbout model ( about, cmds ) =
     ( { model | page = About about }
     , Cmd.map AboutMsg cmds
-    )
-
-
-stepHome : Model -> Home.Model -> ( Model, Cmd msg )
-stepHome model home =
-    ( { model | page = Home home }
-    , Cmd.none
     )
 
 
@@ -197,6 +201,11 @@ stepAdminTrainStops model ( adminTrainStops, cmds ) =
     )
 
 
+stepLogin : Model -> ( Login.Model, Cmd Login.Msg ) -> ( Model, Cmd Msg)
+stepLogin model ( login, cmds ) =
+    ( { model | page = Login login }
+    , Cmd.map LoginMsg cmds
+    )
 
 -- NAVBAR
 
@@ -222,6 +231,7 @@ viewNavbar model =
                     , Navbar.dropdownItem [ href "/admin/discounts" ] [ text "Zniżki" ]
                     ]
                 }
+            , Navbar.itemLink [ href "/login", dynamicActive ( Routes.LoginRoute, model ) ] [ text (dynamicUserText model) ]
             ]
         |> Navbar.view model.navbarState
 
@@ -229,6 +239,17 @@ viewNavbar model =
 
 -- UTILS
 
+dynamicUserText : Model -> String
+dynamicUserText model =
+    let
+        session = exit model
+        user = session.user
+    in
+        case user of
+            Just u ->
+                u.name ++ " " ++ u.surname
+            Nothing ->
+                "Zaloguj się"
 
 dynamicActive : ( Routes.Route, Model ) -> Html.Attribute msg
 dynamicActive ( route, model ) =
@@ -242,6 +263,9 @@ isActive ( route, page ) =
             True
 
         ( Routes.AboutRoute, About _ ) ->
+            True
+
+        ( Routes.LoginRoute, Login _ ) ->
             True
 
         _ ->

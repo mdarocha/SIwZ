@@ -9,6 +9,7 @@ type Route
     | AboutRoute
     | SearchRoute
     | HomeRoute
+    | LoginRoute
 
 
 parser : Parser (Route -> a) a
@@ -18,6 +19,7 @@ parser =
         , map SearchRoute (s "search")
         , map AboutRoute (s "about")
         , map AdminTrainStopsRoute (s "admin" </> s "stops")
+        , map LoginRoute (s "login")
         ]
 
 

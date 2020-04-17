@@ -1,8 +1,9 @@
 module Skeleton exposing (Details, view, viewFooter)
 
 import Browser
+import Bootstrap.Grid as Grid
 import Html exposing (..)
-import Html.Attributes exposing (href)
+import Html.Attributes exposing (href, class)
 
 
 type alias Details msg =
@@ -17,7 +18,7 @@ view toMsg details navbar =
         details.title
     , body =
         [ navbar
-        , Html.map toMsg <| div [] details.body
+        , Html.map toMsg <| Grid.container [ class "pt-2" ] details.body
         , viewFooter
         ]
     }
