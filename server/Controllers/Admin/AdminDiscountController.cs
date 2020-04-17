@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Server.Models;
-using server.Database;
+using Server.Database;
 using Server.Services;
 
 namespace Server.Controllers.Admin

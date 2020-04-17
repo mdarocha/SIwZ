@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-using server.Database;
+using Server.Database;
 using Server.Models;
 
 namespace Server.Services

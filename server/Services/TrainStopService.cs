@@ -1,7 +1,7 @@
 using Server.Models;
 using System.Collections.Generic;
 using System.Linq;
-using server.Database;
+using Server.Database;
 
 namespace Server.Services
 {

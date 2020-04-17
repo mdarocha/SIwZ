@@ -10,11 +10,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
-using server.Database;
+using Server.Database;
 using Server.Models;
 using Server.Services;
 
-namespace server
+namespace Server
 {
     public class Startup
     {

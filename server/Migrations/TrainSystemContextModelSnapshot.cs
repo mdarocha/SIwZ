@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using server.Database;
+using Server.Database;
 
-namespace server.Migrations
+namespace Server.Migrations
 {
     [DbContext(typeof(TrainSystemContext))]
     partial class TrainSystemContextModelSnapshot : ModelSnapshot

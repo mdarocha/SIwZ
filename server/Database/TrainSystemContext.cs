@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Server.Models;
 
-namespace server.Database
+namespace Server.Database
 {
     public class TrainSystemContext : IdentityDbContext<User, Role, string>
     {
