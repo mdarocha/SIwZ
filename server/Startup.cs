@@ -1,16 +1,17 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using MongoDB.Driver;
+using Microsoft.IdentityModel.Tokens;
+using server.Database;
+using Server.Models;
 using Server.Services;
 
 namespace server
@@ -27,32 +28,59 @@ namespace server
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var dbConnection = Environment.GetEnvironmentVariable("TRAINS_DB") ?? "mongodb://localhost:27017";
-            services.AddSingleton<IMongoClient>(new MongoClient(dbConnection));
+            var dbConnection = Environment.GetEnvironmentVariable("TRAINS_DB") ??
+                               "Host=localhost;Database=TrainSystem;Username=admin;Password=admin1";
+            services.AddDbContext<TrainSystemContext>(opt => opt.UseNpgsql(dbConnection));
 
-            services.AddSingleton<TrainStopService>();
+            services.AddTransient<TrainStopService>();
+            services.AddTransient<RouteService>();
+            services.AddTransient<DiscountService>();
+            services.AddTransient<TrainService>();
+
+            services.AddScoped<JwtService>();
+            
+            services.AddIdentity<User, Role>()
+                .AddEntityFrameworkStores<TrainSystemContext>()
+                .AddDefaultTokenProviders();
+
+            services.AddAuthentication(auth =>
+            {
+                auth.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                auth.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                auth.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(bearer =>
+            {
+                bearer.RequireHttpsMetadata = false;
+                bearer.SaveToken = true;
+                bearer.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("lol123456789`123456734hfdsjkhkjh")),
+                };
+            });
             
             services.AddControllers();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, TrainSystemContext context)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
-
-            app.UseHttpsRedirection();
             
             app.UseRouting();
-            
+
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseCors(builder => builder.WithOrigins("*").AllowAnyHeader().AllowAnyMethod());
-            
+
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 
+            context.Database.Migrate();
         }
     }
 }

@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Server.Models;
@@ -9,7 +7,7 @@ using Server.Services;
 
 namespace Server.Controllers
 {
-    [Route("/api/[controller]")]
+    [Route("/api/stops")]
     [ApiController]
     public class TrainStopController : ControllerBase
     {
@@ -49,15 +47,7 @@ namespace Server.Controllers
             
             return ts;
         }
-
-        [HttpPost]
-        [Route("Create")]
-        public ActionResult<TrainStop> Create([FromBody] TrainStop trainStop)
-        {
-            var ts = _trainStopService.Create(trainStop);
-            
-            return Ok(ts);
-        }
+        
     }
 }
 

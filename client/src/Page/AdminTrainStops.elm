@@ -26,7 +26,7 @@ type alias Error =
 
 
 type alias TrainStop =
-    { id : String
+    { id : Int
     , city : String
     , name : String
     }
@@ -68,7 +68,7 @@ type Msg
 
 init : Session.Data -> ( Model, Cmd Msg )
 init session =
-    ( Model session Loading (TrainStop "" "" "") Nothing
+    ( Model session Loading (TrainStop 0 "" "") Nothing
     , getStops session.api
     )
 
@@ -110,7 +110,7 @@ update msg model =
                                     [ model.stopToAdd ]
 
                         newStopToAdd =
-                            TrainStop "" "" ""
+                            TrainStop 0 "" ""
                     in
                     ( { model | stopToAdd = newStopToAdd, stopList = Success newStopList, stopAddError = Nothing }, Cmd.none )
 
@@ -146,7 +146,7 @@ update msg model =
                     else
                         let
                             newStopToAdd =
-                                TrainStop "" "" ""
+                                TrainStop 0 "" ""
                         in
                         ( { model | stopToAdd = newStopToAdd, stopAddError = Just "Nieprawidłowy przystanek" }, Cmd.none )
 
@@ -234,7 +234,7 @@ formError error =
 getStops : String -> Cmd Msg
 getStops api =
     Http.get
-        { url = api ++ "trainstop/get"
+        { url = api ++ "admin/stops/get"
         , expect = Http.expectJson GotStops stopsDecoder
         }
 
@@ -244,7 +244,7 @@ addStop api stop =
     Http.post
         { body = Http.jsonBody (stopEncoder stop)
         , expect = Http.expectWhatever AddStop
-        , url = api ++ "trainstop/create"
+        , url = api ++ "admin/stops/create"
         }
 
 
@@ -260,7 +260,7 @@ stopsDecoder =
 stopDecoder : Decode.Decoder TrainStop
 stopDecoder =
     Decode.map3 TrainStop
-        (Decode.field "id" Decode.string)
+        (Decode.field "id" Decode.int)
         (Decode.field "city" Decode.string)
         (Decode.field "name" Decode.string)
 
@@ -268,7 +268,7 @@ stopDecoder =
 stopEncoder : TrainStop -> Encode.Value
 stopEncoder stop =
     Encode.object
-        [ ( "id", Encode.string stop.id )
+        [ ( "id", Encode.int stop.id )
         , ( "city", Encode.string stop.city )
         , ( "name", Encode.string stop.name )
         ]
