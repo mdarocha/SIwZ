@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Server.Models;
-using server.PostgreSQL;
+using server.Database;
 
 namespace Server.Services
 {

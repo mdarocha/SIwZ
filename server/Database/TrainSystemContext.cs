@@ -3,7 +3,7 @@ using System.Threading;
 using Microsoft.EntityFrameworkCore;
 using Server.Models;
 
-namespace server.PostgreSQL
+namespace server.Database
 {
     public class TrainSystemContext : DbContext
     {
