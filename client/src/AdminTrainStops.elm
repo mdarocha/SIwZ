@@ -24,7 +24,7 @@ type alias Error =
 
 
 type alias TrainStop =
-    { id : String
+    { id : Int
     , city : String
     , name : String
     }
@@ -66,7 +66,7 @@ type Msg
 
 init : String -> ( Model, Cmd Msg )
 init api =
-    ( Model api Loading (TrainStop "" "" "") Nothing
+    ( Model api Loading (TrainStop 0 "" "") Nothing
     , getStops api
     )
 
@@ -108,7 +108,7 @@ update msg model =
                                     [ model.stopToAdd ]
 
                         newStopToAdd =
-                            TrainStop "" "" ""
+                            TrainStop 0 "" ""
                     in
                     ( { model | stopToAdd = newStopToAdd, stopList = Success newStopList, stopAddError = Nothing }, Cmd.none )
 
@@ -144,7 +144,7 @@ update msg model =
                     else
                         let
                             newStopToAdd =
-                                TrainStop "" "" ""
+                                TrainStop 0 "" ""
                         in
                         ( { model | stopToAdd = newStopToAdd, stopAddError = Just "Nieprawidłowy przystanek" }, Cmd.none )
 
@@ -254,7 +254,7 @@ stopsDecoder =
 stopDecoder : Decode.Decoder TrainStop
 stopDecoder =
     Decode.map3 TrainStop
-        (Decode.field "id" Decode.string)
+        (Decode.field "id" Decode.int)
         (Decode.field "city" Decode.string)
         (Decode.field "name" Decode.string)
 
@@ -262,7 +262,7 @@ stopDecoder =
 stopEncoder : TrainStop -> Encode.Value
 stopEncoder stop =
     Encode.object
-        [ ( "id", Encode.string stop.id )
+        [ ( "id", Encode.int stop.id )
         , ( "city", Encode.string stop.city )
         , ( "name", Encode.string stop.name )
         ]
