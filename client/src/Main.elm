@@ -1,15 +1,41 @@
 module Main exposing (..)
 
-import Bootstrap.Grid as Grid
 import Bootstrap.Navbar as Navbar
 import Browser
 import Browser.Navigation as Nav
 import Html exposing (..)
-import Html.Attributes exposing (class, classList, href, id)
-import Routes exposing (..)
-import Session exposing (..)
-import AdminTrainStops
-import Url
+import Html.Attributes exposing (..)
+import Page.About as About
+import Page.AdminTrainStops as AdminTrainStops
+import Page.Home as Home
+import Routes
+import Session
+import Skeleton
+import Url exposing (Url)
+import Url.Parser exposing (map)
+
+
+type alias Model =
+    { nav : Nav.Key
+    , page : Page
+    , navbarState : Navbar.State
+    }
+
+
+type Page
+    = NotFound Session.Data
+    | About About.Model
+    | Home Home.Model
+    | AdminTrainStops AdminTrainStops.Model
+
+
+type Msg
+    = NoOp
+    | LinkClicked Browser.UrlRequest
+    | UrlChanged Url.Url
+    | NavbarMsg Navbar.State
+    | AboutMsg About.Msg
+    | AdminTrainStopsMsg AdminTrainStops.Msg
 
 
 main : Program String Model Msg
@@ -24,245 +50,199 @@ main =
         }
 
 
-
--- MODEL
-
-
-type Model
-    = AdminTrainStops Session AdminTrainStops.Model
-    | TrainSearch Session
-    | About Session
-    | NotFound Session
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Navbar.subscriptions model.navbarState NavbarMsg
 
 
-toSession : Model -> Session
-toSession model =
-    case model of
-        AdminTrainStops session _ ->
-            session
-
-        NotFound session ->
-            session
-
-        TrainSearch session ->
-            session
-
-        About session ->
-            session
-
-
-setSession : Model -> Session -> Model
-setSession model session =
-    case model of
-        AdminTrainStops _ trainModel ->
-            AdminTrainStops session trainModel
-
-        TrainSearch _ ->
-            TrainSearch session
-
-        About _ ->
-            About session
-
+view : Model -> Browser.Document Msg
+view model =
+    case model.page of
         NotFound _ ->
-            NotFound session
+            Skeleton.view never
+                { title = "Nie znaleziono"
+                , body = [ text "Nie znaleziono" ]
+                }
+                (viewNavbar model)
 
+        About about ->
+            Skeleton.view AboutMsg (About.view about) (viewNavbar model)
 
+        Home home ->
+            Skeleton.view never (Home.view home) (viewNavbar model)
 
--- INIT
+        AdminTrainStops adminTrainStops ->
+            Skeleton.view AdminTrainStopsMsg (AdminTrainStops.view adminTrainStops) (viewNavbar model)
 
 
 init : String -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init api url key =
     let
+        session =
+            Session.Data api
+
         ( navbarState, navbarCmd ) =
             Navbar.initialState NavbarMsg
 
-        session =
-            Session api key navbarState
-
         ( model, routeCmd ) =
-            changeRoute (fromUrl url) (NotFound session)
+            changeRoute (Routes.fromUrl url) { nav = key, page = NotFound session, navbarState = navbarState }
     in
     ( model, Cmd.batch [ routeCmd, navbarCmd ] )
 
 
-
--- UPDATE
-
-
-type Msg
-    = LinkClicked Browser.UrlRequest
-    | UrlChanged Url.Url
-    | NavbarMsg Navbar.State
-    | AdminTrainStopsUpdate AdminTrainStops.Msg
-
-
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
-    case ( msg, model ) of
-        ( LinkClicked request, _ ) ->
-            case request of
+update message model =
+    case message of
+        NoOp ->
+            ( model, Cmd.none )
+
+        LinkClicked urlRequest ->
+            case urlRequest of
                 Browser.Internal url ->
-                    let
-                        session =
-                            toSession model
-                    in
-                    ( model, Nav.pushUrl session.nav (Url.toString url) )
+                    ( model
+                    , Nav.pushUrl model.nav (Url.toString url)
+                    )
 
                 Browser.External href ->
-                    ( model, Nav.load href )
+                    ( model
+                    , Nav.load href
+                    )
 
-        ( UrlChanged url, _ ) ->
-            changeRoute (fromUrl url) model
+        UrlChanged url ->
+            changeRoute (Routes.fromUrl url) model
 
-        ( NavbarMsg state, _ ) ->
-            let
-                oldSession =
-                    toSession model
+        NavbarMsg msg ->
+            ( { model | navbarState = msg }
+            , Cmd.map NavbarMsg Cmd.none
+            )
 
-                newSession =
-                    { oldSession | navbarState = state }
-            in
-            ( setSession model newSession, Cmd.none )
+        AboutMsg msg ->
+            case model.page of
+                About about ->
+                    stepAbout model (About.update msg about)
 
-        ( AdminTrainStopsUpdate trainMsg, AdminTrainStops session trainModel ) ->
-            AdminTrainStops.update trainMsg trainModel
-                |> convertResult (AdminTrainStops session) AdminTrainStopsUpdate
+                _ ->
+                    ( model, Cmd.none )
 
-        ( _, NotFound _ ) ->
-            ( model, Cmd.none )
+        AdminTrainStopsMsg msg ->
+            case model.page of
+                AdminTrainStops adminTrainStops ->
+                    stepAdminTrainStops model (AdminTrainStops.update msg adminTrainStops)
 
-        ( _, About _ ) ->
-            ( model, Cmd.none )
-
-        ( _, TrainSearch _ ) ->
-            ( model, Cmd.none )
-
-
-convertResult : (subModel -> Model) -> (subMsg -> Msg) -> ( subModel, Cmd subMsg ) -> ( Model, Cmd Msg )
-convertResult toModel toMsg ( subModel, subCmd ) =
-    ( toModel subModel, Cmd.map toMsg subCmd )
+                _ ->
+                    ( model, Cmd.none )
 
 
-changeRoute : Maybe Route -> Model -> ( Model, Cmd Msg )
+exit : Model -> Session.Data
+exit model =
+    case model.page of
+        NotFound session ->
+            session
+
+        About m ->
+            m.session
+
+        Home m ->
+            m.session
+
+        AdminTrainStops m ->
+            m.session
+
+
+changeRoute : Maybe Routes.Route -> Model -> ( Model, Cmd Msg )
 changeRoute route model =
     let
         session =
-            toSession model
+            exit model
     in
     case route of
         Nothing ->
-            ( NotFound session, Cmd.none )
+            ( { model | page = NotFound session }
+            , Cmd.none
+            )
 
-        Just Routes.AdminTrainStops ->
-            AdminTrainStops.init session.api
-                |> convertResult (AdminTrainStops session) AdminTrainStopsUpdate
+        Just Routes.AdminTrainStopsRoute ->
+            stepAdminTrainStops model (AdminTrainStops.init session)
 
         Just Routes.SearchRoute ->
-            ( TrainSearch session, Cmd.none )
+            ( { model | page = NotFound session }
+            , Cmd.none
+            )
 
         Just Routes.AboutRoute ->
-            ( About session, Cmd.none )
+            stepAbout model (About.init session)
 
-        Just Routes.Root ->
-            ( model, Nav.replaceUrl session.nav "/search" )
-
--- SUBSCRIPTIONS
+        Just Routes.HomeRoute ->
+            stepHome model (Home.init session)
 
 
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    let
-        session =
-            toSession model
-    in
-    Navbar.subscriptions session.navbarState NavbarMsg
+stepAbout : Model -> ( About.Model, Cmd About.Msg ) -> ( Model, Cmd Msg )
+stepAbout model ( about, cmds ) =
+    ( { model | page = About about }
+    , Cmd.map AboutMsg cmds
+    )
+
+
+stepHome : Model -> Home.Model -> ( Model, Cmd msg )
+stepHome model home =
+    ( { model | page = Home home }
+    , Cmd.none
+    )
+
+
+stepAdminTrainStops : Model -> ( AdminTrainStops.Model, Cmd AdminTrainStops.Msg ) -> ( Model, Cmd Msg )
+stepAdminTrainStops model ( adminTrainStops, cmds ) =
+    ( { model | page = AdminTrainStops adminTrainStops }
+    , Cmd.map AdminTrainStopsMsg cmds
+    )
 
 
 
--- VIEW
+-- NAVBAR
 
 
-view : Model -> Browser.Document Msg
-view model =
-    { title = "Trains"
-    , body = 
-        [ viewHeader model
-        , div [ id "wrap" ] [ Grid.container [] [ viewContent model ] ]
-        , viewFooter
-        ]
-    }
-
-
-viewContent : Model -> Html Msg
-viewContent model =
-    case model of
-        AdminTrainStops _ trainModel ->
-            AdminTrainStops.view trainModel
-                |> Html.map AdminTrainStopsUpdate
-
-        NotFound _ ->
-            text "404 not found"
-
-        About _ ->
-            text "About page"
-
-        TrainSearch _ ->
-            text "Train search page"
-
-viewFooter : Html Msg
-viewFooter =
-    footer [] [ text "© 2137 lololololol" ]
-
--- TODO make this dynamic
-viewHeader : Model -> Html Msg 
-viewHeader model =
-    let
-        session =
-            toSession model
-
-        navbarState =
-            session.navbarState
-    in
+viewNavbar : Model -> Html Msg
+viewNavbar model =
     Navbar.config NavbarMsg
         |> Navbar.withAnimation
         |> Navbar.dark
         |> Navbar.brand [ href "/" ] [ text "SIwZ Trains" ]
         |> Navbar.items
-            [ Navbar.itemLink [ href "/search", dynamicActive Routes.SearchRoute model ] [ text "Wyszukaj połączenie" ]
-            , Navbar.itemLink [ href "/about", dynamicActive Routes.AboutRoute model ] [ text "O nas" ]
+            [ Navbar.itemLink [ href "/search", dynamicActive ( Routes.SearchRoute, model ) ] [ text "Wyszukaj połączenie" ]
+            , Navbar.itemLink [ href "/about", dynamicActive ( Routes.AboutRoute, model ) ] [ text "O nas" ]
             , Navbar.dropdown
                 { id = "admin-dropdown"
                 , toggle = Navbar.dropdownToggle [] [ text "Panel admina" ]
                 , items =
                     [ Navbar.dropdownItem [ href "/admin/users" ] [ text "Użytkownicy" ]
                     , Navbar.dropdownItem [ href "/admin/train" ] [ text "Pociągi" ]
-                    , Navbar.dropdownItem [ href "/admin/stops", dynamicActive Routes.AdminTrainStops model ] [ text "Przystanki" ]
-                    , Navbar.dropdownItem [ href "/admin/routes"] [ text "Trasy" ]
+                    , Navbar.dropdownItem [ href "/admin/stops", dynamicActive ( Routes.AdminTrainStopsRoute, model ) ] [ text "Przystanki" ]
+                    , Navbar.dropdownItem [ href "/admin/routes" ] [ text "Trasy" ]
                     , Navbar.dropdownItem [ href "/admin/tickets" ] [ text "Bilety" ]
                     , Navbar.dropdownItem [ href "/admin/discounts" ] [ text "Zniżki" ]
                     ]
                 }
             ]
-        |> Navbar.view navbarState
+        |> Navbar.view model.navbarState
 
 
-dynamicActive : Route -> Model -> Html.Attribute Msg
-dynamicActive route model =
-    classList [ ( "active", isActive route model ) ]
+
+-- UTILS
 
 
-isActive : Route -> Model -> Bool
-isActive route model =
-    case ( route, model ) of
-        ( Routes.SearchRoute, TrainSearch _ ) ->
-            True
+dynamicActive : ( Routes.Route, Model ) -> Html.Attribute msg
+dynamicActive ( route, model ) =
+    classList [ ( "active", isActive ( route, model.page ) ) ]
 
-        ( Routes.AdminTrainStops, AdminTrainStops _ _ ) ->
+
+isActive : ( Routes.Route, Page ) -> Bool
+isActive ( route, page ) =
+    case ( route, page ) of
+        ( Routes.AdminTrainStopsRoute, AdminTrainStops _ ) ->
             True
 
         ( Routes.AboutRoute, About _ ) ->
             True
 
-        ( _, _ ) ->
+        _ ->
             False

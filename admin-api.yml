@@ -1,0 +1,540 @@
+openapi: 3.0.0
+info:
+  title: TrainSystem Admin API
+  description: TrainSystem Admin API for SIwZ project.
+  version: 0.0.1
+servers:
+  - url: http://localhost:5000/api/admin
+paths:
+  /stops:
+    get:
+      tags:
+        - Stop
+      summary: Returns a list of Stops.
+      responses:
+        '200':    # status code
+          description: A JSON array of Stops.
+          content:
+            application/json:
+              schema: 
+                type: array
+                items:
+                  $ref: '#/components/schemas/Stop'
+    post:
+      tags:
+        - Stop
+      summary: Creates new Stop.
+      requestBody:
+        required: true
+        content:
+          application:json:
+            schema:
+              $ref: '#/components/schemas/StopForm'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stop'
+  /stops/{id}:
+    parameters:
+      - $ref: '#/components/parameters/id'
+    get:
+      tags:
+        - Stop
+      summary: Return Stop with given id.
+      responses:
+        '200':
+          description: Stop object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stop'
+    patch:
+      tags:
+        - Stop
+      summary: Modify Stop with given id.
+      requestBody:
+        required: true
+        content:
+          application:json:
+            schema:
+              $ref: '#/components/schemas/StopForm'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stop'
+    delete:
+      tags:
+        - Stop
+      summary: Delets Stop with given id.
+      responses:
+        '200':
+          description: Ok
+  /routes:
+    get:
+      tags:
+        - Route
+      summary: Returns a list of Routes.
+      responses:
+        '200':    # status code
+          description: A JSON array of Routes.
+          content:
+            application/json:
+              schema: 
+                type: array
+                items:
+                  $ref: '#/components/schemas/Route'
+    post:
+      tags:
+        - Route
+      summary: Creates new Route.
+      requestBody:
+        required: true
+        content:
+          application:json:
+            schema:
+              $ref: '#/components/schemas/RouteForm'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Route'
+  /routes/{id}:
+    parameters:
+      - $ref: '#/components/parameters/id'
+    get:
+      tags:
+        - Route
+      summary: Returns Route with given id.
+      responses:
+        '200':
+          description: Route object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Route'
+    patch:
+      tags:
+        - Route
+      summary: Modify Route with given id.
+      requestBody:
+        required: true
+        content:
+          application:json:
+            schema:
+              $ref: '#/components/schemas/StopForm'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouteForm'
+    delete:
+      tags:
+        - Route
+      summary: Deletes Route with given id.
+      responses:
+        '200':
+          description: Ok
+  /discounts:
+    get:
+      tags:
+        - Discount
+      summary: Returns a list of Discounts.
+      responses:
+        '200':    # status code
+          description: A JSON array of Discounts.
+          content:
+            application/json:
+              schema: 
+                type: array
+                items:
+                  $ref: '#/components/schemas/Discount'
+                  
+    post:
+      tags:
+        - Discount
+      summary: Creates new Discount.
+      requestBody:
+        required: true
+        content:
+          application:json:
+            schema:
+              $ref: '#/components/schemas/DiscountForm'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discount'
+  /discounts/{id}:
+    parameters:
+      - $ref: '#/components/parameters/id'
+    get:
+      tags:
+        - Discount
+      summary: Return Discount with given id.
+      responses:
+        '200':
+          description: Discount object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discount'
+    patch:
+      tags:
+        - Discount
+      summary: Modify Discount with given id.
+      requestBody:
+        required: true
+        content:
+          application:json:
+            schema:
+              $ref: '#/components/schemas/DiscountForm'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discount'
+    delete:
+      tags:
+        - Discount
+      summary: Deletes Discount with given id.
+      responses:
+        '200':
+          description: Ok
+  /trains:
+    get:
+      tags:
+        - Train
+      summary: Returns a list of Trains.
+      responses:
+        '200':    # status code
+          description: A JSON array of Discounts.
+          content:
+            application/json:
+              schema: 
+                type: array
+                items:
+                  $ref: '#/components/schemas/Train'
+                  
+    post:
+      tags:
+        - Train
+      summary: Creates new Train.
+      requestBody:
+        required: true
+        content:
+          application:json:
+            schema:
+              $ref: '#/components/schemas/TrainForm'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Train'
+  /trains/{id}:
+    parameters:
+      - $ref: '#/components/parameters/id'
+    get:
+      tags:
+        - Train
+      summary: Return Train with given id.
+      responses:
+        '200':
+          description: Train object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Discount'
+    patch:
+      tags:
+        - Train
+      summary: Modify Train with given id.
+      requestBody:
+        required: true
+        content:
+          application:json:
+            schema:
+              $ref: '#/components/schemas/TrainForm'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Train'
+    delete:
+      tags:
+        - Train
+      summary: Deletes Train with given id.
+      responses:
+        '200':
+          description: Ok 
+  /rides:
+    get:
+      tags:
+        - Ride
+      summary: Returns a list of Rides.
+      responses:
+        '200':    # status code
+          description: A JSON array of Discounts.
+          content:
+            application/json:
+              schema: 
+                type: array
+                items:
+                  $ref: '#/components/schemas/Ride'
+    post:
+      tags:
+        - Ride
+      summary: Creates new Ride.
+      requestBody:
+        required: true
+        content:
+          application:json:
+            schema:
+              $ref: '#/components/schemas/RideForm'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ride'                          
+  /rides/{id}:
+    parameters:
+      - $ref: '#/components/parameters/id'
+    get:
+      tags:
+        - Ride
+      summary: Returns Ride object with given id.
+      responses:
+        '200':
+          description: Ride object.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ride'
+    patch:
+      tags:
+        - Ride
+      summary: Modify Ride with given id.
+      requestBody:
+        required: true
+        content:
+          application:json:
+            schema:
+              $ref: '#/components/schemas/RideForm'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ride'
+    delete:
+      tags:
+        - Ride
+      summary: Deletes Ride with given id.
+      responses:
+        '200':
+          description: Ok 
+  /tickets:
+    get:
+      tags:
+        - Tickets
+      summary: Returns all tickets connected with given user Id.
+      parameters: 
+        - name: userId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Ticket'
+  /ticket/{id}:
+    delete:
+      tags:
+        - Tickets
+      summary: Revokes ticket with given id.
+      parameters: 
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          description: Ok
+          
+components:
+  parameters:
+    id:
+      name: id
+      in: path
+      description: Numeric ID of related object
+      required: true
+      schema:
+        type: integer
+  schemas:
+    StopForm:
+      type: object
+      properties:
+        Name:
+          type: string
+        City:
+          type: string
+    Stop:
+      type: object
+      properties:
+        Id:
+          type: integer
+        Name:
+          type: string
+        City:
+          type: string
+    RouteStop:
+      type: object
+      properties:
+        No:
+          type: integer
+        Stop:
+          $ref: '#/components/schemas/Stop'
+    Route:
+      type: object
+      properties:
+        Id:
+          type: integer
+        Name:
+          type: string
+        Stops:
+          type: array
+          items:
+            $ref: '#/components/schemas/RouteStop'
+    RouteStopForm:
+      type: object
+      properties:
+        StopId:
+          type: integer
+        StopNo:
+          type: integer
+    RouteForm:
+      type: object
+      properties:
+        Name:
+          type: string
+        Stops:
+          type: array
+          uniqueItems: true
+          minItems: 2
+          items:
+            $ref: '#/components/schemas/RouteStopForm'
+    DiscountForm:
+      type: object
+      properties:
+        Type:
+          type: string
+        Value:
+          type: integer
+        ValueType:
+          type: integer
+          description:  0 - Percentage, 1 - Flat
+    Discount:
+      type: object
+      properties:
+        Id:
+          type: integer
+        Type:
+          type: string
+        Value:
+          type: integer
+        ValueType:
+          type: integer
+          description:  0 - Percentage, 1 - Flat
+    Train:
+      type: object
+      properties:
+        Id:
+          type: integer
+        Name:
+          type: string
+        Type:
+          type: integer
+          description:  0 - Interstitial, 1 - Open Coach
+        Seats:
+          type: integer
+        Wagons:
+          type: integer
+    TrainForm:
+      type: object
+      properties:
+        Name:
+          type: string
+        Type:
+          type: integer
+          description:  0 - Interstitial, 1 - Open Coach
+        Seats:
+          type: integer
+        Wagons:
+          type: integer
+    Ride:
+      type: object
+      properties:
+        Id:
+          type: integer
+        Route:
+          $ref: '#/components/schemas/Route'
+        StartTime:
+          type: string
+        Train:
+          $ref: '#/components/schemas/Train'
+        FreeTickets:
+          type: integer
+    RideForm:
+      type: object
+      properties:
+        RouteId:
+          type: integer
+        StartTime:
+          type: string
+        TrainId:
+          type: integer
+    Ticket:
+      type: object
+      properties:
+        Id:
+          type: integer
+        Ride:
+          $ref: '#/components/schemas/Ride'
+        Price:
+          type: integer
+          description: Price after applying discount
+        UserId:
+          type: integer
+        From:
+          $ref: '#/components/schemas/Stop'
+        To:
+          $ref: '#/components/schemas/Stop'
+        Train:
+          $ref: '#/components/schemas/Train'
+        WagonNo:
+          type: integer
+        SeatNo:
+          type: integer
