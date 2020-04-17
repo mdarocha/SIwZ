@@ -4,10 +4,52 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace server.Migrations
 {
-    public partial class Init : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "AspNetRoles",
+                columns: table => new
+                {
+                    Id = table.Column<string>(nullable: false),
+                    Name = table.Column<string>(maxLength: 256, nullable: true),
+                    NormalizedName = table.Column<string>(maxLength: 256, nullable: true),
+                    ConcurrencyStamp = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetRoles", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUsers",
+                columns: table => new
+                {
+                    Id = table.Column<string>(nullable: false),
+                    UserName = table.Column<string>(maxLength: 256, nullable: true),
+                    NormalizedUserName = table.Column<string>(maxLength: 256, nullable: true),
+                    Email = table.Column<string>(maxLength: 256, nullable: true),
+                    NormalizedEmail = table.Column<string>(maxLength: 256, nullable: true),
+                    EmailConfirmed = table.Column<bool>(nullable: false),
+                    PasswordHash = table.Column<string>(nullable: true),
+                    SecurityStamp = table.Column<string>(nullable: true),
+                    ConcurrencyStamp = table.Column<string>(nullable: true),
+                    PhoneNumber = table.Column<string>(nullable: true),
+                    PhoneNumberConfirmed = table.Column<bool>(nullable: false),
+                    TwoFactorEnabled = table.Column<bool>(nullable: false),
+                    LockoutEnd = table.Column<DateTimeOffset>(nullable: true),
+                    LockoutEnabled = table.Column<bool>(nullable: false),
+                    AccessFailedCount = table.Column<int>(nullable: false),
+                    Name = table.Column<string>(nullable: false),
+                    Surname = table.Column<string>(nullable: false),
+                    IsAdmin = table.Column<bool>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Discounts",
                 columns: table => new
@@ -67,21 +109,109 @@ namespace server.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Users",
+                name: "AspNetRoleClaims",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Login = table.Column<string>(nullable: false),
-                    Name = table.Column<string>(nullable: false),
-                    Surname = table.Column<string>(nullable: false),
-                    Password = table.Column<string>(nullable: false),
-                    Token = table.Column<string>(nullable: false),
-                    IsAdmin = table.Column<bool>(nullable: false)
+                    RoleId = table.Column<string>(nullable: false),
+                    ClaimType = table.Column<string>(nullable: true),
+                    ClaimValue = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.PrimaryKey("PK_AspNetRoleClaims", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "AspNetRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUserClaims",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<string>(nullable: false),
+                    ClaimType = table.Column<string>(nullable: true),
+                    ClaimValue = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserClaims", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AspNetUserClaims_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUserLogins",
+                columns: table => new
+                {
+                    LoginProvider = table.Column<string>(nullable: false),
+                    ProviderKey = table.Column<string>(nullable: false),
+                    ProviderDisplayName = table.Column<string>(nullable: true),
+                    UserId = table.Column<string>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserLogins", x => new { x.LoginProvider, x.ProviderKey });
+                    table.ForeignKey(
+                        name: "FK_AspNetUserLogins_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUserRoles",
+                columns: table => new
+                {
+                    UserId = table.Column<string>(nullable: false),
+                    RoleId = table.Column<string>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserRoles", x => new { x.UserId, x.RoleId });
+                    table.ForeignKey(
+                        name: "FK_AspNetUserRoles_AspNetRoles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "AspNetRoles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AspNetUserRoles_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AspNetUserTokens",
+                columns: table => new
+                {
+                    UserId = table.Column<string>(nullable: false),
+                    LoginProvider = table.Column<string>(nullable: false),
+                    Name = table.Column<string>(nullable: false),
+                    Value = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AspNetUserTokens", x => new { x.UserId, x.LoginProvider, x.Name });
+                    table.ForeignKey(
+                        name: "FK_AspNetUserTokens_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -147,7 +277,7 @@ namespace server.Migrations
                     RideId = table.Column<int>(nullable: false),
                     Price = table.Column<int>(nullable: false),
                     DiscountId = table.Column<int>(nullable: false),
-                    UserId = table.Column<int>(nullable: false),
+                    UserId = table.Column<string>(nullable: false),
                     FromId = table.Column<int>(nullable: false),
                     ToId = table.Column<int>(nullable: false),
                     TrainName = table.Column<string>(nullable: false),
@@ -182,9 +312,9 @@ namespace server.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Tickets_Users_UserId",
+                        name: "FK_Tickets_AspNetUsers_UserId",
                         column: x => x.UserId,
-                        principalTable: "Users",
+                        principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -239,19 +369,56 @@ namespace server.Migrations
                 columns: new[] { "RouteId", "TrainStopId", "ArrivalTime", "StopNo" },
                 values: new object[,]
                 {
-                    { 2, 1, new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2315), 1 },
-                    { 3, 1, new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2325), 1 },
-                    { 4, 1, new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2339), 1 },
-                    { 3, 2, new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2322), 1 },
-                    { 4, 2, new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2336), 1 },
-                    { 3, 3, new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2329), 1 },
-                    { 2, 4, new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2318), 1 },
-                    { 4, 4, new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2343), 1 },
-                    { 1, 5, new DateTime(2020, 4, 17, 18, 56, 4, 823, DateTimeKind.Local).AddTicks(7475), 1 },
-                    { 4, 5, new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2332), 1 },
-                    { 1, 6, new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2309), 1 },
-                    { 1, 7, new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2265), 1 }
+                    { 2, 1, new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1178), 1 },
+                    { 3, 1, new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1189), 1 },
+                    { 4, 1, new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1205), 1 },
+                    { 3, 2, new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1186), 1 },
+                    { 4, 2, new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1201), 1 },
+                    { 3, 3, new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1193), 1 },
+                    { 2, 4, new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1182), 1 },
+                    { 4, 4, new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1209), 1 },
+                    { 1, 5, new DateTime(2020, 4, 17, 20, 53, 49, 177, DateTimeKind.Local).AddTicks(2126), 1 },
+                    { 4, 5, new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1197), 1 },
+                    { 1, 6, new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1172), 1 },
+                    { 1, 7, new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1125), 1 }
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetRoleClaims_RoleId",
+                table: "AspNetRoleClaims",
+                column: "RoleId");
+
+            migrationBuilder.CreateIndex(
+                name: "RoleNameIndex",
+                table: "AspNetRoles",
+                column: "NormalizedName",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUserClaims_UserId",
+                table: "AspNetUserClaims",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUserLogins_UserId",
+                table: "AspNetUserLogins",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUserRoles_RoleId",
+                table: "AspNetUserRoles",
+                column: "RoleId");
+
+            migrationBuilder.CreateIndex(
+                name: "EmailIndex",
+                table: "AspNetUsers",
+                column: "NormalizedEmail");
+
+            migrationBuilder.CreateIndex(
+                name: "UserNameIndex",
+                table: "AspNetUsers",
+                column: "NormalizedUserName",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Rides_RouteId",
@@ -297,10 +464,28 @@ namespace server.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "AspNetRoleClaims");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUserClaims");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUserLogins");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUserRoles");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUserTokens");
+
+            migrationBuilder.DropTable(
                 name: "StopsToRoutes");
 
             migrationBuilder.DropTable(
                 name: "Tickets");
+
+            migrationBuilder.DropTable(
+                name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "Discounts");
@@ -312,7 +497,7 @@ namespace server.Migrations
                 name: "Rides");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "Routes");

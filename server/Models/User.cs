@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Server.Models
 {
-    public class User : IdentityUser<int>
+    public class User : IdentityUser
     {
         [Required]
         [PersonalData]
@@ -17,7 +17,7 @@ namespace Server.Models
         public bool IsAdmin { set; get; }
     }
 
-    public class Role : IdentityRole<int>
+    public class Role : IdentityRole
     {
         
     }

@@ -19,7 +19,7 @@ namespace server.Migrations
                 .HasAnnotation("ProductVersion", "3.1.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -32,8 +32,9 @@ namespace server.Migrations
                     b.Property<string>("ClaimValue")
                         .HasColumnType("text");
 
-                    b.Property<int>("RoleId")
-                        .HasColumnType("integer");
+                    b.Property<string>("RoleId")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -42,7 +43,7 @@ namespace server.Migrations
                     b.ToTable("AspNetRoleClaims");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -55,8 +56,9 @@ namespace server.Migrations
                     b.Property<string>("ClaimValue")
                         .HasColumnType("text");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -65,7 +67,7 @@ namespace server.Migrations
                     b.ToTable("AspNetUserClaims");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider")
                         .HasColumnType("text");
@@ -76,8 +78,9 @@ namespace server.Migrations
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("text");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
@@ -86,13 +89,13 @@ namespace server.Migrations
                     b.ToTable("AspNetUserLogins");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
 
-                    b.Property<int>("RoleId")
-                        .HasColumnType("integer");
+                    b.Property<string>("RoleId")
+                        .HasColumnType("text");
 
                     b.HasKey("UserId", "RoleId");
 
@@ -101,10 +104,10 @@ namespace server.Migrations
                     b.ToTable("AspNetUserRoles");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
 
                     b.Property<string>("LoginProvider")
                         .HasColumnType("text");
@@ -188,10 +191,8 @@ namespace server.Migrations
 
             modelBuilder.Entity("Server.Models.Role", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -277,84 +278,84 @@ namespace server.Migrations
                         {
                             RouteId = 1,
                             TrainStopId = 5,
-                            ArrivalTime = new DateTime(2020, 4, 17, 20, 38, 55, 696, DateTimeKind.Local).AddTicks(2219),
+                            ArrivalTime = new DateTime(2020, 4, 17, 20, 53, 49, 177, DateTimeKind.Local).AddTicks(2126),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 1,
                             TrainStopId = 7,
-                            ArrivalTime = new DateTime(2020, 4, 17, 20, 38, 55, 701, DateTimeKind.Local).AddTicks(1006),
+                            ArrivalTime = new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1125),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 1,
                             TrainStopId = 6,
-                            ArrivalTime = new DateTime(2020, 4, 17, 20, 38, 55, 701, DateTimeKind.Local).AddTicks(1049),
+                            ArrivalTime = new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1172),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 2,
                             TrainStopId = 1,
-                            ArrivalTime = new DateTime(2020, 4, 17, 20, 38, 55, 701, DateTimeKind.Local).AddTicks(1055),
+                            ArrivalTime = new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1178),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 2,
                             TrainStopId = 4,
-                            ArrivalTime = new DateTime(2020, 4, 17, 20, 38, 55, 701, DateTimeKind.Local).AddTicks(1059),
+                            ArrivalTime = new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1182),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 3,
                             TrainStopId = 2,
-                            ArrivalTime = new DateTime(2020, 4, 17, 20, 38, 55, 701, DateTimeKind.Local).AddTicks(1062),
+                            ArrivalTime = new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1186),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 3,
                             TrainStopId = 1,
-                            ArrivalTime = new DateTime(2020, 4, 17, 20, 38, 55, 701, DateTimeKind.Local).AddTicks(1065),
+                            ArrivalTime = new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1189),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 3,
                             TrainStopId = 3,
-                            ArrivalTime = new DateTime(2020, 4, 17, 20, 38, 55, 701, DateTimeKind.Local).AddTicks(1069),
+                            ArrivalTime = new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1193),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 4,
                             TrainStopId = 5,
-                            ArrivalTime = new DateTime(2020, 4, 17, 20, 38, 55, 701, DateTimeKind.Local).AddTicks(1072),
+                            ArrivalTime = new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1197),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 4,
                             TrainStopId = 2,
-                            ArrivalTime = new DateTime(2020, 4, 17, 20, 38, 55, 701, DateTimeKind.Local).AddTicks(1075),
+                            ArrivalTime = new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1201),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 4,
                             TrainStopId = 1,
-                            ArrivalTime = new DateTime(2020, 4, 17, 20, 38, 55, 701, DateTimeKind.Local).AddTicks(1079),
+                            ArrivalTime = new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1205),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 4,
                             TrainStopId = 4,
-                            ArrivalTime = new DateTime(2020, 4, 17, 20, 38, 55, 701, DateTimeKind.Local).AddTicks(1082),
+                            ArrivalTime = new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1209),
                             StopNo = 1
                         });
                 });
@@ -388,8 +389,9 @@ namespace server.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<int>("WagonNo")
                         .HasColumnType("integer");
@@ -534,10 +536,8 @@ namespace server.Migrations
 
             modelBuilder.Entity("Server.Models.User", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
 
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("integer");
@@ -609,7 +609,7 @@ namespace server.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Server.Models.Role", null)
                         .WithMany()
@@ -618,7 +618,7 @@ namespace server.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
                     b.HasOne("Server.Models.User", null)
                         .WithMany()
@@ -627,7 +627,7 @@ namespace server.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.HasOne("Server.Models.User", null)
                         .WithMany()
@@ -636,7 +636,7 @@ namespace server.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
                     b.HasOne("Server.Models.Role", null)
                         .WithMany()
@@ -651,7 +651,7 @@ namespace server.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
                     b.HasOne("Server.Models.User", null)
                         .WithMany()

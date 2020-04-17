@@ -55,7 +55,8 @@ namespace server
                 bearer.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = false,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("lol")),
+                    ValidateAudience = false,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("lol123456789`123456734hfdsjkhkjh")),
                 };
             });
             

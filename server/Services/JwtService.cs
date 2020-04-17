@@ -69,7 +69,7 @@ namespace Server.Services
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("lol"));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("lol123456789`123456734hfdsjkhkjh"));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var expires = DateTime.Now.AddDays(7);
 

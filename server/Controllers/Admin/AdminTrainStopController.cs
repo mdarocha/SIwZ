@@ -20,6 +20,7 @@ namespace Server.Controllers.Admin
         
         [HttpGet]
         [Route("Get")]
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public ActionResult<List<TrainStop>> Get() =>
             _trainStopService.Get();

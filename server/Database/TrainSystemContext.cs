@@ -8,7 +8,7 @@ using Server.Models;
 
 namespace server.Database
 {
-    public class TrainSystemContext : IdentityDbContext<User, Role, int>
+    public class TrainSystemContext : IdentityDbContext<User, Role, string>
     {
         public TrainSystemContext(DbContextOptions<TrainSystemContext> options) : base(options)
         {
@@ -26,12 +26,12 @@ namespace server.Database
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
-            
             modelBuilder.Entity<StopToRoute>()
                 .HasKey(x => new {x.RouteId, x.TrainStopId});
             
             Seed(modelBuilder); //sneed
+            
+            base.OnModelCreating(modelBuilder);
         }
 
         private void Seed(ModelBuilder modelBuilder)
