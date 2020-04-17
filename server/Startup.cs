@@ -54,7 +54,7 @@ namespace server
 
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
 
-            context.Database.EnsureCreated();
+            context.Database.Migrate();
         }
     }
 }

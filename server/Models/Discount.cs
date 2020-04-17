@@ -17,6 +17,6 @@ namespace Server.Models
 
         [Required] public int Value { set; get; }
 
-        [Required] public int ValueType { set; get; }
+        [Required] public DiscountValueTypes ValueType { set; get; }
     }
 }

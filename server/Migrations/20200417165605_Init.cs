@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace server.Migrations
 {
-    public partial class Initial : Migration
+    public partial class Init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -14,7 +14,7 @@ namespace server.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Type = table.Column<string>(maxLength: 1, nullable: true),
+                    Type = table.Column<string>(nullable: false),
                     Value = table.Column<int>(nullable: false),
                     ValueType = table.Column<int>(nullable: false)
                 },
@@ -73,6 +73,8 @@ namespace server.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Login = table.Column<string>(nullable: false),
+                    Name = table.Column<string>(nullable: false),
+                    Surname = table.Column<string>(nullable: false),
                     Password = table.Column<string>(nullable: false),
                     Token = table.Column<string>(nullable: false),
                     IsAdmin = table.Column<bool>(nullable: false)
@@ -114,28 +116,26 @@ namespace server.Migrations
                 name: "StopsToRoutes",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    RouteId = table.Column<int>(nullable: true),
-                    TrainStopId = table.Column<int>(nullable: true),
+                    RouteId = table.Column<int>(nullable: false),
+                    TrainStopId = table.Column<int>(nullable: false),
                     StopNo = table.Column<int>(nullable: false),
                     ArrivalTime = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_StopsToRoutes", x => x.Id);
+                    table.PrimaryKey("PK_StopsToRoutes", x => new { x.RouteId, x.TrainStopId });
                     table.ForeignKey(
                         name: "FK_StopsToRoutes_Routes_RouteId",
                         column: x => x.RouteId,
                         principalTable: "Routes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_StopsToRoutes_TrainStops_TrainStopId",
                         column: x => x.TrainStopId,
                         principalTable: "TrainStops",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -150,9 +150,9 @@ namespace server.Migrations
                     UserId = table.Column<int>(nullable: false),
                     FromId = table.Column<int>(nullable: false),
                     ToId = table.Column<int>(nullable: false),
-                    TrainId = table.Column<int>(nullable: false),
-                    WagonNr = table.Column<int>(nullable: false),
-                    SeatNr = table.Column<int>(nullable: false)
+                    TrainName = table.Column<string>(nullable: false),
+                    WagonNo = table.Column<int>(nullable: false),
+                    SeatNo = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -182,17 +182,20 @@ namespace server.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Tickets_Trains_TrainId",
-                        column: x => x.TrainId,
-                        principalTable: "Trains",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_Tickets_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "Discounts",
+                columns: new[] { "Id", "Type", "Value", "ValueType" },
+                values: new object[,]
+                {
+                    { 1, "ExampleFlat", 2, 1 },
+                    { 2, "ExamplePercentage", 5, 0 }
                 });
 
             migrationBuilder.InsertData(
@@ -211,13 +214,13 @@ namespace server.Migrations
                 columns: new[] { "Id", "City", "Name" },
                 values: new object[,]
                 {
-                    { 1, "Cracow", "Main train station" },
-                    { 2, "Cracow", "Plaszow" },
-                    { 3, "Cracow", "Airport" },
-                    { 4, "Warsaw", "Main train station" },
                     { 5, "Rzeszow", "Main train station" },
+                    { 4, "Warsaw", "Main train station" },
+                    { 3, "Cracow", "Airport" },
+                    { 2, "Cracow", "Plaszow" },
+                    { 7, "Katowice", "Main train station" },
                     { 6, "Wrocalw", "Main train station" },
-                    { 7, "Katowice", "Main train station" }
+                    { 1, "Cracow", "Main train station" }
                 });
 
             migrationBuilder.InsertData(
@@ -225,10 +228,29 @@ namespace server.Migrations
                 columns: new[] { "Id", "Name", "Seats", "Type", "Wagons" },
                 values: new object[,]
                 {
-                    { 1, "ICC1", 60, 0, 5 },
+                    { 4, "REG2", 40, 1, 5 },
                     { 2, "ICC2", 40, 0, 10 },
-                    { 3, "REG1", 30, 1, 5 },
-                    { 4, "REG2", 40, 1, 5 }
+                    { 1, "ICC1", 60, 0, 5 },
+                    { 3, "REG1", 30, 1, 5 }
+                });
+
+            migrationBuilder.InsertData(
+                table: "StopsToRoutes",
+                columns: new[] { "RouteId", "TrainStopId", "ArrivalTime", "StopNo" },
+                values: new object[,]
+                {
+                    { 2, 1, new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2315), 1 },
+                    { 3, 1, new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2325), 1 },
+                    { 4, 1, new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2339), 1 },
+                    { 3, 2, new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2322), 1 },
+                    { 4, 2, new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2336), 1 },
+                    { 3, 3, new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2329), 1 },
+                    { 2, 4, new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2318), 1 },
+                    { 4, 4, new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2343), 1 },
+                    { 1, 5, new DateTime(2020, 4, 17, 18, 56, 4, 823, DateTimeKind.Local).AddTicks(7475), 1 },
+                    { 4, 5, new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2332), 1 },
+                    { 1, 6, new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2309), 1 },
+                    { 1, 7, new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2265), 1 }
                 });
 
             migrationBuilder.CreateIndex(
@@ -240,11 +262,6 @@ namespace server.Migrations
                 name: "IX_Rides_TrainId",
                 table: "Rides",
                 column: "TrainId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_StopsToRoutes_RouteId",
-                table: "StopsToRoutes",
-                column: "RouteId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_StopsToRoutes_TrainStopId",
@@ -270,11 +287,6 @@ namespace server.Migrations
                 name: "IX_Tickets_ToId",
                 table: "Tickets",
                 column: "ToId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Tickets_TrainId",
-                table: "Tickets",
-                column: "TrainId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tickets_UserId",

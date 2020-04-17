@@ -4,7 +4,7 @@ namespace Server.Models
 {
     public class Train
     {
-        public enum TrainTypes
+        public enum TrainType
         {
             Sectional,
             OpenCoach
@@ -17,7 +17,7 @@ namespace Server.Models
         public string Name { get; set; } 
 
         [Required]
-        public int Type { set; get; }
+        public TrainType Type { set; get; }
 
         [Required]
         public int Seats { set; get; }
