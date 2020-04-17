@@ -1,28 +1,24 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
 
 namespace Server.Models
 {
-    public class User
+    public class User : IdentityUser<int>
     {
-        [Key]
-        public int Id { set; get; }
-        
         [Required]
-        public string Login { set; get; }
-        
-        [Required]
+        [PersonalData]
         public string Name { set; get; }
         
         [Required]
+        [PersonalData]
         public string Surname { set; get; }
 
         [Required]
-        public string Password { set; get; }
-
-        [Required]
-        public string Token { set; get; }
-        
-        [Required]
         public bool IsAdmin { set; get; }
+    }
+
+    public class Role : IdentityRole<int>
+    {
+        
     }
 }

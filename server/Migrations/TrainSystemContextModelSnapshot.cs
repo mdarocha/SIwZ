@@ -19,6 +19,107 @@ namespace server.Migrations
                 .HasAnnotation("ProductVersion", "3.1.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("text");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetRoleClaims");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("text");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserClaims");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
+                {
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProviderKey")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProviderDisplayName")
+                        .HasColumnType("text");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("LoginProvider", "ProviderKey");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserLogins");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetUserRoles");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("LoginProvider")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("text");
+
+                    b.HasKey("UserId", "LoginProvider", "Name");
+
+                    b.ToTable("AspNetUserTokens");
+                });
+
             modelBuilder.Entity("Server.Models.Discount", b =>
                 {
                     b.Property<int>("Id")
@@ -85,6 +186,34 @@ namespace server.Migrations
                     b.ToTable("Rides");
                 });
 
+            modelBuilder.Entity("Server.Models.Role", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("character varying(256)")
+                        .HasMaxLength(256);
+
+                    b.Property<string>("NormalizedName")
+                        .HasColumnType("character varying(256)")
+                        .HasMaxLength(256);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasName("RoleNameIndex");
+
+                    b.ToTable("AspNetRoles");
+                });
+
             modelBuilder.Entity("Server.Models.Route", b =>
                 {
                     b.Property<int>("Id")
@@ -148,84 +277,84 @@ namespace server.Migrations
                         {
                             RouteId = 1,
                             TrainStopId = 5,
-                            ArrivalTime = new DateTime(2020, 4, 17, 18, 56, 4, 823, DateTimeKind.Local).AddTicks(7475),
+                            ArrivalTime = new DateTime(2020, 4, 17, 20, 38, 55, 696, DateTimeKind.Local).AddTicks(2219),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 1,
                             TrainStopId = 7,
-                            ArrivalTime = new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2265),
+                            ArrivalTime = new DateTime(2020, 4, 17, 20, 38, 55, 701, DateTimeKind.Local).AddTicks(1006),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 1,
                             TrainStopId = 6,
-                            ArrivalTime = new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2309),
+                            ArrivalTime = new DateTime(2020, 4, 17, 20, 38, 55, 701, DateTimeKind.Local).AddTicks(1049),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 2,
                             TrainStopId = 1,
-                            ArrivalTime = new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2315),
+                            ArrivalTime = new DateTime(2020, 4, 17, 20, 38, 55, 701, DateTimeKind.Local).AddTicks(1055),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 2,
                             TrainStopId = 4,
-                            ArrivalTime = new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2318),
+                            ArrivalTime = new DateTime(2020, 4, 17, 20, 38, 55, 701, DateTimeKind.Local).AddTicks(1059),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 3,
                             TrainStopId = 2,
-                            ArrivalTime = new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2322),
+                            ArrivalTime = new DateTime(2020, 4, 17, 20, 38, 55, 701, DateTimeKind.Local).AddTicks(1062),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 3,
                             TrainStopId = 1,
-                            ArrivalTime = new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2325),
+                            ArrivalTime = new DateTime(2020, 4, 17, 20, 38, 55, 701, DateTimeKind.Local).AddTicks(1065),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 3,
                             TrainStopId = 3,
-                            ArrivalTime = new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2329),
+                            ArrivalTime = new DateTime(2020, 4, 17, 20, 38, 55, 701, DateTimeKind.Local).AddTicks(1069),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 4,
                             TrainStopId = 5,
-                            ArrivalTime = new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2332),
+                            ArrivalTime = new DateTime(2020, 4, 17, 20, 38, 55, 701, DateTimeKind.Local).AddTicks(1072),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 4,
                             TrainStopId = 2,
-                            ArrivalTime = new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2336),
+                            ArrivalTime = new DateTime(2020, 4, 17, 20, 38, 55, 701, DateTimeKind.Local).AddTicks(1075),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 4,
                             TrainStopId = 1,
-                            ArrivalTime = new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2339),
+                            ArrivalTime = new DateTime(2020, 4, 17, 20, 38, 55, 701, DateTimeKind.Local).AddTicks(1079),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 4,
                             TrainStopId = 4,
-                            ArrivalTime = new DateTime(2020, 4, 17, 18, 56, 4, 828, DateTimeKind.Local).AddTicks(2343),
+                            ArrivalTime = new DateTime(2020, 4, 17, 20, 38, 55, 701, DateTimeKind.Local).AddTicks(1082),
                             StopNo = 1
                         });
                 });
@@ -410,32 +539,125 @@ namespace server.Migrations
                         .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("character varying(256)")
+                        .HasMaxLength(256);
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsAdmin")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("Login")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Password")
-                        .IsRequired()
+                    b.Property<string>("NormalizedEmail")
+                        .HasColumnType("character varying(256)")
+                        .HasMaxLength(256);
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasColumnType("character varying(256)")
+                        .HasMaxLength(256);
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
 
                     b.Property<string>("Surname")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Token")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("UserName")
+                        .HasColumnType("character varying(256)")
+                        .HasMaxLength(256);
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.HasIndex("NormalizedEmail")
+                        .HasName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasName("UserNameIndex");
+
+                    b.ToTable("AspNetUsers");
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
+                {
+                    b.HasOne("Server.Models.Role", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
+                {
+                    b.HasOne("Server.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
+                {
+                    b.HasOne("Server.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
+                {
+                    b.HasOne("Server.Models.Role", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Server.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
+                {
+                    b.HasOne("Server.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Server.Models.Ride", b =>

@@ -1,12 +1,17 @@
 using System;
 using System.Linq;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using server.Database;
+using Server.Models;
 using Server.Services;
 
 namespace server
@@ -28,13 +33,32 @@ namespace server
             services.AddDbContext<TrainSystemContext>(opt => opt.UseNpgsql(dbConnection));
 
             services.AddTransient<TrainStopService>();
-
             services.AddTransient<RouteService>();
-
             services.AddTransient<DiscountService>();
-
             services.AddTransient<TrainService>();
 
+            services.AddScoped<JwtService>();
+            
+            services.AddIdentity<User, Role>()
+                .AddEntityFrameworkStores<TrainSystemContext>()
+                .AddDefaultTokenProviders();
+
+            services.AddAuthentication(auth =>
+            {
+                auth.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                auth.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                auth.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(bearer =>
+            {
+                bearer.RequireHttpsMetadata = false;
+                bearer.SaveToken = true;
+                bearer.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = false,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("lol")),
+                };
+            });
+            
             services.AddControllers();
         }
 
@@ -48,6 +72,7 @@ namespace server
             
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseCors(builder => builder.WithOrigins("*").AllowAnyHeader().AllowAnyMethod());
