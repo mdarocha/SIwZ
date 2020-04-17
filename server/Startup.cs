@@ -25,8 +25,7 @@ namespace server
         {
             var dbConnection = Environment.GetEnvironmentVariable("TRAINS_DB") ??
                                "Host=localhost;Database=TrainSystem;Username=admin;Password=admin1";
-            services.AddEntityFrameworkNpgsql().AddDbContext<TrainSystemContext>(opt =>
-                opt.UseNpgsql(dbConnection));
+            services.AddDbContext<TrainSystemContext>(opt => opt.UseNpgsql(dbConnection));
 
             services.AddTransient<TrainStopService>();
 
@@ -46,9 +45,7 @@ namespace server
             {
                 app.UseDeveloperExceptionPage();
             }
-
-            app.UseHttpsRedirection();
-
+            
             app.UseRouting();
 
             app.UseAuthorization();
