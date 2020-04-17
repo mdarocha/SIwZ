@@ -23,12 +23,12 @@ namespace Server
             Configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
+        private IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var dbConnection = Environment.GetEnvironmentVariable("TRAINS_DB") ??
+            var dbConnection = Configuration["TRAINS_DB"] ??
                                "Host=localhost;Database=TrainSystem;Username=admin;Password=admin1";
             services.AddDbContext<TrainSystemContext>(opt => opt.UseNpgsql(dbConnection));
 
@@ -51,15 +51,28 @@ namespace Server
             }).AddJwtBearer(bearer =>
             {
                 bearer.RequireHttpsMetadata = false;
-                bearer.SaveToken = true;
+                bearer.SaveToken = false;
                 bearer.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = false,
                     ValidateAudience = false,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("lol123456789`123456734hfdsjkhkjh")),
+                    IssuerSigningKey = new SymmetricSecurityKey(Configuration.GetSecretKey()),
                 };
             });
-            
+
+            services.Configure<IdentityOptions>(conf =>
+            {
+                conf.Password.RequireDigit = false;
+                conf.Password.RequireLowercase = true;
+                conf.Password.RequireUppercase = false;
+                conf.Password.RequireNonAlphanumeric = false;
+                
+                conf.Password.RequiredLength = 10;
+                conf.Password.RequiredUniqueChars = 5;
+
+                conf.SignIn.RequireConfirmedEmail = false;
+                conf.User.RequireUniqueEmail = true;
+            });
             services.AddControllers();
         }
 
