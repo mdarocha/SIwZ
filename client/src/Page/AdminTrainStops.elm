@@ -66,10 +66,10 @@ type Msg
 -- INIT
 
 
-init : String -> ( Model, Cmd Msg )
-init api =
-    ( Model api Loading (TrainStop 0 "" "") Nothing
-    , getStops api
+init : Session.Data -> ( Model, Cmd Msg )
+init session =
+    ( Model session Loading (TrainStop 0 "" "") Nothing
+    , getStops session.api
     )
 
 
