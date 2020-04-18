@@ -27,6 +27,7 @@ namespace Server.Services
 
         public TrainStop Create(TrainStop trainStop)
         {
+            trainStop.Id = 0;
             _context.TrainStops.Add(trainStop);
             _context.SaveChanges();
             return trainStop;

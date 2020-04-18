@@ -30,7 +30,10 @@ namespace Server
         {
             var dbConnection = Configuration["TRAINS_DB"] ??
                                "Host=localhost;Database=TrainSystem;Username=admin;Password=admin1";
-            services.AddDbContext<TrainSystemContext>(opt => opt.UseNpgsql(dbConnection));
+            services.AddDbContext<TrainSystemContext>(opt =>
+            {
+                opt.UseNpgsql(dbConnection);
+            });
 
             services.AddTransient<TrainStopService>();
             services.AddTransient<RouteService>();
