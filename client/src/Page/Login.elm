@@ -17,6 +17,7 @@ import Skeleton
 type alias Model =
     { session : Session.Data
     , login : LoginData
+    , register : RegisterData
     }
 
 
@@ -25,13 +26,24 @@ type alias LoginData =
     , password : String
     }
 
+type alias RegisterData =
+    { email : String
+    , password : String
+    , name : String
+    , surname : String
+    }
 
 type Msg
     = LoginEmailUpdate String
     | LoginPasswordUpdate String
     | LoginSubmit
     | LoginPerformed (Result Http.Error Session.User)
-
+    | RegisterNameUpdate String
+    | RegisterSurnameUpdate String
+    | RegisterPasswordUpdate String
+    | RegisterEmailUpdate String
+    | RegisterSubmit
+    | RegisterPerformed (Result Http.Error Session.User)
 
 
 -- INIT
@@ -39,7 +51,7 @@ type Msg
 
 init : Session.Data -> ( Model, Cmd msg )
 init session =
-    ( Model session (LoginData "" ""), Cmd.none )
+    ( Model session (LoginData "" "") (RegisterData "" "" "" ""), Cmd.none )
 
 
 
@@ -82,13 +94,52 @@ update msg model =
                         newSession =
                             { oldSession | user = Just user }
                     in
-                    ( Model newSession (LoginData "" ""), Cmd.none )
+                    ( Model newSession (LoginData "" "") model.register, Cmd.none )
 
                 Err _ ->
                     ( model, Cmd.none )
 
+        RegisterNameUpdate name ->
+            let
+                oldRegister = model.register
+                newRegister = { oldRegister | name = name }
+            in
+            ( { model | register = newRegister }, Cmd.none )
 
+        RegisterSurnameUpdate surname ->
+            let
+                oldRegister = model.register
+                newRegister = { oldRegister | surname = surname }
+            in
+            ( { model | register = newRegister }, Cmd.none )
 
+        RegisterEmailUpdate email ->
+            let
+                oldRegister = model.register
+                newRegister = { oldRegister | email = email }
+            in
+            ( { model | register = newRegister }, Cmd.none )
+
+        RegisterPasswordUpdate pass ->
+            let
+                oldRegister = model.register
+                newRegister = { oldRegister | password = pass }
+            in
+            ( { model | register = newRegister }, Cmd.none )
+
+        RegisterSubmit ->
+            ( model, performRegister model.session.api model.register )
+
+        RegisterPerformed result ->
+            case result of
+                Ok user ->
+                    let
+                        oldSession = model.session
+                        newSession = { oldSession | user = Just user }
+                    in
+                    ( Model newSession model.login (RegisterData "" "" "" ""), Cmd.none)
+                Err _ ->
+                    ( model, Cmd.none )
 -- VIEW
 
 
@@ -119,10 +170,29 @@ viewLogin model =
         ]
 
 
-viewRegister : Model -> Html msg
+viewRegister : Model -> Html Msg
 viewRegister model =
-    text "register"
-
+    Form.form []
+        [ Form.row []
+            [ Form.col []
+                [ Form.label [ for "register-name" ] [ text "Imię" ]
+                , Input.text [ Input.id "register-name", Input.value model.register.name, Input.attrs [ onInput (\v -> RegisterNameUpdate v) ] ]
+                ]
+            , Form.col []
+                [ Form.label [ for "register-surname" ] [ text "Nazwisko" ]
+                , Input.text [ Input.id "register-surname", Input.value model.register.surname, Input.attrs [ onInput (\v -> RegisterSurnameUpdate v) ] ]
+                ]
+            ]
+        , Form.group []
+            [ Form.label [ for "register-email" ] [ text "Adres e-mail" ]
+            , Input.email [ Input.id "register-email", Input.value model.register.email, Input.attrs [ onInput (\v -> RegisterEmailUpdate v) ] ]
+            ]
+        , Form.group []
+            [ Form.label [ for "register-password" ] [ text "Hasło" ]
+            , Input.password [ Input.id "register-password", Input.value model.register.password, Input.attrs [ onInput (\v -> RegisterPasswordUpdate v) ] ]
+            ]
+        , Button.button [ Button.primary, Button.onClick RegisterSubmit ] [ text "Zarejestruj się" ]
+        ]
 
 
 -- HTTP
@@ -136,7 +206,13 @@ performLogin api login =
         , url = api ++ "user/login"
         }
 
-
+performRegister : String -> RegisterData -> Cmd Msg
+performRegister api register =
+    Http.post
+        { body = Http.jsonBody (registerEncoder register)
+        , expect = Http.expectJson RegisterPerformed userDecoder
+        , url = api ++ "user/register"
+        }
 
 -- JSON
 
@@ -148,6 +224,14 @@ loginEncoder login =
         , ( "password", Encode.string login.password )
         ]
 
+registerEncoder : RegisterData -> Encode.Value
+registerEncoder register =
+    Encode.object
+        [ ( "name", Encode.string register.name )
+        , ( "surname", Encode.string register.surname )
+        , ( "email", Encode.string register.email )
+        , ( "password", Encode.string register.password )
+        ]
 
 userDecoder : Decode.Decoder Session.User
 userDecoder =
