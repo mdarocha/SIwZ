@@ -15,7 +15,7 @@ import Json.Decode as Decode
 import Json.Encode as Encode
 import Session
 import Skeleton
-
+import Jwt.Http
 
 
 -- MODEL
@@ -39,7 +39,8 @@ type TrainStops
 
 
 type alias Model =
-    { session : Session.Data
+    { api : String
+    , user : Session.User
     , stopList : TrainStops
     , stopToAdd : TrainStop
     , stopAddError : Maybe Error
@@ -66,10 +67,10 @@ type Msg
 -- INIT
 
 
-init : Session.Data -> ( Model, Cmd Msg )
-init session =
-    ( Model session Loading (TrainStop 0 "" "") Nothing
-    , getStops session.api
+init : String -> Session.User -> ( Model, Cmd Msg )
+init api user =
+    ( Model api user Loading (TrainStop 0 "" "") Nothing
+    , getStops api user.token
     )
 
 
@@ -141,7 +142,7 @@ update msg model =
 
                 Submit ->
                     if isValidInput model.stopToAdd then
-                        ( model, addStop model.session.api model.stopToAdd )
+                        ( model, addStop model.api model.stopToAdd model.user.token )
 
                     else
                         let
@@ -231,17 +232,17 @@ formError error =
 -- HTTP
 
 
-getStops : String -> Cmd Msg
-getStops api =
-    Http.get
+getStops : String -> String -> Cmd Msg
+getStops api token =
+    Jwt.Http.get token
         { url = api ++ "admin/stops/get"
         , expect = Http.expectJson GotStops stopsDecoder
         }
 
 
-addStop : String -> TrainStop -> Cmd Msg
-addStop api stop =
-    Http.post
+addStop : String -> TrainStop -> String -> Cmd Msg
+addStop api stop token =
+    Jwt.Http.post token
         { body = Http.jsonBody (stopEncoder stop)
         , expect = Http.expectWhatever AddStop
         , url = api ++ "admin/stops/create"

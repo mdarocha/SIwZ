@@ -1,9 +1,9 @@
 module Skeleton exposing (Details, view, viewFooter)
 
-import Browser
 import Bootstrap.Grid as Grid
+import Browser
 import Html exposing (..)
-import Html.Attributes exposing (href, class)
+import Html.Attributes exposing (class, href)
 
 
 type alias Details msg =

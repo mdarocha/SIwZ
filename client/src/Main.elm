@@ -79,6 +79,7 @@ view model =
         Login login ->
             Skeleton.view LoginMsg (Login.view login) (viewNavbar model)
 
+
 init : String -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init api url key =
     let
@@ -137,11 +138,13 @@ update message model =
             case model.page of
                 Login login ->
                     stepLogin model (Login.update msg login)
+
                 _ ->
                     ( model, Cmd.none )
 
-exit : Model -> Session.Data
-exit model =
+
+toSession : Model -> Session.Data
+toSession model =
     case model.page of
         NotFound session ->
             session
@@ -153,16 +156,17 @@ exit model =
             m.session
 
         AdminTrainStops m ->
-            m.session
+            Session.Data m.api (Just m.user)
 
         Login m ->
             m.session
+
 
 changeRoute : Maybe Routes.Route -> Model -> ( Model, Cmd Msg )
 changeRoute route model =
     let
         session =
-            exit model
+            toSession model
     in
     case route of
         Nothing ->
@@ -171,7 +175,11 @@ changeRoute route model =
             )
 
         Just Routes.AdminTrainStopsRoute ->
-            stepAdminTrainStops model (AdminTrainStops.init session)
+            case session.user of
+                Nothing ->
+                    ( model, Nav.pushUrl model.nav "/login" )
+                Just user ->
+                    stepAdminTrainStops model (AdminTrainStops.init session.api user)
 
         Just Routes.SearchRoute ->
             ( { model | page = NotFound session }
@@ -187,6 +195,7 @@ changeRoute route model =
         Just Routes.LoginRoute ->
             stepLogin model (Login.init session)
 
+
 stepAbout : Model -> ( About.Model, Cmd About.Msg ) -> ( Model, Cmd Msg )
 stepAbout model ( about, cmds ) =
     ( { model | page = About about }
@@ -201,11 +210,13 @@ stepAdminTrainStops model ( adminTrainStops, cmds ) =
     )
 
 
-stepLogin : Model -> ( Login.Model, Cmd Login.Msg ) -> ( Model, Cmd Msg)
+stepLogin : Model -> ( Login.Model, Cmd Login.Msg ) -> ( Model, Cmd Msg )
 stepLogin model ( login, cmds ) =
     ( { model | page = Login login }
     , Cmd.map LoginMsg cmds
     )
+
+
 
 -- NAVBAR
 
@@ -239,17 +250,23 @@ viewNavbar model =
 
 -- UTILS
 
+
 dynamicUserText : Model -> String
 dynamicUserText model =
     let
-        session = exit model
-        user = session.user
+        session =
+            toSession model
+
+        user =
+            session.user
     in
-        case user of
-            Just u ->
-                u.name ++ " " ++ u.surname
-            Nothing ->
-                "Zaloguj się"
+    case user of
+        Just u ->
+            u.name ++ " " ++ u.surname
+
+        Nothing ->
+            "Zaloguj się"
+
 
 dynamicActive : ( Routes.Route, Model ) -> Html.Attribute msg
 dynamicActive ( route, model ) =

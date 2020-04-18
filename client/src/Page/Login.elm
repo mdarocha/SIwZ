@@ -1,33 +1,37 @@
 module Page.Login exposing (Model, Msg, init, update, view)
 
+import Bootstrap.Button as Button
+import Bootstrap.Form as Form
+import Bootstrap.Form.Input as Input
+import Bootstrap.Grid as Grid
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
-import Bootstrap.Grid as Grid
-import Bootstrap.Form as Form
-import Bootstrap.Form.Input as Input
-import Bootstrap.Button as Button
 import Http
-import Session
-import Skeleton
 import Json.Decode as Decode
 import Json.Encode as Encode
+import Session
+import Skeleton
+
 
 type alias Model =
     { session : Session.Data
     , login : LoginData
     }
 
+
 type alias LoginData =
     { email : String
     , password : String
     }
+
 
 type Msg
     = LoginEmailUpdate String
     | LoginPasswordUpdate String
     | LoginSubmit
     | LoginPerformed (Result Http.Error Session.User)
+
 
 
 -- INIT
@@ -37,49 +41,68 @@ init : Session.Data -> ( Model, Cmd msg )
 init session =
     ( Model session (LoginData "" ""), Cmd.none )
 
+
+
 -- UPDATE
+
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         LoginEmailUpdate email ->
             let
-                oldLogin = model.login
-                newLogin = { oldLogin | email = email }
+                oldLogin =
+                    model.login
+
+                newLogin =
+                    { oldLogin | email = email }
             in
             ( { model | login = newLogin }, Cmd.none )
+
         LoginPasswordUpdate pass ->
             let
-                oldLogin = model.login
-                newLogin = { oldLogin | password = pass }
+                oldLogin =
+                    model.login
+
+                newLogin =
+                    { oldLogin | password = pass }
             in
             ( { model | login = newLogin }, Cmd.none )
+
         LoginSubmit ->
-            ( model , performLogin model.session.api model.login )
+            ( model, performLogin model.session.api model.login )
 
         LoginPerformed result ->
             case result of
                 Ok user ->
                     let
-                        oldSession = model.session
-                        newSession = { oldSession | user = Just user }
+                        oldSession =
+                            model.session
+
+                        newSession =
+                            { oldSession | user = Just user }
                     in
                     ( Model newSession (LoginData "" ""), Cmd.none )
+
                 Err _ ->
                     ( model, Cmd.none )
 
+
+
 -- VIEW
+
 
 view : Model -> Skeleton.Details Msg
 view model =
     { title = "Zaloguj się"
-    , body = 
+    , body =
         [ Grid.row []
             [ Grid.col [] [ h2 [] [ text "Zaloguj się" ], viewLogin model ]
             , Grid.col [] [ h2 [] [ text "Zarejestruj się" ], viewRegister model ]
             ]
         ]
     }
+
 
 viewLogin : Model -> Html Msg
 viewLogin model =
@@ -95,11 +118,15 @@ viewLogin model =
         , Button.button [ Button.primary, Button.onClick LoginSubmit ] [ text "Zaloguj się" ]
         ]
 
+
 viewRegister : Model -> Html msg
 viewRegister model =
     text "register"
 
+
+
 -- HTTP
+
 
 performLogin : String -> LoginData -> Cmd Msg
 performLogin api login =
@@ -108,6 +135,8 @@ performLogin api login =
         , expect = Http.expectJson LoginPerformed userDecoder
         , url = api ++ "user/login"
         }
+
+
 
 -- JSON
 
@@ -119,6 +148,7 @@ loginEncoder login =
         , ( "password", Encode.string login.password )
         ]
 
+
 userDecoder : Decode.Decoder Session.User
 userDecoder =
     Decode.map5 Session.User
@@ -127,4 +157,3 @@ userDecoder =
         (Decode.field "name" Decode.string)
         (Decode.field "surname" Decode.string)
         (Decode.field "token" Decode.string)
-
