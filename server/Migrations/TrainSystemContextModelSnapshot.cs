@@ -128,6 +128,7 @@ namespace Server.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:IdentitySequenceOptions", "'3', '1', '', '', 'False', '1'")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("Type")
@@ -166,18 +167,22 @@ namespace Server.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:IdentitySequenceOptions", "'5', '1', '', '', 'False', '1'")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<int>("FreeTickets")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("RouteId")
+                    b.Property<int>("Price")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RouteId")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<int?>("TrainId")
+                    b.Property<int>("TrainId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
@@ -187,6 +192,44 @@ namespace Server.Migrations
                     b.HasIndex("TrainId");
 
                     b.ToTable("Rides");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            FreeTickets = 300,
+                            Price = 100,
+                            RouteId = 1,
+                            StartTime = new DateTime(2020, 4, 25, 17, 27, 25, 429, DateTimeKind.Local).AddTicks(140),
+                            TrainId = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            FreeTickets = 400,
+                            Price = 50,
+                            RouteId = 2,
+                            StartTime = new DateTime(2020, 4, 25, 17, 27, 25, 429, DateTimeKind.Local).AddTicks(2011),
+                            TrainId = 2
+                        },
+                        new
+                        {
+                            Id = 3,
+                            FreeTickets = 150,
+                            Price = 10,
+                            RouteId = 3,
+                            StartTime = new DateTime(2020, 4, 25, 17, 27, 25, 429, DateTimeKind.Local).AddTicks(2050),
+                            TrainId = 3
+                        },
+                        new
+                        {
+                            Id = 4,
+                            FreeTickets = 200,
+                            Price = 80,
+                            RouteId = 4,
+                            StartTime = new DateTime(2020, 4, 25, 17, 27, 25, 429, DateTimeKind.Local).AddTicks(2054),
+                            TrainId = 4
+                        });
                 });
 
             modelBuilder.Entity("Server.Models.Role", b =>
@@ -220,6 +263,7 @@ namespace Server.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:IdentitySequenceOptions", "'5', '1', '', '', 'False', '1'")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("Name")
@@ -278,85 +322,85 @@ namespace Server.Migrations
                         {
                             RouteId = 1,
                             TrainStopId = 5,
-                            ArrivalTime = new DateTime(2020, 4, 17, 20, 53, 49, 177, DateTimeKind.Local).AddTicks(2126),
+                            ArrivalTime = new DateTime(2020, 4, 25, 17, 27, 25, 424, DateTimeKind.Local).AddTicks(5900),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 1,
                             TrainStopId = 7,
-                            ArrivalTime = new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1125),
-                            StopNo = 1
+                            ArrivalTime = new DateTime(2020, 4, 25, 17, 27, 25, 428, DateTimeKind.Local).AddTicks(7727),
+                            StopNo = 2
                         },
                         new
                         {
                             RouteId = 1,
                             TrainStopId = 6,
-                            ArrivalTime = new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1172),
-                            StopNo = 1
+                            ArrivalTime = new DateTime(2020, 4, 25, 17, 27, 25, 428, DateTimeKind.Local).AddTicks(7771),
+                            StopNo = 3
                         },
                         new
                         {
                             RouteId = 2,
                             TrainStopId = 1,
-                            ArrivalTime = new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1178),
+                            ArrivalTime = new DateTime(2020, 4, 25, 17, 27, 25, 428, DateTimeKind.Local).AddTicks(7777),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 2,
                             TrainStopId = 4,
-                            ArrivalTime = new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1182),
-                            StopNo = 1
+                            ArrivalTime = new DateTime(2020, 4, 25, 17, 27, 25, 428, DateTimeKind.Local).AddTicks(7781),
+                            StopNo = 2
                         },
                         new
                         {
                             RouteId = 3,
                             TrainStopId = 2,
-                            ArrivalTime = new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1186),
+                            ArrivalTime = new DateTime(2020, 4, 25, 17, 27, 25, 428, DateTimeKind.Local).AddTicks(7785),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 3,
                             TrainStopId = 1,
-                            ArrivalTime = new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1189),
-                            StopNo = 1
+                            ArrivalTime = new DateTime(2020, 4, 25, 17, 27, 25, 428, DateTimeKind.Local).AddTicks(7789),
+                            StopNo = 2
                         },
                         new
                         {
                             RouteId = 3,
                             TrainStopId = 3,
-                            ArrivalTime = new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1193),
-                            StopNo = 1
+                            ArrivalTime = new DateTime(2020, 4, 25, 17, 27, 25, 428, DateTimeKind.Local).AddTicks(7792),
+                            StopNo = 3
                         },
                         new
                         {
                             RouteId = 4,
                             TrainStopId = 5,
-                            ArrivalTime = new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1197),
+                            ArrivalTime = new DateTime(2020, 4, 25, 17, 27, 25, 428, DateTimeKind.Local).AddTicks(7796),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 4,
                             TrainStopId = 2,
-                            ArrivalTime = new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1201),
-                            StopNo = 1
+                            ArrivalTime = new DateTime(2020, 4, 25, 17, 27, 25, 428, DateTimeKind.Local).AddTicks(7799),
+                            StopNo = 2
                         },
                         new
                         {
                             RouteId = 4,
                             TrainStopId = 1,
-                            ArrivalTime = new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1205),
-                            StopNo = 1
+                            ArrivalTime = new DateTime(2020, 4, 25, 17, 27, 25, 428, DateTimeKind.Local).AddTicks(7803),
+                            StopNo = 3
                         },
                         new
                         {
                             RouteId = 4,
                             TrainStopId = 4,
-                            ArrivalTime = new DateTime(2020, 4, 17, 20, 53, 49, 182, DateTimeKind.Local).AddTicks(1209),
-                            StopNo = 1
+                            ArrivalTime = new DateTime(2020, 4, 25, 17, 27, 25, 428, DateTimeKind.Local).AddTicks(7806),
+                            StopNo = 4
                         });
                 });
 
@@ -416,6 +460,7 @@ namespace Server.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:IdentitySequenceOptions", "'5', '1', '', '', 'False', '1'")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("Name")
@@ -475,6 +520,7 @@ namespace Server.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:IdentitySequenceOptions", "'8', '1', '', '', 'False', '1'")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("City")
@@ -664,11 +710,15 @@ namespace Server.Migrations
                 {
                     b.HasOne("Server.Models.Route", "Route")
                         .WithMany()
-                        .HasForeignKey("RouteId");
+                        .HasForeignKey("RouteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Server.Models.Train", "Train")
                         .WithMany()
-                        .HasForeignKey("TrainId");
+                        .HasForeignKey("TrainId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Server.Models.StopToRoute", b =>
