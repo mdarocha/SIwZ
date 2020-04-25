@@ -37,22 +37,24 @@ namespace Server.Database
         private void Seed(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<TrainStop>().HasData(
-                new TrainStop {Id = 1, City = "Cracow", Name = "Main train station"},
-                new TrainStop {Id = 2, City = "Cracow", Name = "Plaszow"},
-                new TrainStop {Id = 3, City = "Cracow", Name = "Airport"},
-                new TrainStop {Id = 4, City = "Warsaw", Name = "Main train station"},
-                new TrainStop {Id = 5, City = "Rzeszow", Name = "Main train station"},
-                new TrainStop {Id = 6, City = "Wrocalw", Name = "Main train station"},
-                new TrainStop {Id = 7, City = "Katowice", Name = "Main train station"}
+                new TrainStop { Id = 1, City = "Cracow", Name = "Main train station"},
+                new TrainStop { Id = 2, City = "Cracow", Name = "Plaszow"},
+                new TrainStop { Id = 3, City = "Cracow", Name = "Airport"},
+                new TrainStop { Id = 4, City = "Warsaw", Name = "Main train station"},
+                new TrainStop { Id = 5, City = "Rzeszow", Name = "Main train station"},
+                new TrainStop { Id = 6, City = "Wrocalw", Name = "Main train station"},
+                new TrainStop { Id = 7, City = "Katowice", Name = "Main train station"}
             );
-
+            modelBuilder.Entity<TrainStop>().Property(p => p.Id).HasIdentityOptions(startValue: 8);
+            
             modelBuilder.Entity<Route>().HasData(
-                new Route {Id = 1, Name = "Rzeszow-Wroclaw"},
-                new Route {Id = 2, Name = "Krakow-Warszawa"},
-                new Route {Id = 3, Name = "Plaszow-Airport"},
-                new Route {Id = 4, Name = "Rzeszow-Warsaw"}
+                new Route { Id = 1, Name = "Rzeszow-Wroclaw"},
+                new Route { Id = 2, Name = "Krakow-Warszawa"},
+                new Route { Id = 3, Name = "Plaszow-Airport"},
+                new Route { Id = 4, Name = "Rzeszow-Warsaw"}
             );
-
+            modelBuilder.Entity<Route>().Property(p => p.Id).HasIdentityOptions(startValue: 5);
+            
             modelBuilder.Entity<Train>().HasData(
                 new Train
                 {
@@ -87,7 +89,8 @@ namespace Server.Database
                     Wagons = 5
                 }
             );
-
+            modelBuilder.Entity<Train>().Property(p => p.Id).HasIdentityOptions(startValue: 5);
+            
             modelBuilder.Entity<Discount>().HasData(
                 new Discount
                 {
@@ -98,11 +101,14 @@ namespace Server.Database
                 },
                 new Discount
                 {
-                    Id = 2, Type = "ExamplePercentage", Value = 5,
+                    Id = 2,
+                    Type = "ExamplePercentage", 
+                    Value = 5,
                     ValueType = Discount.DiscountValueTypes.Percentage
                 }
             );
-
+            modelBuilder.Entity<Discount>().Property(p => p.Id).HasIdentityOptions(startValue: 3);
+            
             modelBuilder.Entity<StopToRoute>().HasData(
                 new StopToRoute
                 {
