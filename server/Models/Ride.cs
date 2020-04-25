@@ -9,15 +9,22 @@ namespace Server.Models
     {
         [Key]
         public int Id { set; get; }
+        
+        public int RouteId { get; set; }
 
         public virtual Route Route { set; get; }
 
         [Required]
         public DateTime StartTime { set; get; }
 
-        public Train Train { set; get; }
+        public int TrainId { get; set; }
+        
+        public virtual Train Train { set; get; }
 
         [Required]
         public int FreeTickets { set; get; }
+        
+        [Required]
+        public int Price { set; get; }
     }
 }
