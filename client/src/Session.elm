@@ -1,5 +1,5 @@
 module Session exposing (Data, User)
-
+import Browser.Navigation as Nav
 
 type alias User =
     { id : String
@@ -12,5 +12,6 @@ type alias User =
 
 type alias Data =
     { api : String
+    , key : Nav.Key
     , user : Maybe User
     }

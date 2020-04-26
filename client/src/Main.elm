@@ -17,8 +17,7 @@ import Url.Parser exposing (map)
 
 
 type alias Model =
-    { nav : Nav.Key
-    , page : Page
+    { page : Page
     , navbarState : Navbar.State
     }
 
@@ -84,25 +83,28 @@ init : String -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init api url key =
     let
         session =
-            Session.Data api Nothing
+            Session.Data api key Nothing
 
         ( navbarState, navbarCmd ) =
             Navbar.initialState NavbarMsg
 
         ( model, routeCmd ) =
-            changeRoute (Routes.fromUrl url) { nav = key, page = NotFound session, navbarState = navbarState }
+            changeRoute (Routes.fromUrl url) { page = NotFound session, navbarState = navbarState }
     in
     ( model, Cmd.batch [ routeCmd, navbarCmd ] )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
+    let
+        session = toSession model
+    in
     case message of
         LinkClicked urlRequest ->
             case urlRequest of
                 Browser.Internal url ->
                     ( model
-                    , Nav.pushUrl model.nav (Url.toString url)
+                    , Nav.pushUrl session.key (Url.toString url)
                     )
 
                 Browser.External href ->
@@ -156,7 +158,7 @@ toSession model =
             m.session
 
         AdminTrainStops m ->
-            Session.Data m.api (Just m.user)
+            m.session
 
         Login m ->
             m.session
@@ -175,11 +177,7 @@ changeRoute route model =
             )
 
         Just Routes.AdminTrainStopsRoute ->
-            case session.user of
-                Nothing ->
-                    ( model, Nav.pushUrl model.nav "/login" )
-                Just user ->
-                    stepAdminTrainStops model (AdminTrainStops.init session.api user)
+            stepAdminTrainStops model (AdminTrainStops.init session)
 
         Just Routes.SearchRoute ->
             ( { model | page = NotFound session }
@@ -190,10 +188,10 @@ changeRoute route model =
             stepAbout model (About.init session)
 
         Just Routes.HomeRoute ->
-            ( model, Nav.pushUrl model.nav "/search" )
+            ( model, Nav.pushUrl session.key "/search" )
 
-        Just Routes.LoginRoute ->
-            stepLogin model (Login.init session)
+        Just (Routes.LoginRoute redirect) ->
+            stepLogin model (Login.init session redirect)
 
 
 stepAbout : Model -> ( About.Model, Cmd About.Msg ) -> ( Model, Cmd Msg )
@@ -242,7 +240,7 @@ viewNavbar model =
                     , Navbar.dropdownItem [ href "/admin/discounts" ] [ text "Zniżki" ]
                     ]
                 }
-            , Navbar.itemLink [ href "/login", dynamicActive ( Routes.LoginRoute, model ) ] [ text (dynamicUserText model) ]
+            , Navbar.itemLink [ href "/login", dynamicActive ( Routes.LoginRoute Nothing, model ) ] [ text (dynamicUserText model) ]
             ]
         |> Navbar.view model.navbarState
 
@@ -282,7 +280,7 @@ isActive ( route, page ) =
         ( Routes.AboutRoute, About _ ) ->
             True
 
-        ( Routes.LoginRoute, Login _ ) ->
+        ( Routes.LoginRoute _, Login _ ) ->
             True
 
         _ ->

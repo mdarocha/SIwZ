@@ -70,7 +70,7 @@ namespace Server
                 conf.Password.RequireUppercase = false;
                 conf.Password.RequireNonAlphanumeric = false;
                 
-                conf.Password.RequiredLength = 10;
+                conf.Password.RequiredLength = 5;
                 conf.Password.RequiredUniqueChars = 5;
 
                 conf.SignIn.RequireConfirmedEmail = false;

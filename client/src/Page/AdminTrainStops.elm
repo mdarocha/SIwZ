@@ -11,6 +11,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Http
+import Browser.Navigation as Nav
 import Json.Decode as Decode
 import Json.Encode as Encode
 import Session
@@ -39,8 +40,7 @@ type TrainStops
 
 
 type alias Model =
-    { api : String
-    , user : Session.User
+    { session : Session.Data
     , stopList : TrainStops
     , stopToAdd : TrainStop
     , stopAddError : Maybe Error
@@ -67,10 +67,17 @@ type Msg
 -- INIT
 
 
-init : String -> Session.User -> ( Model, Cmd Msg )
-init api user =
-    ( Model api user Loading (TrainStop 0 "" "") Nothing
-    , getStops api user.token
+init : Session.Data -> ( Model, Cmd Msg )
+init session =
+    let
+        cmd = case session.user of
+            Just user ->
+                getStops session.api user.token
+            Nothing ->
+                Nav.pushUrl session.key "/login?return=admin/stops"
+    in
+    ( Model session Loading (TrainStop 0 "" "") Nothing
+    , cmd
     )
 
 
@@ -142,8 +149,11 @@ update msg model =
 
                 Submit ->
                     if isValidInput model.stopToAdd then
-                        ( model, addStop model.api model.stopToAdd model.user.token )
-
+                        case model.session.user of
+                            Just user ->
+                                ( model, addStop model.session.api model.stopToAdd user.token )
+                            Nothing ->
+                                ( { model | stopAddError = Just "Błąd dodawania - zaloguj się" }, Cmd.none )
                     else
                         let
                             newStopToAdd =

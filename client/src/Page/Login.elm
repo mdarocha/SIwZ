@@ -4,6 +4,8 @@ import Bootstrap.Button as Button
 import Bootstrap.Form as Form
 import Bootstrap.Form.Input as Input
 import Bootstrap.Grid as Grid
+import Bootstrap.Alert as Alert
+import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
@@ -16,6 +18,8 @@ import Skeleton
 
 type alias Model =
     { session : Session.Data
+    , redirect : Maybe String
+    , errorText : Maybe String
     , login : LoginData
     , register : RegisterData
     }
@@ -49,9 +53,9 @@ type Msg
 -- INIT
 
 
-init : Session.Data -> ( Model, Cmd msg )
-init session =
-    ( Model session (LoginData "" "") (RegisterData "" "" "" ""), Cmd.none )
+init : Session.Data -> Maybe String -> ( Model, Cmd msg )
+init session redirect =
+    ( Model session redirect Nothing (LoginData "" "") (RegisterData "" "" "" ""), Cmd.none )
 
 
 
@@ -94,10 +98,10 @@ update msg model =
                         newSession =
                             { oldSession | user = Just user }
                     in
-                    ( Model newSession (LoginData "" "") model.register, Cmd.none )
+                    ( Model newSession model.redirect Nothing (LoginData "" "") model.register, redirectCommand model.session.key model.redirect)
 
                 Err _ ->
-                    ( model, Cmd.none )
+                    ( { model | errorText = Just "Wystąpił błąd" }, Cmd.none )
 
         RegisterNameUpdate name ->
             let
@@ -137,9 +141,18 @@ update msg model =
                         oldSession = model.session
                         newSession = { oldSession | user = Just user }
                     in
-                    ( Model newSession model.login (RegisterData "" "" "" ""), Cmd.none)
+                    ( Model newSession model.redirect Nothing model.login (RegisterData "" "" "" ""), redirectCommand model.session.key model.redirect)
                 Err _ ->
-                    ( model, Cmd.none )
+                    ( { model | errorText = Just "Wystąpił błąd" }, Cmd.none )
+
+redirectCommand : Nav.Key -> Maybe String -> Cmd Msg
+redirectCommand key redirect =
+    case redirect of
+        Just url ->
+            Nav.pushUrl key ("/" ++ url)
+        Nothing ->
+            Cmd.none
+
 -- VIEW
 
 
@@ -148,6 +161,15 @@ view model =
     { title = "Zaloguj się"
     , body =
         [ Grid.row []
+            [ Grid.col []
+                [ case model.errorText of
+                    Just err ->
+                        Alert.simpleDanger [] [ text err ]
+                    Nothing ->
+                        text ""
+                ]
+            ]
+        , Grid.row []
             [ Grid.col [] [ h2 [] [ text "Zaloguj się" ], viewLogin model ]
             , Grid.col [] [ h2 [] [ text "Zarejestruj się" ], viewRegister model ]
             ]

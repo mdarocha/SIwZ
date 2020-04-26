@@ -1,15 +1,15 @@
 module Routes exposing (Route(..), fromUrl)
 
 import Url exposing (Url)
-import Url.Parser exposing ((</>), Parser, map, oneOf, s, top)
-
+import Url.Parser exposing ((</>), (<?>), Parser, map, oneOf, s, top)
+import Url.Parser.Query as Query
 
 type Route
     = AdminTrainStopsRoute
     | AboutRoute
     | SearchRoute
     | HomeRoute
-    | LoginRoute
+    | LoginRoute (Maybe String)
 
 
 parser : Parser (Route -> a) a
@@ -19,7 +19,7 @@ parser =
         , map SearchRoute (s "search")
         , map AboutRoute (s "about")
         , map AdminTrainStopsRoute (s "admin" </> s "stops")
-        , map LoginRoute (s "login")
+        , map LoginRoute (s "login" <?> Query.string "return")
         ]
 
 
