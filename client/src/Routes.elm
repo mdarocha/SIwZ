@@ -4,6 +4,7 @@ import Url exposing (Url)
 import Url.Parser exposing ((</>), (<?>), Parser, map, oneOf, s, top)
 import Url.Parser.Query as Query
 
+
 type Route
     = AdminTrainStopsRoute
     | AboutRoute

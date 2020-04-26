@@ -1,10 +1,10 @@
 module Page.Login exposing (Model, Msg, init, update, view)
 
+import Bootstrap.Alert as Alert
 import Bootstrap.Button as Button
 import Bootstrap.Form as Form
 import Bootstrap.Form.Input as Input
 import Bootstrap.Grid as Grid
-import Bootstrap.Alert as Alert
 import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -30,12 +30,14 @@ type alias LoginData =
     , password : String
     }
 
+
 type alias RegisterData =
     { email : String
     , password : String
     , name : String
     , surname : String
     }
+
 
 type Msg
     = LoginEmailUpdate String
@@ -48,6 +50,7 @@ type Msg
     | RegisterEmailUpdate String
     | RegisterSubmit
     | RegisterPerformed (Result Http.Error Session.User)
+
 
 
 -- INIT
@@ -98,36 +101,48 @@ update msg model =
                         newSession =
                             { oldSession | user = Just user }
                     in
-                    ( Model newSession model.redirect Nothing (LoginData "" "") model.register, redirectCommand model.session.key model.redirect)
+                    ( Model newSession model.redirect Nothing (LoginData "" "") model.register, redirectCommand model.session.key model.redirect )
 
                 Err _ ->
                     ( { model | errorText = Just "Wystąpił błąd" }, Cmd.none )
 
         RegisterNameUpdate name ->
             let
-                oldRegister = model.register
-                newRegister = { oldRegister | name = name }
+                oldRegister =
+                    model.register
+
+                newRegister =
+                    { oldRegister | name = name }
             in
             ( { model | register = newRegister }, Cmd.none )
 
         RegisterSurnameUpdate surname ->
             let
-                oldRegister = model.register
-                newRegister = { oldRegister | surname = surname }
+                oldRegister =
+                    model.register
+
+                newRegister =
+                    { oldRegister | surname = surname }
             in
             ( { model | register = newRegister }, Cmd.none )
 
         RegisterEmailUpdate email ->
             let
-                oldRegister = model.register
-                newRegister = { oldRegister | email = email }
+                oldRegister =
+                    model.register
+
+                newRegister =
+                    { oldRegister | email = email }
             in
             ( { model | register = newRegister }, Cmd.none )
 
         RegisterPasswordUpdate pass ->
             let
-                oldRegister = model.register
-                newRegister = { oldRegister | password = pass }
+                oldRegister =
+                    model.register
+
+                newRegister =
+                    { oldRegister | password = pass }
             in
             ( { model | register = newRegister }, Cmd.none )
 
@@ -138,20 +153,28 @@ update msg model =
             case result of
                 Ok user ->
                     let
-                        oldSession = model.session
-                        newSession = { oldSession | user = Just user }
+                        oldSession =
+                            model.session
+
+                        newSession =
+                            { oldSession | user = Just user }
                     in
-                    ( Model newSession model.redirect Nothing model.login (RegisterData "" "" "" ""), redirectCommand model.session.key model.redirect)
+                    ( Model newSession model.redirect Nothing model.login (RegisterData "" "" "" ""), redirectCommand model.session.key model.redirect )
+
                 Err _ ->
                     ( { model | errorText = Just "Wystąpił błąd" }, Cmd.none )
+
 
 redirectCommand : Nav.Key -> Maybe String -> Cmd Msg
 redirectCommand key redirect =
     case redirect of
         Just url ->
             Nav.pushUrl key ("/" ++ url)
+
         Nothing ->
             Cmd.none
+
+
 
 -- VIEW
 
@@ -165,6 +188,7 @@ view model =
                 [ case model.errorText of
                     Just err ->
                         Alert.simpleDanger [] [ text err ]
+
                     Nothing ->
                         text ""
                 ]
@@ -217,6 +241,7 @@ viewRegister model =
         ]
 
 
+
 -- HTTP
 
 
@@ -228,6 +253,7 @@ performLogin api login =
         , url = api ++ "user/login"
         }
 
+
 performRegister : String -> RegisterData -> Cmd Msg
 performRegister api register =
     Http.post
@@ -235,6 +261,8 @@ performRegister api register =
         , expect = Http.expectJson RegisterPerformed userDecoder
         , url = api ++ "user/register"
         }
+
+
 
 -- JSON
 
@@ -246,6 +274,7 @@ loginEncoder login =
         , ( "password", Encode.string login.password )
         ]
 
+
 registerEncoder : RegisterData -> Encode.Value
 registerEncoder register =
     Encode.object
@@ -254,6 +283,7 @@ registerEncoder register =
         , ( "email", Encode.string register.email )
         , ( "password", Encode.string register.password )
         ]
+
 
 userDecoder : Decode.Decoder Session.User
 userDecoder =

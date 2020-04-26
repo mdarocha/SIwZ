@@ -97,7 +97,8 @@ init api url key =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update message model =
     let
-        session = toSession model
+        session =
+            toSession model
     in
     case message of
         LinkClicked urlRequest ->

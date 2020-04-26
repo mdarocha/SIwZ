@@ -1,5 +1,7 @@
 module Session exposing (Data, User)
+
 import Browser.Navigation as Nav
+
 
 type alias User =
     { id : String

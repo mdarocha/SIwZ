@@ -7,16 +7,17 @@ import Bootstrap.Form.Input as Input
 import Bootstrap.Grid as Grid
 import Bootstrap.Spinner as Spinner
 import Bootstrap.Table as Table
+import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Http
-import Browser.Navigation as Nav
 import Json.Decode as Decode
 import Json.Encode as Encode
+import Jwt.Http
 import Session
 import Skeleton
-import Jwt.Http
+
 
 
 -- MODEL
@@ -70,11 +71,13 @@ type Msg
 init : Session.Data -> ( Model, Cmd Msg )
 init session =
     let
-        cmd = case session.user of
-            Just user ->
-                getStops session.api user.token
-            Nothing ->
-                Nav.pushUrl session.key "/login?return=admin/stops"
+        cmd =
+            case session.user of
+                Just user ->
+                    getStops session.api user.token
+
+                Nothing ->
+                    Nav.pushUrl session.key "/login?return=admin/stops"
     in
     ( Model session Loading (TrainStop 0 "" "") Nothing
     , cmd
@@ -152,8 +155,10 @@ update msg model =
                         case model.session.user of
                             Just user ->
                                 ( model, addStop model.session.api model.stopToAdd user.token )
+
                             Nothing ->
                                 ( { model | stopAddError = Just "Błąd dodawania - zaloguj się" }, Cmd.none )
+
                     else
                         let
                             newStopToAdd =
