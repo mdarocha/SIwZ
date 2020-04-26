@@ -10,7 +10,8 @@ namespace Server.Models
             Flat
         }
         
-        [Key] public int Id { set; get; }
+        [Key] 
+        public int Id { set; get; }
 
         [Required]
         public string Type { set; get; }

@@ -9,6 +9,7 @@ namespace Server.Controllers.Admin
 {
     [Route("/api/admin/stops")]
     [ApiController]
+    [Authorize]
     public class AdminTrainStopController : ControllerBase
     {
         private readonly TrainStopService _trainStopService;
@@ -20,7 +21,6 @@ namespace Server.Controllers.Admin
         
         [HttpGet]
         [Route("Get")]
-        [Authorize]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public ActionResult<List<TrainStop>> Get() =>
             _trainStopService.Get();
