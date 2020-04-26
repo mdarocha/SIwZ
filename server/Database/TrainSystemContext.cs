@@ -195,6 +195,46 @@ namespace Server.Database
                     ArrivalTime = DateTime.Now
                 }
             );
+
+            modelBuilder.Entity<Ride>().HasData(
+                new Ride
+                {
+                    Id = 1,
+                    RouteId = 1,
+                    StartTime = DateTime.Now,
+                    TrainId = 1,
+                    FreeTickets = 300,
+                    Price = 100
+                },
+                new Ride
+                {
+                    Id = 2,
+                    RouteId = 2,
+                    StartTime = DateTime.Now,
+                    TrainId = 2,
+                    FreeTickets = 400,
+                    Price = 50
+                }, 
+                new Ride
+                {
+                    Id = 3,
+                    RouteId = 3,
+                    StartTime = DateTime.Now,
+                    TrainId = 3,
+                    FreeTickets = 150,
+                    Price = 10
+                }, 
+                new Ride
+                {
+                    Id = 4,
+                    RouteId = 4,
+                    StartTime = DateTime.Now,
+                    TrainId = 4,
+                    FreeTickets = 200,
+                    Price = 80
+                }
+            );
+            modelBuilder.Entity<Ride>().Property(p => p.Id).HasIdentityOptions(startValue: 5);
         }
     }
 }

@@ -167,18 +167,22 @@ namespace server.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:IdentitySequenceOptions", "'5', '1', '', '', 'False', '1'")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<int>("FreeTickets")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("RouteId")
+                    b.Property<int>("Price")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RouteId")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<int?>("TrainId")
+                    b.Property<int>("TrainId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
@@ -188,6 +192,44 @@ namespace server.Migrations
                     b.HasIndex("TrainId");
 
                     b.ToTable("Rides");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            FreeTickets = 300,
+                            Price = 100,
+                            RouteId = 1,
+                            StartTime = new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(7954),
+                            TrainId = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            FreeTickets = 400,
+                            Price = 50,
+                            RouteId = 2,
+                            StartTime = new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(9885),
+                            TrainId = 2
+                        },
+                        new
+                        {
+                            Id = 3,
+                            FreeTickets = 150,
+                            Price = 10,
+                            RouteId = 3,
+                            StartTime = new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(9930),
+                            TrainId = 3
+                        },
+                        new
+                        {
+                            Id = 4,
+                            FreeTickets = 200,
+                            Price = 80,
+                            RouteId = 4,
+                            StartTime = new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(9935),
+                            TrainId = 4
+                        });
                 });
 
             modelBuilder.Entity("Server.Models.Role", b =>
@@ -280,84 +322,84 @@ namespace server.Migrations
                         {
                             RouteId = 1,
                             TrainStopId = 5,
-                            ArrivalTime = new DateTime(2020, 4, 18, 12, 29, 33, 819, DateTimeKind.Local).AddTicks(6687),
+                            ArrivalTime = new DateTime(2020, 4, 26, 18, 28, 30, 781, DateTimeKind.Local).AddTicks(8404),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 1,
                             TrainStopId = 7,
-                            ArrivalTime = new DateTime(2020, 4, 18, 12, 29, 33, 824, DateTimeKind.Local).AddTicks(4636),
+                            ArrivalTime = new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5307),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 1,
                             TrainStopId = 6,
-                            ArrivalTime = new DateTime(2020, 4, 18, 12, 29, 33, 824, DateTimeKind.Local).AddTicks(4681),
+                            ArrivalTime = new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5348),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 2,
                             TrainStopId = 1,
-                            ArrivalTime = new DateTime(2020, 4, 18, 12, 29, 33, 824, DateTimeKind.Local).AddTicks(4687),
+                            ArrivalTime = new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5354),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 2,
                             TrainStopId = 4,
-                            ArrivalTime = new DateTime(2020, 4, 18, 12, 29, 33, 824, DateTimeKind.Local).AddTicks(4691),
+                            ArrivalTime = new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5357),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 3,
                             TrainStopId = 2,
-                            ArrivalTime = new DateTime(2020, 4, 18, 12, 29, 33, 824, DateTimeKind.Local).AddTicks(4695),
+                            ArrivalTime = new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5361),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 3,
                             TrainStopId = 1,
-                            ArrivalTime = new DateTime(2020, 4, 18, 12, 29, 33, 824, DateTimeKind.Local).AddTicks(4699),
+                            ArrivalTime = new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5364),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 3,
                             TrainStopId = 3,
-                            ArrivalTime = new DateTime(2020, 4, 18, 12, 29, 33, 824, DateTimeKind.Local).AddTicks(4703),
+                            ArrivalTime = new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5367),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 4,
                             TrainStopId = 5,
-                            ArrivalTime = new DateTime(2020, 4, 18, 12, 29, 33, 824, DateTimeKind.Local).AddTicks(4707),
+                            ArrivalTime = new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5370),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 4,
                             TrainStopId = 2,
-                            ArrivalTime = new DateTime(2020, 4, 18, 12, 29, 33, 824, DateTimeKind.Local).AddTicks(4711),
+                            ArrivalTime = new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5373),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 4,
                             TrainStopId = 1,
-                            ArrivalTime = new DateTime(2020, 4, 18, 12, 29, 33, 824, DateTimeKind.Local).AddTicks(4715),
+                            ArrivalTime = new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5377),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 4,
                             TrainStopId = 4,
-                            ArrivalTime = new DateTime(2020, 4, 18, 12, 29, 33, 824, DateTimeKind.Local).AddTicks(4719),
+                            ArrivalTime = new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5380),
                             StopNo = 1
                         });
                 });
@@ -668,11 +710,15 @@ namespace server.Migrations
                 {
                     b.HasOne("Server.Models.Route", "Route")
                         .WithMany()
-                        .HasForeignKey("RouteId");
+                        .HasForeignKey("RouteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Server.Models.Train", "Train")
                         .WithMany()
-                        .HasForeignKey("TrainId");
+                        .HasForeignKey("TrainId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Server.Models.StopToRoute", b =>

@@ -223,11 +223,13 @@ namespace server.Migrations
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
+                        .Annotation("Npgsql:IdentitySequenceOptions", "'5', '1', '', '', 'False', '1'")
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    RouteId = table.Column<int>(nullable: true),
+                    RouteId = table.Column<int>(nullable: false),
                     StartTime = table.Column<DateTime>(nullable: false),
-                    TrainId = table.Column<int>(nullable: true),
-                    FreeTickets = table.Column<int>(nullable: false)
+                    TrainId = table.Column<int>(nullable: false),
+                    FreeTickets = table.Column<int>(nullable: false),
+                    Price = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -237,13 +239,13 @@ namespace server.Migrations
                         column: x => x.RouteId,
                         principalTable: "Routes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Rides_Trains_TrainId",
                         column: x => x.TrainId,
                         principalTable: "Trains",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -369,22 +371,33 @@ namespace server.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "Rides",
+                columns: new[] { "Id", "FreeTickets", "Price", "RouteId", "StartTime", "TrainId" },
+                values: new object[,]
+                {
+                    { 1, 300, 100, 1, new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(7954), 1 },
+                    { 2, 400, 50, 2, new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(9885), 2 },
+                    { 3, 150, 10, 3, new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(9930), 3 },
+                    { 4, 200, 80, 4, new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(9935), 4 }
+                });
+
+            migrationBuilder.InsertData(
                 table: "StopsToRoutes",
                 columns: new[] { "RouteId", "TrainStopId", "ArrivalTime", "StopNo" },
                 values: new object[,]
                 {
-                    { 2, 1, new DateTime(2020, 4, 18, 12, 29, 33, 824, DateTimeKind.Local).AddTicks(4687), 1 },
-                    { 3, 1, new DateTime(2020, 4, 18, 12, 29, 33, 824, DateTimeKind.Local).AddTicks(4699), 1 },
-                    { 4, 1, new DateTime(2020, 4, 18, 12, 29, 33, 824, DateTimeKind.Local).AddTicks(4715), 1 },
-                    { 3, 2, new DateTime(2020, 4, 18, 12, 29, 33, 824, DateTimeKind.Local).AddTicks(4695), 1 },
-                    { 4, 2, new DateTime(2020, 4, 18, 12, 29, 33, 824, DateTimeKind.Local).AddTicks(4711), 1 },
-                    { 3, 3, new DateTime(2020, 4, 18, 12, 29, 33, 824, DateTimeKind.Local).AddTicks(4703), 1 },
-                    { 2, 4, new DateTime(2020, 4, 18, 12, 29, 33, 824, DateTimeKind.Local).AddTicks(4691), 1 },
-                    { 4, 4, new DateTime(2020, 4, 18, 12, 29, 33, 824, DateTimeKind.Local).AddTicks(4719), 1 },
-                    { 1, 5, new DateTime(2020, 4, 18, 12, 29, 33, 819, DateTimeKind.Local).AddTicks(6687), 1 },
-                    { 4, 5, new DateTime(2020, 4, 18, 12, 29, 33, 824, DateTimeKind.Local).AddTicks(4707), 1 },
-                    { 1, 6, new DateTime(2020, 4, 18, 12, 29, 33, 824, DateTimeKind.Local).AddTicks(4681), 1 },
-                    { 1, 7, new DateTime(2020, 4, 18, 12, 29, 33, 824, DateTimeKind.Local).AddTicks(4636), 1 }
+                    { 2, 1, new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5354), 1 },
+                    { 3, 1, new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5364), 1 },
+                    { 4, 1, new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5377), 1 },
+                    { 3, 2, new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5361), 1 },
+                    { 4, 2, new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5373), 1 },
+                    { 3, 3, new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5367), 1 },
+                    { 2, 4, new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5357), 1 },
+                    { 4, 4, new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5380), 1 },
+                    { 1, 5, new DateTime(2020, 4, 26, 18, 28, 30, 781, DateTimeKind.Local).AddTicks(8404), 1 },
+                    { 4, 5, new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5370), 1 },
+                    { 1, 6, new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5348), 1 },
+                    { 1, 7, new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5307), 1 }
                 });
 
             migrationBuilder.CreateIndex(
