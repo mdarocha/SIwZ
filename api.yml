@@ -385,6 +385,8 @@ paths:
           description: Ok
   /ride:
     get:
+      tags: 
+        - TicketsBooking
       parameters:
         - $ref: '#/components/parameters/from'
         - $ref: '#/components/parameters/to'
@@ -401,6 +403,8 @@ paths:
                   $ref: '#/components/schemas/Ride'
   /stops:
     get:
+      tags: 
+        - TicketsBooking
       responses:
         '200':
           description: List of all TrainStops
@@ -412,6 +416,8 @@ paths:
                   $ref: '#/components/schemas/Stop'
   /routes:
     get:
+      tags: 
+        - TicketsBooking
       responses:
         '200':
           description: List of all routes
@@ -425,6 +431,8 @@ paths:
     parameters:
       - $ref: '#/components/parameters/id'
     get:
+      tags: 
+        - TicketsBooking
       responses:
         '200':
           description: List of available seats for ride with given id
