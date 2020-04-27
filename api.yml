@@ -1,12 +1,12 @@
 openapi: 3.0.0
 info:
-  title: TrainSystem Admin API
+  title: TrainSystem API
   description: TrainSystem Admin API for SIwZ project.
   version: 0.0.1
 servers:
-  - url: http://localhost:5000/api/admin
+  - url: http://localhost:5000/api
 paths:
-  /stops:
+  /admin/stops:
     get:
       tags:
         - Stop
@@ -37,7 +37,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Stop'
-  /stops/{id}:
+  /admin/stops/{id}:
     parameters:
       - $ref: '#/components/parameters/id'
     get:
@@ -75,7 +75,7 @@ paths:
       responses:
         '200':
           description: Ok
-  /routes:
+  /admin/routes:
     get:
       tags:
         - Route
@@ -106,7 +106,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Route'
-  /routes/{id}:
+  /admin/routes/{id}:
     parameters:
       - $ref: '#/components/parameters/id'
     get:
@@ -144,7 +144,7 @@ paths:
       responses:
         '200':
           description: Ok
-  /discounts:
+  /admin/discounts:
     get:
       tags:
         - Discount
@@ -176,7 +176,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Discount'
-  /discounts/{id}:
+  /admin/discounts/{id}:
     parameters:
       - $ref: '#/components/parameters/id'
     get:
@@ -214,7 +214,7 @@ paths:
       responses:
         '200':
           description: Ok
-  /trains:
+  /admin/trains:
     get:
       tags:
         - Train
@@ -246,7 +246,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Train'
-  /trains/{id}:
+  /admin/trains/{id}:
     parameters:
       - $ref: '#/components/parameters/id'
     get:
@@ -284,7 +284,7 @@ paths:
       responses:
         '200':
           description: Ok 
-  /rides:
+  /admin/rides:
     get:
       tags:
         - Ride
@@ -315,7 +315,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Ride'                          
-  /rides/{id}:
+  /admin/rides/{id}:
     parameters:
       - $ref: '#/components/parameters/id'
     get:
@@ -353,7 +353,7 @@ paths:
       responses:
         '200':
           description: Ok 
-  /tickets:
+  /admin/tickets:
     get:
       tags:
         - Tickets
@@ -373,7 +373,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Ticket'
-  /ticket/{id}:
+  /admin/ticket/{id}:
     delete:
       tags:
         - Tickets
@@ -383,7 +383,57 @@ paths:
       responses:
         '200':
           description: Ok
-          
+  /ride:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/from'
+        - $ref: '#/components/parameters/to'
+        - $ref: '#/components/parameters/date'
+        - $ref: '#/components/parameters/routeId'
+      responses:
+        '200':
+          description: List of matching Rides
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Ride'
+  /stops:
+    get:
+      responses:
+        '200':
+          description: List of all TrainStops
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Stop'
+  /routes:
+    get:
+      responses:
+        '200':
+          description: List of all routes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Route'
+  /tickets/ride/{id}:
+    parameters:
+      - $ref: '#/components/parameters/id'
+    get:
+      responses:
+        '200':
+          description: List of available seats for ride with given id
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Seat'       
 components:
   parameters:
     id:
@@ -393,7 +443,47 @@ components:
       required: true
       schema:
         type: integer
+    routeId:
+      name: route
+      in: path
+      description: Route id
+      required: true
+      schema:
+        type: integer
+    rideId:
+      name: route
+      in: path
+      description: Ride id
+      required: true
+      schema:
+        type: integer
+    from:
+      name: from
+      in: query
+      description: ID of first TrainStop
+      schema:
+        type: integer
+    to:
+      name: to
+      in: query
+      description: ID of last TrainStop
+      schema:
+        type: integer
+    date:
+      name: date
+      in: query
+      description: departure date
+      schema:
+        type: string
   schemas:
+    Seat:
+      type: object
+      properties:
+        Wagon:
+          type: integer
+        SeatNo:
+          type:
+            integer
     StopForm:
       type: object
       properties:
