@@ -5,6 +5,7 @@
     "recreate": "docker-compose down && docker-compose build --no-cache && docker-compose up -d --force-recreate --remove-orphans",
     "stop": "docker-compose down",
     "postwoman": "docker run -p 3000:3000 liyasthomas/postwoman:latest",
-    "swagger": "docker run -p 80:8080 -e SWAGGER_JSON=/api/api.yml -v $(pwd):/api swaggerapi/swagger-ui"
+    "swagger": "docker run -p 80:8080 -e SWAGGER_JSON=/api/api.yml -v $(pwd):/api swaggerapi/swagger-ui",
+    "postgres": "docker run -p 5432:5432 -e POSTGRES_USER=admin -e POSTGRES_PASSWORD=admin1 postgres"
   }
 }

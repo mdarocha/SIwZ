@@ -7,12 +7,14 @@ import Bootstrap.Form.Input as Input
 import Bootstrap.Grid as Grid
 import Bootstrap.Spinner as Spinner
 import Bootstrap.Table as Table
+import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Decode as Decode
 import Json.Encode as Encode
+import Jwt.Http
 import Session
 import Skeleton
 
@@ -68,8 +70,17 @@ type Msg
 
 init : Session.Data -> ( Model, Cmd Msg )
 init session =
+    let
+        cmd =
+            case session.user of
+                Just user ->
+                    getStops session.api user.token
+
+                Nothing ->
+                    Nav.pushUrl session.key "/login?return=admin/stops"
+    in
     ( Model session Loading (TrainStop 0 "" "") Nothing
-    , getStops session.api
+    , cmd
     )
 
 
@@ -141,7 +152,12 @@ update msg model =
 
                 Submit ->
                     if isValidInput model.stopToAdd then
-                        ( model, addStop model.session.api model.stopToAdd )
+                        case model.session.user of
+                            Just user ->
+                                ( model, addStop model.session.api model.stopToAdd user.token )
+
+                            Nothing ->
+                                ( { model | stopAddError = Just "Błąd dodawania - zaloguj się" }, Cmd.none )
 
                     else
                         let
@@ -231,17 +247,17 @@ formError error =
 -- HTTP
 
 
-getStops : String -> Cmd Msg
-getStops api =
-    Http.get
+getStops : String -> String -> Cmd Msg
+getStops api token =
+    Jwt.Http.get token
         { url = api ++ "admin/stops/get"
         , expect = Http.expectJson GotStops stopsDecoder
         }
 
 
-addStop : String -> TrainStop -> Cmd Msg
-addStop api stop =
-    Http.post
+addStop : String -> TrainStop -> String -> Cmd Msg
+addStop api stop token =
+    Jwt.Http.post token
         { body = Http.jsonBody (stopEncoder stop)
         , expect = Http.expectWhatever AddStop
         , url = api ++ "admin/stops/create"

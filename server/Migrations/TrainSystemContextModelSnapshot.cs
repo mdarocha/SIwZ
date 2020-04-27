@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Server.Database;
 
-namespace Server.Migrations
+namespace server.Migrations
 {
     [DbContext(typeof(TrainSystemContext))]
     partial class TrainSystemContextModelSnapshot : ModelSnapshot
@@ -200,7 +200,7 @@ namespace Server.Migrations
                             FreeTickets = 300,
                             Price = 100,
                             RouteId = 1,
-                            StartTime = new DateTime(2020, 4, 25, 17, 27, 25, 429, DateTimeKind.Local).AddTicks(140),
+                            StartTime = new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(7954),
                             TrainId = 1
                         },
                         new
@@ -209,7 +209,7 @@ namespace Server.Migrations
                             FreeTickets = 400,
                             Price = 50,
                             RouteId = 2,
-                            StartTime = new DateTime(2020, 4, 25, 17, 27, 25, 429, DateTimeKind.Local).AddTicks(2011),
+                            StartTime = new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(9885),
                             TrainId = 2
                         },
                         new
@@ -218,7 +218,7 @@ namespace Server.Migrations
                             FreeTickets = 150,
                             Price = 10,
                             RouteId = 3,
-                            StartTime = new DateTime(2020, 4, 25, 17, 27, 25, 429, DateTimeKind.Local).AddTicks(2050),
+                            StartTime = new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(9930),
                             TrainId = 3
                         },
                         new
@@ -227,7 +227,7 @@ namespace Server.Migrations
                             FreeTickets = 200,
                             Price = 80,
                             RouteId = 4,
-                            StartTime = new DateTime(2020, 4, 25, 17, 27, 25, 429, DateTimeKind.Local).AddTicks(2054),
+                            StartTime = new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(9935),
                             TrainId = 4
                         });
                 });
@@ -322,85 +322,85 @@ namespace Server.Migrations
                         {
                             RouteId = 1,
                             TrainStopId = 5,
-                            ArrivalTime = new DateTime(2020, 4, 25, 17, 27, 25, 424, DateTimeKind.Local).AddTicks(5900),
+                            ArrivalTime = new DateTime(2020, 4, 26, 18, 28, 30, 781, DateTimeKind.Local).AddTicks(8404),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 1,
                             TrainStopId = 7,
-                            ArrivalTime = new DateTime(2020, 4, 25, 17, 27, 25, 428, DateTimeKind.Local).AddTicks(7727),
-                            StopNo = 2
+                            ArrivalTime = new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5307),
+                            StopNo = 1
                         },
                         new
                         {
                             RouteId = 1,
                             TrainStopId = 6,
-                            ArrivalTime = new DateTime(2020, 4, 25, 17, 27, 25, 428, DateTimeKind.Local).AddTicks(7771),
-                            StopNo = 3
+                            ArrivalTime = new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5348),
+                            StopNo = 1
                         },
                         new
                         {
                             RouteId = 2,
                             TrainStopId = 1,
-                            ArrivalTime = new DateTime(2020, 4, 25, 17, 27, 25, 428, DateTimeKind.Local).AddTicks(7777),
+                            ArrivalTime = new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5354),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 2,
                             TrainStopId = 4,
-                            ArrivalTime = new DateTime(2020, 4, 25, 17, 27, 25, 428, DateTimeKind.Local).AddTicks(7781),
-                            StopNo = 2
+                            ArrivalTime = new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5357),
+                            StopNo = 1
                         },
                         new
                         {
                             RouteId = 3,
                             TrainStopId = 2,
-                            ArrivalTime = new DateTime(2020, 4, 25, 17, 27, 25, 428, DateTimeKind.Local).AddTicks(7785),
+                            ArrivalTime = new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5361),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 3,
                             TrainStopId = 1,
-                            ArrivalTime = new DateTime(2020, 4, 25, 17, 27, 25, 428, DateTimeKind.Local).AddTicks(7789),
-                            StopNo = 2
+                            ArrivalTime = new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5364),
+                            StopNo = 1
                         },
                         new
                         {
                             RouteId = 3,
                             TrainStopId = 3,
-                            ArrivalTime = new DateTime(2020, 4, 25, 17, 27, 25, 428, DateTimeKind.Local).AddTicks(7792),
-                            StopNo = 3
+                            ArrivalTime = new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5367),
+                            StopNo = 1
                         },
                         new
                         {
                             RouteId = 4,
                             TrainStopId = 5,
-                            ArrivalTime = new DateTime(2020, 4, 25, 17, 27, 25, 428, DateTimeKind.Local).AddTicks(7796),
+                            ArrivalTime = new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5370),
                             StopNo = 1
                         },
                         new
                         {
                             RouteId = 4,
                             TrainStopId = 2,
-                            ArrivalTime = new DateTime(2020, 4, 25, 17, 27, 25, 428, DateTimeKind.Local).AddTicks(7799),
-                            StopNo = 2
+                            ArrivalTime = new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5373),
+                            StopNo = 1
                         },
                         new
                         {
                             RouteId = 4,
                             TrainStopId = 1,
-                            ArrivalTime = new DateTime(2020, 4, 25, 17, 27, 25, 428, DateTimeKind.Local).AddTicks(7803),
-                            StopNo = 3
+                            ArrivalTime = new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5377),
+                            StopNo = 1
                         },
                         new
                         {
                             RouteId = 4,
                             TrainStopId = 4,
-                            ArrivalTime = new DateTime(2020, 4, 25, 17, 27, 25, 428, DateTimeKind.Local).AddTicks(7806),
-                            StopNo = 4
+                            ArrivalTime = new DateTime(2020, 4, 26, 18, 28, 30, 786, DateTimeKind.Local).AddTicks(5380),
+                            StopNo = 1
                         });
                 });
 
