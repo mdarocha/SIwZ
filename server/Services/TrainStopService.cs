@@ -14,9 +14,15 @@ namespace Server.Services
             _context = context;
         }
 
-        public List<TrainStop> Get() => _context.TrainStops.Where(ts => true).ToList();
+        public List<TrainStop> GetAll()
+        {
+            return _context.TrainStops.Where(d => true).ToList();
+        }
 
-        public TrainStop Get(string id) => _context.TrainStops.Find(id);
+        public TrainStop GetById(int id)
+        {
+            return _context.TrainStops.Find(id);
+        }
 
         public List<TrainStop> Get(string city, string name)
         {
@@ -27,10 +33,29 @@ namespace Server.Services
 
         public TrainStop Create(TrainStop trainStop)
         {
-            trainStop.Id = 0;
             _context.TrainStops.Add(trainStop);
             _context.SaveChanges();
             return trainStop;
+        }
+        
+        public void Edit(TrainStop trainStop)
+        {
+            var ts = _context.TrainStops.Find(trainStop.Id);
+
+            if (ts != null)
+            {
+                ts.City = trainStop.City;
+                ts.Name = trainStop.Name;
+
+                _context.TrainStops.Update(ts);
+                _context.SaveChanges();
+            }
+        }
+        
+        public void Delete(TrainStop trainStop)
+        {
+            _context.TrainStops.Remove(trainStop);
+            _context.SaveChanges();
         }
     }
 }

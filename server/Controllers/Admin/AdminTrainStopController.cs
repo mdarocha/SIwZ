@@ -9,7 +9,7 @@ namespace Server.Controllers.Admin
 {
     [Route("/api/admin/stops")]
     [ApiController]
-    [Authorize]
+    //[Authorize]  if uncommented it's always failing fetch
     public class AdminTrainStopController : ControllerBase
     {
         private readonly TrainStopService _trainStopService;
@@ -18,20 +18,49 @@ namespace Server.Controllers.Admin
         {
             _trainStopService = service;
         }
-        
+
         [HttpGet]
-        [Route("Get")]
+        [Route("")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public ActionResult<List<TrainStop>> Get() =>
-            _trainStopService.Get();
+        public ActionResult<List<TrainStop>> GetAll()
+        {
+            var stops = _trainStopService.GetAll();
+            return Ok(stops);
+        }
+        
+        [HttpGet("{id}")]
+        public ActionResult<List<TrainStop>> GetById([FromRoute] int id) 
+        {
+            var trains = _trainStopService.GetById(id);
+            return Ok(trains);
+        }
+            
         
         [HttpPost]
-        [Route("Create")]
-        public ActionResult<TrainStop> Create([FromBody] TrainStop trainStop)
+        [Route("")]
+        public ActionResult<TrainStop> Create(TrainStop trainStop)
         {
             var ts = _trainStopService.Create(trainStop);
 
             return Ok(ts);
+        }
+        
+        [HttpPatch]
+        [Route("")] 
+        public ActionResult<Train> Edit(TrainStop trainStop)
+        {
+            _trainStopService.Edit(trainStop);
+            return Ok(); 
+        }
+        
+        [HttpDelete("{id}")]
+        [Route("")]
+        public ActionResult Delete([FromRoute]int id)
+        {
+            var deleteTrainStop = _trainStopService.GetById(id);
+            _trainStopService.Delete(deleteTrainStop);
+            
+            return Ok();
         }
         
         

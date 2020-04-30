@@ -37,6 +37,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Stop'
+                
+    patch:
+      tags:
+        - Stop
+      summary: Modify Stop with given id.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Stop'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stop'
+                
   /admin/stops/{id}:
     parameters:
       - $ref: '#/components/parameters/id'
@@ -51,23 +70,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Stop'
-    patch:
-      tags:
-        - Stop
-      summary: Modify Stop with given id.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/StopForm'
-      responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Stop'
+    
     delete:
       tags:
         - Stop

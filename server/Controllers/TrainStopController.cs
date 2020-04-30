@@ -22,13 +22,13 @@ namespace Server.Controllers
         [Route("Get")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public ActionResult<List<TrainStop>> Get() =>
-            _trainStopService.Get();
+            _trainStopService.GetAll();
 
         [HttpGet]
         [Route("GetStop")]
-        public ActionResult<TrainStop> GetStop(string id)
+        public ActionResult<TrainStop> GetStop(int id)
         {
-            var ts = _trainStopService.Get(id);
+            var ts = _trainStopService.GetById(id);
 
             if (ts == null)
                 return new NotFoundResult();
