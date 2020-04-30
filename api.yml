@@ -27,7 +27,7 @@ paths:
       requestBody:
         required: true
         content:
-          application:json:
+          application/json:
             schema:
               $ref: '#/components/schemas/StopForm'
       responses:
@@ -58,7 +58,7 @@ paths:
       requestBody:
         required: true
         content:
-          application:json:
+          application/json:
             schema:
               $ref: '#/components/schemas/StopForm'
       responses:
@@ -96,7 +96,7 @@ paths:
       requestBody:
         required: true
         content:
-          application:json:
+          application/json:
             schema:
               $ref: '#/components/schemas/RouteForm'
       responses:
@@ -127,7 +127,7 @@ paths:
       requestBody:
         required: true
         content:
-          application:json:
+          application/json:
             schema:
               $ref: '#/components/schemas/StopForm'
       responses:
@@ -166,7 +166,7 @@ paths:
       requestBody:
         required: true
         content:
-          application:json:
+          application/json:
             schema:
               $ref: '#/components/schemas/DiscountForm'
       responses:
@@ -197,7 +197,7 @@ paths:
       requestBody:
         required: true
         content:
-          application:json:
+          application/json:
             schema:
               $ref: '#/components/schemas/DiscountForm'
       responses:
@@ -236,7 +236,7 @@ paths:
       requestBody:
         required: true
         content:
-          application:json:
+          application/json:
             schema:
               $ref: '#/components/schemas/TrainForm'
       responses:
@@ -246,6 +246,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Train'
+                
+    patch:
+      tags:
+        - Train
+      summary: Modify Train with given id.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Train'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Train'
+                
   /admin/trains/{id}:
     parameters:
       - $ref: '#/components/parameters/id'
@@ -260,23 +279,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Discount'
-    patch:
-      tags:
-        - Train
-      summary: Modify Train with given id.
-      requestBody:
-        required: true
-        content:
-          application:json:
-            schema:
-              $ref: '#/components/schemas/TrainForm'
-      responses:
-        '200':
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Train'
+
     delete:
       tags:
         - Train
@@ -305,7 +308,7 @@ paths:
       requestBody:
         required: true
         content:
-          application:json:
+          application/json:
             schema:
               $ref: '#/components/schemas/RideForm'
       responses:
@@ -336,7 +339,7 @@ paths:
       requestBody:
         required: true
         content:
-          application:json:
+          application/json:
             schema:
               $ref: '#/components/schemas/RideForm'
       responses:
