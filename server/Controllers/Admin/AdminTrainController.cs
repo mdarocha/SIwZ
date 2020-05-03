@@ -25,17 +25,16 @@ namespace Server.Controllers.Admin
             return Ok(trains);
         }
         
-        [HttpGet]
-        [Route("/{id}")]
-        public ActionResult<List<Train>> GetById(int id) 
+        [HttpGet("{id}")]
+        public ActionResult<List<Train>> GetById([FromRoute] int id) 
         {
             var trains = _service.GetById(id);
             return Ok(trains);
         }
         
         [HttpPost]
-        [Route("/add")]
-        public ActionResult<Train> Add(Train train) // 
+        [Route("")]
+        public ActionResult<Train> Add(Train train)  
         {
             //Validation pls
             var d = _service.Create(train); 
@@ -43,15 +42,15 @@ namespace Server.Controllers.Admin
         }
 
         [HttpPatch]
-        [Route("/edit")] 
+        [Route("")] 
         public ActionResult<Train> Edit(Train train)
         {
             _service.Edit(train);
-            return Ok(); // to implement
+            return Ok(); 
         }
         
-        [HttpDelete]
-        [Route("/{id}")]
+        [HttpDelete("{id}")]
+        [Route("")]
         public ActionResult Delete([FromRoute]int id)
         {
             var deleteTrain = _service.GetById(id);

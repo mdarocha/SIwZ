@@ -24,11 +24,11 @@ namespace Server.Controllers
 
         [HttpGet("routes")]
         public ActionResult<List<Route>> GetRoutes() =>
-            _routeService.Get();
+            _routeService.GetAll();
 
         [HttpGet("stops")]
         public ActionResult<List<TrainStop>> GetStops() =>
-            _trainStopService.Get();
+            _trainStopService.GetAll();
 
         [HttpGet("rides")]
         public ActionResult<List<Ride>> GetRides() =>
