@@ -41,6 +41,7 @@ namespace Server
             services.AddTransient<TrainService>();
             services.AddTransient<RideService>();
             services.AddTransient<RouteService>();
+            services.AddTransient<StopToRouteService>();
 
             services.AddScoped<JwtService>();
             

@@ -13,13 +13,15 @@ namespace Server.Controllers
         private readonly RouteService _routeService;
         private readonly TrainStopService _trainStopService;
         private readonly RideService _rideService;
+        private readonly StopToRouteService _stopToRouteService;
 
         public TicketsBookingController(RouteService routeService, TrainStopService trainStopService,
-            RideService rideService)
+            RideService rideService, StopToRouteService stopToRouteService)
         {
             _routeService = routeService;
             _trainStopService = trainStopService;
             _rideService = rideService;
+            _stopToRouteService = stopToRouteService;
         }
 
         [HttpGet("routes")]
@@ -31,7 +33,17 @@ namespace Server.Controllers
             _trainStopService.GetAll();
 
         [HttpGet("rides")]
-        public ActionResult<List<Ride>> GetRides() =>
-            _rideService.RideSearch();
+        public ActionResult<List<Ride>> GetRides([FromQuery] int from, [FromQuery] int to, [FromQuery] int route)
+        {
+            if (route.Equals(null))
+            {
+                var routesIds = _stopToRouteService.GetRoutes(from, to);
+                return _rideService.GetByIdsList(routesIds);
+            }
+            else
+            {
+                return _rideService.GetByRouteId(route);
+            }
+        }
     }
 }

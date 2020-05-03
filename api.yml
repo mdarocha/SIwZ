@@ -465,7 +465,7 @@ components:
         type: integer
     routeId:
       name: route
-      in: path
+      in: query
       description: Route id
       required: true
       schema:
