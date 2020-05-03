@@ -40,6 +40,7 @@ namespace Server
             services.AddTransient<DiscountService>();
             services.AddTransient<TrainService>();
             services.AddTransient<RideService>();
+            services.AddTransient<StopToRouteService>();
 
             services.AddScoped<JwtService>();
             

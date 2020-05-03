@@ -16,5 +16,11 @@ namespace Server.Services
 
         public List<Ride> RideSearch() =>
             _context.Rides.Where(ride => true).ToList();
+
+        public List<Ride> GetByRouteId(int routeId) =>
+            _context.Rides.Where(ride => ride.RouteId == routeId).ToList();
+
+        public List<Ride> GetByIdsList(List<int> ids) =>
+            _context.Rides.Where(ride => ids.Contains(ride.Id)).ToList();
     }
 }
