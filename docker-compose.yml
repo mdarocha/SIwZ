@@ -10,6 +10,7 @@ services:
         restart: always
         environment:
             - TRAINS_DB=Host=database;Database=TrainSystem;Username=admin;Password=admin1
+            - TRAINS_JWT_SECRET="development time secret dont peek"
             - ASPNETCORE_URLS=http://+:5000
             - ASPNETCORE_ENVIRONMENT=Production
 
@@ -30,10 +31,11 @@ services:
         restart: always
         ports:
             - 5432:5432
+        volumes:
+            - database:/var/lib/postgresql/data
         environment:
             - POSTGRES_PASSWORD=admin1
             - POSTGRES_USER=admin
-            - POSTGRES_DB=TrainSystem
 
 volumes:
     database:
