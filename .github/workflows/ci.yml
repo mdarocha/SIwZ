@@ -16,6 +16,9 @@ jobs:
         working-directory: server/
         run: dotnet restore
 
+      - name: Check foreach
+        run: ./.github/check.sh
+
       - name: Build
         working-directory: server/
         run: dotnet build --configuration Release --no-restore
