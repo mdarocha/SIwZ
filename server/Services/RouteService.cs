@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Server.Models;
 using Server.Database;
+using Server.ModelsDTO;
 
 namespace Server.Services
 {
@@ -25,10 +26,22 @@ namespace Server.Services
             return _context.Routes.Find(id);
         }
         
-        public Route Create(Route route)
+        public Route Create(RouteDto routeDto) 
         {
+            Route route = new Route();
+            route.Name = routeDto.Name;
+            
             _context.Routes.Add(route);
             _context.SaveChanges();
+
+            var routeId = route.Id;
+
+            foreach (var item in routeDto.Stops)
+            {
+                
+            }
+            
+            
             return route;
         }
         

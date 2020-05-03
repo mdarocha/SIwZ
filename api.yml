@@ -395,7 +395,7 @@ paths:
       responses:
         '200':
           description: Ok
-  /rides:
+  /ride:
     get:
       tags: 
         - TicketsBooking
@@ -467,6 +467,7 @@ components:
       name: route
       in: path
       description: Route id
+      required: true
       schema:
         type: integer
     rideId:
@@ -544,6 +545,10 @@ components:
           type: integer
         StopNo:
           type: integer
+        HoursDiff:
+          type: integer
+        MinutesDiff:
+          type: integer
     RouteForm:
       type: object
       properties:
@@ -552,7 +557,7 @@ components:
         Stops:
           type: array
           uniqueItems: true
-          minItems: 2
+          minItems: 4
           items:
             $ref: '#/components/schemas/RouteStopForm'
     DiscountForm:

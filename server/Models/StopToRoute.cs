@@ -13,6 +13,9 @@ namespace Server.Models
         public virtual Route Route { get; set; }
         public virtual TrainStop TrainStop { get; set; }
         public int StopNo { get; set; }
-        public DateTime ArrivalTime { get; set; }
+        
+        public int HoursDiff{ get; set; }
+        
+        public int MinutesDiff { get; set; }
     }
 }
