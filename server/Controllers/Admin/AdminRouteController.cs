@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Server.Models;
+using Server.ModelsDTO;
 using Server.Services;
 
 namespace Server.Controllers.Admin
@@ -34,9 +35,9 @@ namespace Server.Controllers.Admin
 
         [HttpPost]
         [Route("")]
-        public ActionResult<Route> Create([FromBody] Route route)
+        public ActionResult<Route> Create([FromBody] RouteDTO route)
         {
-            var r = _service.Create(route);
+            var r = _service.Create(route); 
             return Ok(r);
         }
         

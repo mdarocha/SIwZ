@@ -26,7 +26,7 @@ namespace Server.Services
             return _context.Routes.Find(id);
         }
         
-        public Route Create(RouteDto routeDto) 
+        public Route Create(RouteDTO routeDto) 
         {
             Route route = new Route();
             route.Name = routeDto.Name;
