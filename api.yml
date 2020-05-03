@@ -383,7 +383,7 @@ paths:
       responses:
         '200':
           description: Ok
-  /ride:
+  /rides:
     get:
       tags: 
         - TicketsBooking
@@ -455,7 +455,6 @@ components:
       name: route
       in: path
       description: Route id
-      required: true
       schema:
         type: integer
     rideId:
