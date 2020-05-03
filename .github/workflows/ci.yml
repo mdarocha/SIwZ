@@ -17,8 +17,7 @@ jobs:
         run: dotnet restore
 
       - name: Check foreach
-        working-directory: server/
-        run: [ "$(find . -name \*.cs -exec grep foreach {} \; \| wc -l)" -ne 0 ] && echo "Please use LINQ instead of foreach" && exit 1
+        run: ./.github/check.sh
 
       - name: Build
         working-directory: server/

@@ -23,6 +23,5 @@ namespace Server
                     webBuilder.UseKestrel();
                     webBuilder.UseStartup<Startup>();
                 });
-        foreach
     }
 }
