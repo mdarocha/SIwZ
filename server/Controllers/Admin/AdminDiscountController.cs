@@ -18,32 +18,41 @@ namespace Server.Controllers.Admin
         }
 
         [HttpGet]
-        [Route("list")]
+        [Route("")]
         public ActionResult<List<Discount>> GetAll()
         {
             var discounts = _service.GetAll();
             return Ok(discounts);
         }
+        
+        [HttpGet("{id}")]
+        public ActionResult<List<Discount>> GetById([FromRoute] int id)
+        {
+            var discounts = _service.GetById(id);
+            return Ok(discounts);
+        }
 
         [HttpPatch]
-        [Route("edit")]
+        [Route("")]
         public ActionResult<Discount> Edit(Discount discount)
         {
+            _service.Edit(discount);
             return Ok();
         }
 
         [HttpPost]
-        [Route("add")]
         public ActionResult<Discount> Add(Discount discount)
         {
             var d = _service.Create(discount);
             return d;
         }
 
-        [HttpDelete]
-        [Route("delete")]
-        public ActionResult Delete(int id)
+        [HttpDelete("{id}")]
+        [Route("")]
+        public ActionResult Delete([FromRoute]int id)
         {
+            var deleteDiscount = _service.GetById(id);
+            _service.Delete(deleteDiscount);
             return Ok();
         }
         

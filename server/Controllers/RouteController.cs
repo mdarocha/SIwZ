@@ -19,7 +19,7 @@ namespace Server.Controllers
         [HttpGet]
         [Route("Get")]
         public ActionResult<List<Route>> Get() =>
-            _routeService.Get();
+            _routeService.GetAll();
 
         
     }

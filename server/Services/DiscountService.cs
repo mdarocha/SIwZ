@@ -35,6 +35,21 @@ namespace Server.Services
             _context.SaveChanges();
             return discount;
         }
+        
+        public void Edit(Discount discount)
+        {
+            var dc = _context.Discounts.Find(discount.Id);
+
+            if (dc != null)
+            {
+                dc.Type = discount.Type;
+                dc.Value = discount.Value;
+                dc.ValueType = discount.ValueType;
+
+                _context.Discounts.Update(dc);
+                _context.SaveChanges();
+            }
+        }
 
         public void Delete(Discount discount)
         {
