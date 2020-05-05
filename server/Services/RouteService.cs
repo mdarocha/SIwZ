@@ -10,6 +10,7 @@ namespace Server.Services
     {
         private readonly TrainSystemContext _context;
 
+
         public RouteService(TrainSystemContext context)
         {
             _context = context;
@@ -34,18 +35,10 @@ namespace Server.Services
             _context.Routes.Add(route);
             _context.SaveChanges();
 
-            var routeId = route.Id;
-
-            foreach (var item in routeDto.Stops)
-            {
-                
-            }
-            
-            
             return route;
         }
         
-        public void Edit(Route route)
+        public Route Edit(Route route)
         {
             var r = _context.Routes.Find(route.Id);
 
@@ -56,6 +49,18 @@ namespace Server.Services
                 _context.Routes.Update(r);
                 _context.SaveChanges();
             }
+
+            return r;
+        }
+
+        public Route ChangeName(int id, string name)
+        {
+            var r = _context.Routes.Find(id);
+            r.Name = name;
+            _context.Routes.Update(r);
+            _context.SaveChanges();
+
+            return r;
         }
         
         public void Delete(Route route)

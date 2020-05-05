@@ -108,7 +108,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Route'
+                $ref: '#/components/schemas/RoutePatch'
                 
     patch:
       tags:
@@ -119,14 +119,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Route'
+              $ref: '#/components/schemas/RoutePatch'
       responses:
         '200':
           description: Ok
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Route'
+                $ref: '#/components/schemas/RoutePatch'
                 
   /admin/routes/{id}:
     parameters:
@@ -465,7 +465,7 @@ components:
         type: integer
     routeId:
       name: route
-      in: query
+      in: path
       description: Route id
       required: true
       schema:
@@ -552,6 +552,19 @@ components:
     RouteForm:
       type: object
       properties:
+        Name:
+          type: string
+        Stops:
+          type: array
+          uniqueItems: true
+          minItems: 4
+          items:
+            $ref: '#/components/schemas/RouteStopForm'
+    RoutePatch:
+      type: object
+      properties:
+        Id:
+         type: integer
         Name:
           type: string
         Stops:

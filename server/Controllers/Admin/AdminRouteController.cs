@@ -11,25 +11,28 @@ namespace Server.Controllers.Admin
     [ApiController]
     public class AdminRouteController : ControllerBase
     {
-        private readonly RouteService _service;
+        private readonly RouteService _RouteService;
+        private readonly StopToRouteService _StopToRouteService;
         
-        public AdminRouteController(RouteService service)
+        public AdminRouteController(RouteService service, StopToRouteService service2)
         {
-            _service = service;
+            _RouteService = service;
+            _StopToRouteService = service2;
+
         }
         
         [HttpGet]
         [Route("")]
         public ActionResult<List<Route>> GetAll() 
         {
-            var routes = _service.GetAll();
+            var routes = _RouteService.GetAll();
             return Ok(routes);
         }
         
         [HttpGet("{id}")]
         public ActionResult<List<Train>> GetById([FromRoute] int id) 
         {
-            var routes = _service.GetById(id);
+            var routes = _RouteService.GetById(id);
             return Ok(routes);
         }
 
@@ -37,26 +40,37 @@ namespace Server.Controllers.Admin
         [Route("")]
         public ActionResult<Route> Create([FromBody] RouteDTO route)
         {
-            var r = _service.Create(route); 
+            
+            var r = _RouteService.Create(route);
+            var id = r.Id;
+            
+            var list = _StopToRouteService.AddStops(route.Stops, id);
+            
             return Ok(r);
         }
         
         [HttpPatch]
         [Route("")] 
-        public ActionResult<Route> Edit(Route route)
+        public ActionResult<Route> Edit(RoutePatchDTO route)
         {
-            _service.Edit((route));
-            return Ok(); 
+            var patchRoute = _RouteService.ChangeName(route.Id, route.Name);
+            
+            _StopToRouteService.DeleteStops(route.Id);
+            _StopToRouteService.AddStops(route.Stops, route.Id);
+
+            return Ok(route); 
         }
         
         [HttpDelete("{id}")]
         [Route("")]
         public ActionResult Delete([FromRoute]int id)
         {
-            var deleteRoute = _service.GetById(id);
-            _service.Delete(deleteRoute);
+            var deleteRoute = _RouteService.GetById(id);
+            _RouteService.Delete(deleteRoute);
             
-            return Ok();
+            _StopToRouteService.DeleteStops(id);
+            
+            return Ok(deleteRoute); // should return all deleted object?
         }
     }
 }
