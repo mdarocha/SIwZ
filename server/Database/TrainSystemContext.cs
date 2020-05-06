@@ -156,14 +156,14 @@ namespace Server.Database
                 {
                     RouteId = 3,
                     TrainStopId = 1,
-                    StopNo = 1,
+                    StopNo = 2,
                     ArrivalTime = DateTime.Now
                 },
                 new StopToRoute
                 {
                     RouteId = 3,
                     TrainStopId = 3,
-                    StopNo = 1,
+                    StopNo = 3,
                     ArrivalTime = DateTime.Now
                 },
                 new StopToRoute
@@ -177,21 +177,21 @@ namespace Server.Database
                 {
                     RouteId = 4,
                     TrainStopId = 2,
-                    StopNo = 1,
+                    StopNo = 2,
                     ArrivalTime = DateTime.Now
                 },
                 new StopToRoute
                 {
                     RouteId = 4,
                     TrainStopId = 1,
-                    StopNo = 1,
+                    StopNo = 3,
                     ArrivalTime = DateTime.Now
                 },
                 new StopToRoute
                 {
                     RouteId = 4,
                     TrainStopId = 4,
-                    StopNo = 1,
+                    StopNo = 4,
                     ArrivalTime = DateTime.Now
                 }
             );

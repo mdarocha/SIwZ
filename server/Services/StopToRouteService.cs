@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using Server.Database;
 using Server.Models;
 
@@ -15,36 +16,19 @@ namespace Server.Services
             _context = context;
         }
 
-        public List<int> GetRoutes(int from, int to)
+        public List<Route> GetRoutes(int from, int to)
         {
-            var fromRoutes = _context.StopsToRoutes.Where(str => str.TrainStopId == from);
-            var toRoutes = _context.StopsToRoutes.Where(str => str.TrainStopId == to);
-            List<int> routesIds = new List<int>();
-            
-            foreach (StopToRoute stopToRoute in fromRoutes)
+            var fromRoutes = _context.StopsToRoutes.Include(x => x.Route).Where(str => str.TrainStopId == from).ToList();
+            var toRoutes = _context.StopsToRoutes.Include(x => x.Route).Where(str => str.TrainStopId == to).ToList();
+
+            var routesIds = fromRoutes.Intersect(toRoutes, new StopToRouteComparer());
+
+            return routesIds.AsEnumerable().Where(route =>
             {
-                if (toRoutes.Contains(stopToRoute))
-                {
-                    routesIds.Add(stopToRoute.RouteId);
-                }
-            }
-
-            foreach (var routeId in routesIds)
-            {
-                if (!ValidateRoute(routeId, from, to))
-                {
-                    routesIds.Remove(routeId);
-                }
-            }
-
-            return routesIds;
-        }
-
-        private bool ValidateRoute(int route, int from, int to)
-        {
-            var fromNo = _context.StopsToRoutes.First(str => str.RouteId == route && str.TrainStopId == @from).StopNo;
-            var toNo = _context.StopsToRoutes.First(str => str.RouteId == route && str.TrainStopId == @to).StopNo;
-            return fromNo < toNo;
+                var fromNo = fromRoutes.Single(str => str.RouteId == route.RouteId).StopNo;
+                var toNo = toRoutes.Single(str => str.RouteId == route.RouteId).StopNo;
+                return fromNo < toNo;
+            }).Select(route => route.Route).ToList();
         }
     }
 }
