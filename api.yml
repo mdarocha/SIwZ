@@ -108,7 +108,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Route'
+                $ref: '#/components/schemas/RoutePatch'
                 
     patch:
       tags:
@@ -119,14 +119,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Route'
+              $ref: '#/components/schemas/RoutePatch'
       responses:
         '200':
           description: Ok
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Route'
+                $ref: '#/components/schemas/RoutePatch'
                 
   /admin/routes/{id}:
     parameters:
@@ -141,7 +141,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Route'
+                $ref: '#/components/schemas/RoutePatch'
     
     delete:
       tags:
@@ -395,7 +395,7 @@ paths:
       responses:
         '200':
           description: Ok
-  /rides:
+  /ride:
     get:
       tags: 
         - TicketsBooking
@@ -467,6 +467,7 @@ components:
       name: route
       in: path
       description: Route id
+      required: true
       schema:
         type: integer
     rideId:
@@ -544,6 +545,10 @@ components:
           type: integer
         StopNo:
           type: integer
+        HoursDiff:
+          type: integer
+        MinutesDiff:
+          type: integer
     RouteForm:
       type: object
       properties:
@@ -552,7 +557,20 @@ components:
         Stops:
           type: array
           uniqueItems: true
-          minItems: 2
+          minItems: 4
+          items:
+            $ref: '#/components/schemas/RouteStopForm'
+    RoutePatch:
+      type: object
+      properties:
+        Id:
+         type: integer
+        Name:
+          type: string
+        Stops:
+          type: array
+          uniqueItems: true
+          minItems: 4
           items:
             $ref: '#/components/schemas/RouteStopForm'
     DiscountForm:

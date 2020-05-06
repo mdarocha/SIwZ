@@ -16,5 +16,9 @@
     <Folder Include="Migrations" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="mono_crash.mem.6270.1.blob" />
+  </ItemGroup>
+
 
 </Project>
