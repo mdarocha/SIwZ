@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Server.Models;
 using Server.ModelsDTO;
@@ -23,18 +24,33 @@ namespace Server.Controllers.Admin
         
         [HttpGet]
         [Route("")]
-        public ActionResult<List<Route>> GetAll() 
+        public ActionResult<List<RoutePatchDTO>> GetAll() 
         {
             var routes = _RouteService.GetAll();
-            return Ok(routes);
+            List<RoutePatchDTO> list = routes.Select(x => new RoutePatchDTO
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Stops = _StopToRouteService.GetStops(x.Id)
+            }).ToList();
+
+            return Ok(list); 
         }
         
         [HttpGet("{id}")]
-        public ActionResult<List<Train>> GetById([FromRoute] int id) 
+        public ActionResult<RoutePatchDTO> GetById([FromRoute] int id) // To do zmiany
         {
-            var routes = _RouteService.GetById(id);
-            return Ok(routes);
+            RoutePatchDTO rs = new RoutePatchDTO();
+            var route = _RouteService.GetById(id);
+            var stops = _StopToRouteService.GetById(id); //should return all 
+            rs.Id = route.Id;
+            rs.Name = route.Name;
+            rs.Stops = stops;
+            
+            
+            return Ok(rs);
         }
+        
 
         [HttpPost]
         [Route("")]

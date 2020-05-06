@@ -18,7 +18,7 @@ namespace Server.Services
         
         public List<Route> GetAll()
         {
-            return _context.Routes.Where(d => true).ToList();
+            return _context.Routes.Where(d => true).ToList(); 
         }
 
 
@@ -67,6 +67,13 @@ namespace Server.Services
         {
             _context.Routes.Remove(route);
             _context.SaveChanges();
+        }
+        
+        public int GetMaxId() // returns last route id from db
+        {
+            Route r = new Route();
+            r = _context.Routes.OrderByDescending(u => u.Id).FirstOrDefault();
+            return r.Id;
         }
         
     }

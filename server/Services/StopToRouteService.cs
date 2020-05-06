@@ -16,7 +16,22 @@ namespace Server.Services
             _context = context;
         }
 
-        public List<StopToRoute> AddStops(List<RouteStopDTO> list, int routeId)
+        public List<RouteStopDTO> GetById(int id) 
+        {
+            var stops = _context.StopsToRoutes.Where(str => str.RouteId == id).OrderBy(str => str.StopNo);
+
+            List<RouteStopDTO> s = stops.Select(x => new RouteStopDTO
+            {
+                StopId = x.TrainStopId,
+                StopNo = x.StopNo,
+                HoursDiff = x.HoursDiff,
+                MinutesDiff = x.MinutesDiff
+            }).ToList(); 
+            
+            return s;
+        }
+
+        public List<StopToRoute> AddStops(List<RouteStopDTO> list, int routeId) // to nie bd to moze?
         {
             List<StopToRoute> stops = list.Select(x => new StopToRoute
             {
@@ -48,7 +63,7 @@ namespace Server.Services
             var toRoutes = _context.StopsToRoutes.Where(str => str.TrainStopId == to);
             List<int> routesIds = new List<int>();
             
-            foreach (StopToRoute stopToRoute in fromRoutes)
+            foreach (StopToRoute stopToRoute in fromRoutes) 
             {
                 if (toRoutes.Contains(stopToRoute))
                 {
@@ -73,5 +88,21 @@ namespace Server.Services
             var toNo = _context.StopsToRoutes.First(str => str.RouteId == route && str.TrainStopId == @to).StopNo;
             return fromNo < toNo;
         }
+
+        public List<RouteStopDTO> GetStops(int Id)
+        {
+            var stops = _context.StopsToRoutes.Where(str => str.RouteId == Id).OrderBy(str => str.StopNo);
+            List<RouteStopDTO> list = stops.Select(x => new RouteStopDTO
+            {
+                StopId = x.TrainStopId,
+                StopNo = x.StopNo,
+                HoursDiff = x.HoursDiff,
+                MinutesDiff = x.MinutesDiff
+            }).OrderBy(x => x.StopNo).ToList();
+
+            return list;
+        }
+
+
     }
 }
