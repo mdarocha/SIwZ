@@ -1,10 +1,10 @@
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 namespace Server.ModelsDTO
 {
-    public class RouteDTO
+    public class RoutePatchDTO
     {
+        public int Id { set; get; }
         public string Name { set; get; }
         public List<RouteStopDTO> Stops { set; get; }
     }

@@ -115,84 +115,96 @@ namespace Server.Database
                     RouteId = 1,
                     TrainStopId = 5,
                     StopNo = 1,
-                    ArrivalTime = DateTime.Now
+                    HoursDiff = 0,
+                    MinutesDiff = 0
                 },
                 new StopToRoute
                 {
                     RouteId = 1,
                     TrainStopId = 7,
                     StopNo = 2,
-                    ArrivalTime = DateTime.Now
+                    HoursDiff = 0,
+                    MinutesDiff = 26
                 },
                 new StopToRoute
                 {
                     RouteId = 1,
                     TrainStopId = 6,
                     StopNo = 3,
-                    ArrivalTime = DateTime.Now
+                    HoursDiff = 0,
+                    MinutesDiff = 47
                 },
                 new StopToRoute
                 {
                     RouteId = 2,
                     TrainStopId = 1,
                     StopNo = 1,
-                    ArrivalTime = DateTime.Now
+                    HoursDiff = 0,
+                    MinutesDiff = 0
                 },
                 new StopToRoute
                 {
                     RouteId = 2,
                     TrainStopId = 4,
                     StopNo = 2,
-                    ArrivalTime = DateTime.Now
+                    HoursDiff = 0,
+                    MinutesDiff = 17
                 },
                 new StopToRoute
                 {
                     RouteId = 3,
                     TrainStopId = 2,
                     StopNo = 1,
-                    ArrivalTime = DateTime.Now
+                    HoursDiff = 0,
+                    MinutesDiff = 0
                 },
                 new StopToRoute
                 {
                     RouteId = 3,
                     TrainStopId = 1,
                     StopNo = 2,
-                    ArrivalTime = DateTime.Now
+                    HoursDiff = 0,
+                    MinutesDiff = 37
                 },
                 new StopToRoute
                 {
                     RouteId = 3,
                     TrainStopId = 3,
                     StopNo = 3,
-                    ArrivalTime = DateTime.Now
+                    HoursDiff = 0,
+                    MinutesDiff = 54
                 },
                 new StopToRoute
                 {
                     RouteId = 4,
                     TrainStopId = 5,
                     StopNo = 1,
-                    ArrivalTime = DateTime.Now
+                    HoursDiff = 0,
+                    MinutesDiff = 0
                 },
                 new StopToRoute
                 {
                     RouteId = 4,
                     TrainStopId = 2,
                     StopNo = 2,
-                    ArrivalTime = DateTime.Now
+                    HoursDiff = 0,
+                    MinutesDiff = 43
                 },
                 new StopToRoute
                 {
                     RouteId = 4,
                     TrainStopId = 1,
                     StopNo = 3,
-                    ArrivalTime = DateTime.Now
+                    HoursDiff = 1,
+                    MinutesDiff = 12
                 },
                 new StopToRoute
                 {
                     RouteId = 4,
                     TrainStopId = 4,
                     StopNo = 4,
-                    ArrivalTime = DateTime.Now
+                    HoursDiff = 0,
+                    MinutesDiff = 27
                 }
             );
 

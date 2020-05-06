@@ -2,12 +2,14 @@ using System.Collections.Generic;
 using System.Linq;
 using Server.Models;
 using Server.Database;
+using Server.ModelsDTO;
 
 namespace Server.Services
 {
     public class RouteService
     {
         private readonly TrainSystemContext _context;
+
 
         public RouteService(TrainSystemContext context)
         {
@@ -16,7 +18,7 @@ namespace Server.Services
         
         public List<Route> GetAll()
         {
-            return _context.Routes.Where(d => true).ToList();
+            return _context.Routes.Where(d => true).ToList(); 
         }
 
 
@@ -25,14 +27,18 @@ namespace Server.Services
             return _context.Routes.Find(id);
         }
         
-        public Route Create(Route route)
+        public Route Create(RouteDTO routeDto) 
         {
+            Route route = new Route();
+            route.Name = routeDto.Name;
+            
             _context.Routes.Add(route);
             _context.SaveChanges();
+
             return route;
         }
         
-        public void Edit(Route route)
+        public Route Edit(Route route)
         {
             var r = _context.Routes.Find(route.Id);
 
@@ -43,12 +49,31 @@ namespace Server.Services
                 _context.Routes.Update(r);
                 _context.SaveChanges();
             }
+
+            return r;
+        }
+
+        public Route ChangeName(int id, string name)
+        {
+            var r = _context.Routes.Find(id);
+            r.Name = name;
+            _context.Routes.Update(r);
+            _context.SaveChanges();
+
+            return r;
         }
         
         public void Delete(Route route)
         {
             _context.Routes.Remove(route);
             _context.SaveChanges();
+        }
+        
+        public int GetMaxId() // returns last route id from db
+        {
+            Route r = new Route();
+            r = _context.Routes.OrderByDescending(u => u.Id).FirstOrDefault();
+            return r.Id;
         }
         
     }
