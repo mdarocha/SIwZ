@@ -75,18 +75,9 @@ namespace Server.Services
             }).Select(route => route.Route).ToList();
         }
 
-        public List<RouteStopDTO> GetStops(int Id)
+        public List<StopToRoute> GetStops(int routeId)
         {
-            var stops = _context.StopsToRoutes.Where(str => str.RouteId == Id).OrderBy(str => str.StopNo);
-            List<RouteStopDTO> list = stops.Select(x => new RouteStopDTO
-            {
-                StopId = x.TrainStopId,
-                StopNo = x.StopNo,
-                HoursDiff = x.HoursDiff,
-                MinutesDiff = x.MinutesDiff
-            }).OrderBy(x => x.StopNo).ToList();
-
-            return list;
+            return _context.StopsToRoutes.Where(str => str.RouteId == routeId).OrderBy(str => str.StopNo).ToList();
         }
 
 
