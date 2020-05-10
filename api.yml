@@ -395,7 +395,7 @@ paths:
       responses:
         '200':
           description: Ok
-  /ride:
+  /rides:
     get:
       tags: 
         - TicketsBooking
@@ -403,7 +403,6 @@ paths:
         - $ref: '#/components/parameters/from'
         - $ref: '#/components/parameters/to'
         - $ref: '#/components/parameters/date'
-        - $ref: '#/components/parameters/routeId'
       responses:
         '200':
           description: List of matching Rides
@@ -460,13 +459,6 @@ components:
       name: id
       in: path
       description: Numeric ID of related object
-      required: true
-      schema:
-        type: integer
-    routeId:
-      name: route
-      in: path
-      description: Route id
       required: true
       schema:
         type: integer

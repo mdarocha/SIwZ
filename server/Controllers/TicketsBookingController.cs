@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Server.Models;
+using Server.ModelsDTO;
 using Server.Services;
 
 namespace Server.Controllers
@@ -28,10 +30,34 @@ namespace Server.Controllers
             _trainStopService.GetAll();
 
         [HttpGet("rides")]
-        public ActionResult<List<Ride>> GetRides([FromQuery] int from, [FromQuery] int to)
+        public ActionResult<List<RideDTO>> GetRides([FromQuery] int from, [FromQuery] int to, [FromQuery] DateTime date)
         {
             var routes = _stopToRouteService.GetRoutes(from, to);
-            return Ok(_rideService.GetByIdsList(routes.Select(r => r.Id).ToList()));
+            var rides = _rideService.GetByIdsList(routes.Select(r => r.Id).ToList());
+            
+            //TODO
+            // move date check somewhere else :)
+
+            var rideDTOs = rides.Where(r => r.StartTime > date).Select( r => new RideDTO
+            {
+                Id = r.Id,
+                From = from,
+                To = to,
+                TrainStops = _stopToRouteService.GetStops(r.RouteId).Select(s => new RideStopDTO
+                {
+                    StopId = s.TrainStop.Id,
+                    City = s.TrainStop.City,
+                    Name = s.TrainStop.Name,
+                    StopNo = s.StopNo,
+                    ArrivalTime = r.StartTime.AddHours(s.HoursDiff).AddMinutes(s.MinutesDiff)
+                }).ToList(),
+                StartTime = r.StartTime,
+                Train = r.Train,
+                FreeTickets = r.FreeTickets,
+                Price = r.Price
+            }).ToList(); 
+            
+            return Ok(rideDTOs);
         }
     }
 }

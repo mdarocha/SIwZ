@@ -31,7 +31,13 @@ namespace Server.Controllers.Admin
             {
                 Id = x.Id,
                 Name = x.Name,
-                Stops = _StopToRouteService.GetStops(x.Id)
+                Stops = _StopToRouteService.GetStops(x.Id).Select(stop => new RouteStopDTO
+                {
+                    StopId = stop.TrainStopId,
+                    StopNo = stop.StopNo,
+                    HoursDiff = stop.HoursDiff,
+                    MinutesDiff = stop.MinutesDiff
+                }).ToList()
             }).ToList();
 
             return Ok(list); 
