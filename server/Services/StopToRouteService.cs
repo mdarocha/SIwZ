@@ -77,7 +77,7 @@ namespace Server.Services
 
         public List<StopToRoute> GetStops(int routeId)
         {
-            return _context.StopsToRoutes.Where(str => str.RouteId == routeId).OrderBy(str => str.StopNo).ToList();
+            return _context.StopsToRoutes.Include(x => x.Route).Include(x => x.TrainStop).Where(str => str.RouteId == routeId).OrderBy(str => str.StopNo).ToList();
         }
 
 

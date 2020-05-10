@@ -10,9 +10,9 @@ namespace Server.ModelsDTO
         
         public int From { set; get; }
         
-        //public int 
+        public int To { set; get; } 
         
-        public List<TrainStop> TrainStops { set; get; }
+        public List<RideStopDTO> TrainStops { set; get; }
         
         public DateTime StartTime { set; get; }
         
