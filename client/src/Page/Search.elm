@@ -4,6 +4,7 @@ import Bootstrap.Button as Button
 import Bootstrap.Form.Input as Input
 import Bootstrap.Form.InputGroup as InputGroup
 import Bootstrap.Grid as Grid
+import Bootstrap.Grid.Col as Col
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -46,12 +47,14 @@ type SearchBoxMsg
 type alias Model =
     { session : Session.Data
     , routeFromSearch : SearchBoxState
+    , routeToSearch : SearchBoxState
     , trainStops : TrainStops
     }
 
 
 type Msg
     = RouteFromUpdate SearchBoxMsg
+    | RouteToUpdate SearchBoxMsg
     | GotStopsList (Result Http.Error (List TrainStop))
 
 
@@ -65,7 +68,7 @@ init session =
         newSearchBox =
             SearchBoxState "" Nothing False
     in
-    ( Model session newSearchBox Loading, getStopsList session.api )
+    ( Model session newSearchBox newSearchBox Loading, getStopsList session.api )
 
 
 
@@ -81,6 +84,13 @@ update msg model =
                     updateSearchBox searchMsg model.routeFromSearch
             in
             ( { model | routeFromSearch = newState }, Cmd.map RouteFromUpdate cmds )
+
+        RouteToUpdate searchMsg ->
+            let
+                ( newState, cmds ) =
+                    updateSearchBox searchMsg model.routeToSearch
+            in
+            ( { model | routeToSearch = newState }, Cmd.map RouteToUpdate cmds )
 
         GotStopsList result ->
             case result of
@@ -145,16 +155,15 @@ view model =
     { title = "Route search"
     , body =
         [ Grid.row []
-            [ Grid.col []
-                [ Html.map RouteFromUpdate <| viewSearchBox model.trainStops model.routeFromSearch
-                ]
+            [ Grid.col [ Col.md6, Col.attrs [ class "mt-4" ] ] [ Html.map RouteFromUpdate <| viewSearchBox "Od" model.trainStops model.routeFromSearch ]
+            , Grid.col [ Col.md6, Col.attrs [ class "mt-4" ] ] [ Html.map RouteToUpdate <| viewSearchBox "Do" model.trainStops model.routeToSearch ]
             ]
         ]
     }
 
 
-viewSearchBox : TrainStops -> SearchBoxState -> Html SearchBoxMsg
-viewSearchBox trainStops state =
+viewSearchBox : String -> TrainStops -> SearchBoxState -> Html SearchBoxMsg
+viewSearchBox label trainStops state =
     let
         suggestionItem =
             \s -> li [ class "dropdown-item", onMouseDown <| SuggestionSelected s ] [ text (stopToString s) ]
@@ -168,7 +177,7 @@ viewSearchBox trainStops state =
                     |> InputGroup.view
 
             Nothing ->
-                Input.text [ Input.attrs [ onInput SearchTextUpdate, onFocus ShowSuggestions, onBlur HideSuggestions ], Input.value state.text ]
+                Input.text [ Input.attrs [ onInput SearchTextUpdate, onFocus ShowSuggestions, onBlur HideSuggestions ], Input.value state.text, Input.placeholder label ]
         , if state.showSuggestions then
             case trainStops of
                 Success stops ->
