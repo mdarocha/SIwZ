@@ -1,6 +1,7 @@
 module Main exposing (..)
 
 import Bootstrap.Navbar as Navbar
+import Bootstrap.Grid as Grid
 import Browser
 import Browser.Navigation as Nav
 import Html exposing (..)
@@ -62,7 +63,7 @@ view model =
         NotFound _ ->
             Skeleton.view never
                 { title = "Nie znaleziono"
-                , body = [ text "Nie znaleziono" ]
+                , body =  [ img [ src "https://http.cat/404.jpg", class "mx-auto d-block img-fluid" ] [] ]
                 }
                 (viewNavbar model)
 
