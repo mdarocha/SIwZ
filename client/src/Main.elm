@@ -240,7 +240,7 @@ viewNavbar model =
     Navbar.config NavbarMsg
         |> Navbar.withAnimation
         |> Navbar.dark
-        |> Navbar.brand [ href "/" ] [ text "SIwZ Trains" ]
+        |> Navbar.brand [ href "/" ] [ span [ id "brand-text" ] [ text "SIwZ Trains" ] ]
         |> Navbar.items
             [ Navbar.itemLink [ href "/search", dynamicActive ( Routes.SearchRoute, model ) ] [ text "Wyszukaj połączenie" ]
             , Navbar.itemLink [ href "/about", dynamicActive ( Routes.AboutRoute, model ) ] [ text "O nas" ]
