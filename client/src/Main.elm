@@ -1,15 +1,15 @@
 module Main exposing (..)
 
-import Bootstrap.Navbar as Navbar
 import Bootstrap.Grid as Grid
+import Bootstrap.Navbar as Navbar
 import Browser
 import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Page.About as About
 import Page.AdminTrainStops as AdminTrainStops
-import Page.Home as Home
 import Page.Login as Login
+import Page.Search as Search
 import Routes
 import Session
 import Skeleton
@@ -26,7 +26,7 @@ type alias Model =
 type Page
     = NotFound Session.Data
     | About About.Model
-    | Home Home.Model
+    | Search Search.Model
     | AdminTrainStops AdminTrainStops.Model
     | Login Login.Model
 
@@ -38,6 +38,7 @@ type Msg
     | AboutMsg About.Msg
     | AdminTrainStopsMsg AdminTrainStops.Msg
     | LoginMsg Login.Msg
+    | SearchMsg Search.Msg
 
 
 main : Program String Model Msg
@@ -61,17 +62,17 @@ view : Model -> Browser.Document Msg
 view model =
     case model.page of
         NotFound _ ->
-            Skeleton.view never
+            Skeleton.view SearchMsg
                 { title = "Nie znaleziono"
-                , body =  [ img [ src "https://http.cat/404.jpg", class "mx-auto d-block img-fluid" ] [] ]
+                , body = [ img [ src "https://http.cat/404.jpg", class "mx-auto d-block img-fluid" ] [] ]
                 }
                 (viewNavbar model)
 
         About about ->
             Skeleton.view AboutMsg (About.view about) (viewNavbar model)
 
-        Home home ->
-            Skeleton.view never (Home.view home) (viewNavbar model)
+        Search home ->
+            Skeleton.view SearchMsg (Search.view home) (viewNavbar model)
 
         AdminTrainStops adminTrainStops ->
             Skeleton.view AdminTrainStopsMsg (AdminTrainStops.view adminTrainStops) (viewNavbar model)
@@ -146,6 +147,14 @@ update message model =
                 _ ->
                     ( model, Cmd.none )
 
+        SearchMsg msg ->
+            case model.page of
+                Search search ->
+                    stepSearch model (Search.update msg search)
+
+                _ ->
+                    ( model, Cmd.none )
+
 
 toSession : Model -> Session.Data
 toSession model =
@@ -156,7 +165,7 @@ toSession model =
         About m ->
             m.session
 
-        Home m ->
+        Search m ->
             m.session
 
         AdminTrainStops m ->
@@ -182,14 +191,12 @@ changeRoute route model =
             stepAdminTrainStops model (AdminTrainStops.init session)
 
         Just Routes.SearchRoute ->
-            ( { model | page = NotFound session }
-            , Cmd.none
-            )
+            stepSearch model (Search.init session)
 
         Just Routes.AboutRoute ->
             stepAbout model (About.init session)
 
-        Just Routes.HomeRoute ->
+        Just Routes.RootRoute ->
             ( model, Nav.pushUrl session.key "/search" )
 
         Just (Routes.LoginRoute redirect) ->
@@ -214,6 +221,13 @@ stepLogin : Model -> ( Login.Model, Cmd Login.Msg ) -> ( Model, Cmd Msg )
 stepLogin model ( login, cmds ) =
     ( { model | page = Login login }
     , Cmd.map LoginMsg cmds
+    )
+
+
+stepSearch : Model -> ( Search.Model, Cmd Search.Msg ) -> ( Model, Cmd Msg )
+stepSearch model ( search, cmds ) =
+    ( { model | page = Search search }
+    , Cmd.map SearchMsg cmds
     )
 
 
@@ -283,6 +297,9 @@ isActive ( route, page ) =
             True
 
         ( Routes.LoginRoute _, Login _ ) ->
+            True
+
+        ( Routes.SearchRoute, Search _ ) ->
             True
 
         _ ->
