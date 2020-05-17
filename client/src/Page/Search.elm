@@ -1,9 +1,9 @@
 module Page.Search exposing (Model, Msg, init, update, view)
 
-import Bootstrap.Form.Input as Input
-import Bootstrap.Grid as Grid
-import Bootstrap.Form.InputGroup as InputGroup
 import Bootstrap.Button as Button
+import Bootstrap.Form.Input as Input
+import Bootstrap.Form.InputGroup as InputGroup
+import Bootstrap.Grid as Grid
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -11,8 +11,9 @@ import Http
 import Json.Decode as Decode
 import Json.Encode as Encode
 import Session
-import Skeleton
 import Set
+import Skeleton
+
 
 type alias TrainStop =
     { id : Int
@@ -40,6 +41,7 @@ type SearchBoxMsg
     | HideSuggestions
     | SuggestionSelected TrainStop
     | ClearInput
+
 
 type alias Model =
     { session : Session.Data
@@ -107,25 +109,32 @@ updateSearchBox msg model =
         ClearInput ->
             ( { model | selected = Nothing, text = "" }, Cmd.none )
 
+
+
 -- UTIL
+
+
 performSearch : List TrainStop -> String -> List TrainStop
 performSearch suggestions input =
     let
-        inputWords = List.map String.toLower <| String.words input
+        inputWords =
+            List.map String.toLower <| String.words input
 
         matchesAllWords item =
             let
                 matchesWord word =
                     String.contains word (String.toLower item.city)
-                    || String.contains word (String.toLower item.name)
+                        || String.contains word (String.toLower item.name)
             in
             List.all matchesWord inputWords
     in
-        List.filter matchesAllWords suggestions
+    List.filter matchesAllWords suggestions
+
 
 stopToString : TrainStop -> String
 stopToString stop =
     stop.name ++ " - " ++ stop.city
+
 
 
 -- VIEW
@@ -143,39 +152,45 @@ view model =
         ]
     }
 
+
 viewSearchBox : TrainStops -> SearchBoxState -> Html SearchBoxMsg
 viewSearchBox trainStops state =
     let
-        suggestionItem = \s -> li [ class "dropdown-item", onMouseDown <| SuggestionSelected s ] [ text (stopToString s) ]
+        suggestionItem =
+            \s -> li [ class "dropdown-item", onMouseDown <| SuggestionSelected s ] [ text (stopToString s) ]
     in
-        div [ class "search-box" ]
-            [ case state.selected of
-                Just stop ->
-                    InputGroup.config
-                        (InputGroup.text [ Input.value (stopToString stop), Input.readonly True ])
-                        |> InputGroup.successors [ InputGroup.button [ Button.attrs [ onClick ClearInput ], Button.danger ] [ text "X" ] ]
-                        |> InputGroup.view
-                Nothing ->
-                    Input.text [ Input.attrs [ onInput SearchTextUpdate, onFocus ShowSuggestions, onBlur HideSuggestions], Input.value state.text ]
+    div [ class "search-box" ]
+        [ case state.selected of
+            Just stop ->
+                InputGroup.config
+                    (InputGroup.text [ Input.value (stopToString stop), Input.readonly True ])
+                    |> InputGroup.successors [ InputGroup.button [ Button.attrs [ onClick ClearInput ], Button.danger ] [ text "X" ] ]
+                    |> InputGroup.view
 
-            , if state.showSuggestions then
-                case trainStops of
-                    Success stops ->
-                        let
-                            items = performSearch stops state.text |> List.map suggestionItem
-                        in
-                            if List.length items > 0 then
-                                ul [ class "dropdown-menu" ] items
-                            else
-                                div [] []
-                    Loading ->
+            Nothing ->
+                Input.text [ Input.attrs [ onInput SearchTextUpdate, onFocus ShowSuggestions, onBlur HideSuggestions ], Input.value state.text ]
+        , if state.showSuggestions then
+            case trainStops of
+                Success stops ->
+                    let
+                        items =
+                            performSearch stops state.text |> List.map suggestionItem
+                    in
+                    if List.length items > 0 then
+                        ul [ class "dropdown-menu" ] items
+
+                    else
                         div [] []
 
-                    Failure ->
-                        div [] [ text "Błąd ładowania podpowiedzi - spróbuj odswieżyć stronę" ]
-              else
-                div [] []
-            ]
+                Loading ->
+                    div [] []
+
+                Failure ->
+                    div [] [ text "Błąd ładowania podpowiedzi - spróbuj odswieżyć stronę" ]
+
+          else
+            div [] []
+        ]
 
 
 
