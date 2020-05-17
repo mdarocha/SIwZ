@@ -14,25 +14,58 @@ import Json.Encode as Encode
 import Session
 import Set
 import Skeleton
+import Url.Builder as UrlBuilder
 
-
-type alias TrainStop =
+type alias AutocompleteStop =
     { id : Int
     , name : String
     , city : String
     }
 
 
-type TrainStops
+type AutocompleteStops
     = Failure
     | Loading
-    | Success (List TrainStop)
+    | Success (List AutocompleteStop)
 
+type alias RideStop =
+    { id : Int
+    , arrivalTime : String
+    , stopNumber : Int
+    , name : String
+    , city : String
+    }
+
+type alias RideTrain =
+    { id : Int
+    , name : String
+    , trainType : Int
+    , seats : Int
+    , wagons : Int
+    }
+
+type alias Ride =
+    { id : Int
+    , from : Int
+    , to : Int
+    , stops : List RideStop
+    , startTime : String
+    , train : RideTrain
+    , freeTickets : Int
+    , price : Int
+    }
+
+type Rides
+    = NotStarted
+    | RidesFailure
+    | RidesLoading
+    | RidesSuccess (List Ride)
 
 type alias SearchBoxState =
     { text : String
-    , selected : Maybe TrainStop
+    , selected : Maybe AutocompleteStop
     , showSuggestions : Bool
+    , suggestions : AutocompleteStops
     }
 
 
@@ -40,7 +73,7 @@ type SearchBoxMsg
     = SearchTextUpdate String
     | ShowSuggestions
     | HideSuggestions
-    | SuggestionSelected TrainStop
+    | SuggestionSelected AutocompleteStop
     | ClearInput
 
 
@@ -48,15 +81,18 @@ type alias Model =
     { session : Session.Data
     , routeFromSearch : SearchBoxState
     , routeToSearch : SearchBoxState
-    , trainStops : TrainStops
+    , departureTime : String
+    , rides : Rides
     }
 
 
 type Msg
     = RouteFromUpdate SearchBoxMsg
     | RouteToUpdate SearchBoxMsg
-    | GotStopsList (Result Http.Error (List TrainStop))
-
+    | GotStopsList (Result Http.Error (List AutocompleteStop))
+    | GotRides (Result Http.Error (List Ride))
+    | SubmitSearch
+    | DepartureTimeUpdate String
 
 
 -- INIT
@@ -66,9 +102,9 @@ init : Session.Data -> ( Model, Cmd Msg )
 init session =
     let
         newSearchBox =
-            SearchBoxState "" Nothing False
+            SearchBoxState "" Nothing False Loading
     in
-    ( Model session newSearchBox newSearchBox Loading, getStopsList session.api )
+    ( Model session newSearchBox newSearchBox "" NotStarted, getStopsList session.api )
 
 
 
@@ -95,11 +131,42 @@ update msg model =
         GotStopsList result ->
             case result of
                 Ok stops ->
-                    ( { model | trainStops = Success stops }, Cmd.none )
+                    let
+                        oldFromState = model.routeFromSearch
+                        oldToState = model.routeToSearch
+
+                        newFromState = { oldFromState | suggestions = Success stops }
+                        newToState = { oldToState | suggestions = Success stops }
+                    in
+                        ( { model |  routeToSearch = newToState, routeFromSearch = newFromState }, Cmd.none )
 
                 Err _ ->
-                    ( { model | trainStops = Failure }, Cmd.none )
+                    let
+                        oldFromState = model.routeFromSearch
+                        oldToState = model.routeToSearch
 
+                        newFromState = { oldFromState | suggestions = Failure }
+                        newToState = { oldToState | suggestions = Failure }
+                    in
+                        ( { model |  routeToSearch = newToState, routeFromSearch = newFromState }, Cmd.none )
+
+        SubmitSearch ->
+            case ( model.routeFromSearch.selected, model.routeToSearch.selected ) of
+                (Just from, Just to) ->
+                    ( model, getRides model.session.api from to )
+                (_, _) ->
+                    ( model, Cmd.none )
+
+        DepartureTimeUpdate text ->
+            ( { model | departureTime = text }, Cmd.none )
+
+        GotRides result ->
+            case result of
+                Ok rides ->
+                    ( { model | rides = RidesSuccess rides }, Cmd.none )
+
+                Err _ ->
+                    ( { model | rides = RidesFailure }, Cmd.none )
 
 updateSearchBox : SearchBoxMsg -> SearchBoxState -> ( SearchBoxState, Cmd SearchBoxMsg )
 updateSearchBox msg model =
@@ -124,7 +191,7 @@ updateSearchBox msg model =
 -- UTIL
 
 
-performSearch : List TrainStop -> String -> List TrainStop
+performSearch : List AutocompleteStop -> String -> List AutocompleteStop
 performSearch suggestions input =
     let
         inputWords =
@@ -141,7 +208,7 @@ performSearch suggestions input =
     List.filter matchesAllWords suggestions
 
 
-stopToString : TrainStop -> String
+stopToString : AutocompleteStop -> String
 stopToString stop =
     stop.name ++ " - " ++ stop.city
 
@@ -155,15 +222,20 @@ view model =
     { title = "Route search"
     , body =
         [ Grid.row []
-            [ Grid.col [ Col.md6, Col.attrs [ class "mt-4" ] ] [ Html.map RouteFromUpdate <| viewSearchBox "Od" model.trainStops model.routeFromSearch ]
-            , Grid.col [ Col.md6, Col.attrs [ class "mt-4" ] ] [ Html.map RouteToUpdate <| viewSearchBox "Do" model.trainStops model.routeToSearch ]
+            [ Grid.col [ Col.md6, Col.attrs [ class "mt-4" ] ] [ Html.map RouteFromUpdate <| viewSearchBox "Od" model.routeFromSearch ]
+            , Grid.col [ Col.md6, Col.attrs [ class "mt-4" ] ] [ Html.map RouteToUpdate <| viewSearchBox "Do" model.routeToSearch ]
             ]
+        , Grid.row []
+            [ Grid.col [ Col.md6, Col.attrs [ class "mt-4" ] ] [ Input.datetimeLocal [ Input.attrs [ onInput DepartureTimeUpdate ] ] ]
+            , Grid.col [ Col.md3, Col.offsetMd3, Col.attrs [ class "mt-4" ] ] [ Button.button [ Button.attrs [ onClick SubmitSearch ], Button.primary, Button.large, Button.block] [ text "Szukaj" ] ]
+            ]
+        , viewRides model.rides
         ]
     }
 
 
-viewSearchBox : String -> TrainStops -> SearchBoxState -> Html SearchBoxMsg
-viewSearchBox label trainStops state =
+viewSearchBox : String -> SearchBoxState -> Html SearchBoxMsg
+viewSearchBox label state =
     let
         suggestionItem =
             \s -> li [ class "dropdown-item", onMouseDown <| SuggestionSelected s ] [ text (stopToString s) ]
@@ -179,7 +251,7 @@ viewSearchBox label trainStops state =
             Nothing ->
                 Input.text [ Input.attrs [ onInput SearchTextUpdate, onFocus ShowSuggestions, onBlur HideSuggestions ], Input.value state.text, Input.placeholder label ]
         , if state.showSuggestions then
-            case trainStops of
+            case state.suggestions of
                 Success stops ->
                     let
                         items =
@@ -202,6 +274,20 @@ viewSearchBox label trainStops state =
         ]
 
 
+viewRides : Rides -> Html Msg
+viewRides rides =
+    case rides of
+        RidesLoading ->
+            div [] [ text "Ładowanie" ]
+
+        RidesFailure ->
+            div [] [ text "Błąd" ]
+
+        RidesSuccess rideList ->
+            div [] [ text "Załadowano" ]
+
+        NotStarted ->
+            div [] []
 
 -- HTTP
 
@@ -213,15 +299,61 @@ getStopsList api =
         , expect = Http.expectJson GotStopsList stopsDecoder
         }
 
+ridesUrl : String -> AutocompleteStop -> AutocompleteStop -> String
+ridesUrl api from to =
+    UrlBuilder.relative
+        [ "rides" ]
+        [ UrlBuilder.int "from" from.id
+        , UrlBuilder.int "to" to.id
+        ]
+
+getRides : String -> AutocompleteStop -> AutocompleteStop -> Cmd Msg
+getRides api from to =
+    Http.get
+        { url = api ++ (ridesUrl api from to)
+        , expect = Http.expectJson GotRides ridesDecoder
+        }
 
 
 -- JSON
 
 
-stopsDecoder : Decode.Decoder (List TrainStop)
+stopsDecoder : Decode.Decoder (List AutocompleteStop)
 stopsDecoder =
     Decode.list <|
-        Decode.map3 TrainStop
+        Decode.map3 AutocompleteStop
             (Decode.field "id" Decode.int)
             (Decode.field "city" Decode.string)
             (Decode.field "name" Decode.string)
+
+ridesDecoder : Decode.Decoder (List Ride)
+ridesDecoder =
+    Decode.list <|
+        Decode.map8 Ride
+            (Decode.field "id" Decode.int)
+            (Decode.field "from" Decode.int)
+            (Decode.field "to" Decode.int)
+            (Decode.field "trainStops" rideStopDecoder)
+            (Decode.field "startTime" Decode.string)
+            (Decode.field "train" rideTrainDecoder)
+            (Decode.field "freeTickets" Decode.int)
+            (Decode.field "price" Decode.int)
+
+rideStopDecoder : Decode.Decoder (List RideStop)
+rideStopDecoder =
+    Decode.list <|
+        Decode.map5 RideStop
+            (Decode.field "stopId" Decode.int)
+            (Decode.field "arrivalTime" Decode.string)
+            (Decode.field "stopNo" Decode.int)
+            (Decode.field "name" Decode.string)
+            (Decode.field "city" Decode.string)
+
+rideTrainDecoder : Decode.Decoder RideTrain
+rideTrainDecoder =
+    Decode.map5 RideTrain
+        (Decode.field "id" Decode.int)
+        (Decode.field "name" Decode.string)
+        (Decode.field "type" Decode.int)
+        (Decode.field "seats" Decode.int)
+        (Decode.field "wagons" Decode.int)
