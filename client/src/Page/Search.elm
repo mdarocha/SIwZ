@@ -2,6 +2,8 @@ module Page.Search exposing (Model, Msg, init, update, view)
 
 import Bootstrap.Form.Input as Input
 import Bootstrap.Grid as Grid
+import Bootstrap.Form.InputGroup as InputGroup
+import Bootstrap.Button as Button
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -10,7 +12,7 @@ import Json.Decode as Decode
 import Json.Encode as Encode
 import Session
 import Skeleton
-
+import Set
 
 type alias TrainStop =
     { id : Int
@@ -34,7 +36,10 @@ type alias SearchBoxState =
 
 type SearchBoxMsg
     = SearchTextUpdate String
-
+    | ShowSuggestions
+    | HideSuggestions
+    | SuggestionSelected TrainStop
+    | ClearInput
 
 type alias Model =
     { session : Session.Data
@@ -88,8 +93,39 @@ updateSearchBox : SearchBoxMsg -> SearchBoxState -> ( SearchBoxState, Cmd Search
 updateSearchBox msg model =
     case msg of
         SearchTextUpdate text ->
-            ( { model | text = text }, Cmd.none )
+            ( { model | text = text, showSuggestions = True }, Cmd.none )
 
+        ShowSuggestions ->
+            ( { model | showSuggestions = True }, Cmd.none )
+
+        HideSuggestions ->
+            ( { model | showSuggestions = False }, Cmd.none )
+
+        SuggestionSelected stop ->
+            ( { model | text = "", selected = Just stop }, Cmd.none )
+
+        ClearInput ->
+            ( { model | selected = Nothing, text = "" }, Cmd.none )
+
+-- UTIL
+performSearch : List TrainStop -> String -> List TrainStop
+performSearch suggestions input =
+    let
+        inputWords = List.map String.toLower <| String.words input
+
+        matchesAllWords item =
+            let
+                matchesWord word =
+                    String.contains word (String.toLower item.city)
+                    || String.contains word (String.toLower item.name)
+            in
+            List.all matchesWord inputWords
+    in
+        List.filter matchesAllWords suggestions
+
+stopToString : TrainStop -> String
+stopToString stop =
+    stop.name ++ " - " ++ stop.city
 
 
 -- VIEW
@@ -101,28 +137,45 @@ view model =
     , body =
         [ Grid.row []
             [ Grid.col []
-                [ Html.map RouteFromUpdate <| viewSearchBox model
-                , text model.routeFromSearch.text
+                [ Html.map RouteFromUpdate <| viewSearchBox model.trainStops model.routeFromSearch
                 ]
             ]
         ]
     }
 
+viewSearchBox : TrainStops -> SearchBoxState -> Html SearchBoxMsg
+viewSearchBox trainStops state =
+    let
+        suggestionItem = \s -> li [ class "dropdown-item", onMouseDown <| SuggestionSelected s ] [ text (stopToString s) ]
+    in
+        div [ class "search-box" ]
+            [ case state.selected of
+                Just stop ->
+                    InputGroup.config
+                        (InputGroup.text [ Input.value (stopToString stop), Input.readonly True ])
+                        |> InputGroup.successors [ InputGroup.button [ Button.attrs [ onClick ClearInput ], Button.danger ] [ text "X" ] ]
+                        |> InputGroup.view
+                Nothing ->
+                    Input.text [ Input.attrs [ onInput SearchTextUpdate, onFocus ShowSuggestions, onBlur HideSuggestions], Input.value state.text ]
 
-viewSearchBox : Model -> Html SearchBoxMsg
-viewSearchBox model =
-    div [ class "search-box" ]
-        [ Input.search [ Input.attrs [ onInput SearchTextUpdate ] ]
-        , case model.trainStops of
-            Success stops ->
-                ul [] (List.map (\s -> li [] [ text (s.name ++ " - " ++ s.city) ]) stops)
+            , if state.showSuggestions then
+                case trainStops of
+                    Success stops ->
+                        let
+                            items = performSearch stops state.text |> List.map suggestionItem
+                        in
+                            if List.length items > 0 then
+                                ul [ class "dropdown-menu" ] items
+                            else
+                                div [] []
+                    Loading ->
+                        div [] []
 
-            Loading ->
-                ul [] []
-
-            Failure ->
-                div [] [ text "Błąd ładowania podpowiedzi - spróbuj odswieżyć stronę" ]
-        ]
+                    Failure ->
+                        div [] [ text "Błąd ładowania podpowiedzi - spróbuj odswieżyć stronę" ]
+              else
+                div [] []
+            ]
 
 
 
