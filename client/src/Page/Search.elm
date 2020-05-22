@@ -9,6 +9,7 @@ import Bootstrap.Spinner as Spinner
 import Bootstrap.Card as Card
 import Bootstrap.Card.Block as Block
 import Bootstrap.Text as Text
+import Bootstrap.Form.Checkbox as Checkbox
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -87,6 +88,7 @@ type alias Model =
     { session : Session.Data
     , routeFromSearch : SearchBoxState
     , routeToSearch : SearchBoxState
+    , useDepartureTime : Bool
     , departureTime : String
     , rides : Rides
     }
@@ -110,7 +112,7 @@ init session =
         newSearchBox =
             SearchBoxState "" Nothing False Loading
     in
-    ( Model session newSearchBox newSearchBox "" NotStarted, getStopsList session.api )
+    ( Model session newSearchBox newSearchBox False "" NotStarted, getStopsList session.api )
 
 
 
@@ -165,7 +167,7 @@ update msg model =
         SubmitSearch ->
             case ( model.routeFromSearch.selected, model.routeToSearch.selected ) of
                 (Just from, Just to) ->
-                    ( { model | rides = RidesLoading }, getRides model.session.api from to )
+                    ( { model | rides = RidesLoading }, getRides model.session.api from to model.useDepartureTime model.departureTime )
                 (_, _) ->
                     ( model, Cmd.none )
 
@@ -248,8 +250,8 @@ view model =
             , Grid.col [ Col.md6, Col.attrs [ class "mt-4" ] ] [ Html.map RouteToUpdate <| viewSearchBox "Do" model.routeToSearch ]
             ]
         , Grid.row []
-            [ Grid.col [ Col.md6, Col.attrs [ class "mt-4" ] ] [ Input.datetimeLocal [ Input.attrs [ onInput DepartureTimeUpdate ] ] ]
-            , Grid.col [ Col.md3, Col.offsetMd3, Col.attrs [ class "mt-4" ] ] [ Button.button [ Button.attrs [ onClick SubmitSearch ], Button.primary, Button.large, Button.block] [ text "Szukaj" ] ]
+            [ Grid.col [ Col.md6, Col.attrs [ class "mt-4" ] ] [ Checkbox.checkbox [] "Szukaj wg. czasu odjazdu", Input.datetimeLocal [ Input.attrs [ onInput DepartureTimeUpdate ] ] ]
+            , Grid.col [ Col.md3, Col.offsetMd3, Col.attrs [ class "mt-4" ] ] [ Button.button [ Button.attrs [ class "ride-search-button", onClick SubmitSearch ], Button.primary, Button.large, Button.block] [ text "Szukaj" ] ]
             ]
         , div [ class "mt-4" ] [ viewRides model.rides ]
         ]
@@ -376,18 +378,26 @@ getStopsList api =
         , expect = Http.expectJson GotStopsList stopsDecoder
         }
 
-ridesUrl : String -> AutocompleteStop -> AutocompleteStop -> String
-ridesUrl api from to =
-    UrlBuilder.relative
-        [ "rides" ]
-        [ UrlBuilder.int "from" from.id
-        , UrlBuilder.int "to" to.id
-        ]
+ridesUrl :AutocompleteStop -> AutocompleteStop -> Bool -> String -> String
+ridesUrl from to useDate date =
+    let
+        baseQuery =
+            [ UrlBuilder.int "from" from.id
+            , UrlBuilder.int "to" to.id
+            ]
 
-getRides : String -> AutocompleteStop -> AutocompleteStop -> Cmd Msg
-getRides api from to =
+        query =
+            if useDate then
+                List.append baseQuery [ UrlBuilder.string "date" date ]
+            else
+                baseQuery
+    in
+        UrlBuilder.relative [ "rides" ] query
+
+getRides : String -> AutocompleteStop -> AutocompleteStop -> Bool -> String -> Cmd Msg
+getRides api from to useDate date =
     Http.get
-        { url = api ++ (ridesUrl api from to)
+        { url = api ++ (ridesUrl from to useDate date)
         , expect = Http.expectJson GotRides ridesDecoder
         }
 

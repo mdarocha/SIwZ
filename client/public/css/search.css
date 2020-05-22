@@ -13,6 +13,11 @@
     cursor: pointer;
 }
 
+/* Search button styling */
+.ride-search-button {
+    height: 100%;
+}
+
 /* Ride card styling */
 .ride-card > .card-body:last-child {
     padding-top: 0;
