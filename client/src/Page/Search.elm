@@ -10,6 +10,7 @@ import Bootstrap.Card as Card
 import Bootstrap.Card.Block as Block
 import Bootstrap.Text as Text
 import Bootstrap.Form.Checkbox as Checkbox
+import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -93,6 +94,11 @@ type alias Model =
     , rides : Rides
     }
 
+type alias TicketParams =
+    { from : Int
+    , to : Int
+    , ride : Int
+    }
 
 type Msg
     = RouteFromUpdate SearchBoxMsg
@@ -101,7 +107,7 @@ type Msg
     | GotRides (Result Http.Error (List Ride))
     | SubmitSearch
     | DepartureTimeUpdate String
-
+    | SubmitRide TicketParams
 
 -- INIT
 
@@ -181,6 +187,16 @@ update msg model =
 
                 Err _ ->
                     ( { model | rides = RidesFailure }, Cmd.none )
+
+        SubmitRide ticketParams ->
+            let
+                url = UrlBuilder.absolute [ "ticket" ]
+                    [ UrlBuilder.int "from" ticketParams.from
+                    , UrlBuilder.int "to" ticketParams.to
+                    , UrlBuilder.int "ride" ticketParams.ride
+                    ]
+            in
+            ( model, Nav.pushUrl model.session.key url )
 
 updateSearchBox : SearchBoxMsg -> SearchBoxState -> ( SearchBoxState, Cmd SearchBoxMsg )
 updateSearchBox msg model =
@@ -346,7 +362,12 @@ viewRide ride =
                     div [ class "ride-price" ]
                         [ span [ class "oi oi-paperclip" ] []
                         , span [] [ text <| String.fromInt ride.price ++ " zł" ]
-                        , Button.button [ Button.primary, Button.attrs [ class "align-baseline" ] ] [ text "Kup bilet" ]
+                        , Button.button [ Button.primary,
+                                Button.attrs
+                                    [ class "align-baseline"
+                                    , onClick (SubmitRide <| TicketParams ride.from ride.to ride.id)
+                                    ]
+                                ] [ text "Kup bilet" ]
                         ]
                 ]
             |> Card.view
