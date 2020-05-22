@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Server.Models;
 using Server.ModelsDTO;
 using Server.Services;
@@ -48,9 +49,6 @@ namespace Server.Controllers
             var routes = _stopToRouteService.GetRoutes(from, to);
             var rides = _rideService.GetByIdsList(routes.Select(r => r.Id).ToList());
 
-            //TODO
-            // move date check somewhere else :)
-            
             var rideDTOs = rides.Where(r => r.StartTime > date).Select(r =>
             {
                 var startTime = r.StartTime;
@@ -73,7 +71,6 @@ namespace Server.Controllers
                     }).ToList(),
                     StartTime = r.StartTime,
                     Train = r.Train,
-                    FreeTickets = r.FreeTickets,
                     Price = r.Price
                 };
             }).ToList();
@@ -116,14 +113,45 @@ namespace Server.Controllers
             return seats;
         }
 
+        [HttpGet("rides/{id}")]
+        public ActionResult<RideDTO> GetRide([FromRoute] int id)
+        {
+            var ride = _rideService.GetRide(id);
+            var stops = _stopToRouteService.GetStops(ride.RouteId);
+            var startTime = ride.StartTime;
+            return Ok(new RideDTO
+            {
+                Id = ride.Id,
+                From = stops.First().TrainStopId,
+                To = stops.Last().TrainStopId,
+                TrainStops = stops.Select(s =>
+                {
+                    startTime = startTime.AddHours(s.HoursDiff).AddMinutes(s.MinutesDiff);
+                    return new RideStopDTO
+                    {
+                        StopId = s.TrainStop.Id,
+                        City = s.TrainStop.City,
+                        Name = s.TrainStop.Name,
+                        StopNo = s.StopNo,
+                        ArrivalTime = startTime
+                    };
+                }).ToList(),
+                StartTime = ride.StartTime,
+                Train = ride.Train,
+                Price = ride.Price
+            });
+        }
+
         [HttpGet("discounts")]
         public ActionResult<List<Discount>> GetDiscounts()
             => _discountService.GetAll();
 
         [Authorize]
         [HttpPost("tickets")]
-        public ActionResult<Ticket> BookTicket(TicketFormDTO form)
+        public ActionResult<Ticket> BookTicket([FromBody]TicketFormDTO form)
         {
+            
+            
             var id = _userManager.GetUserId(User);
             var ride = _rideService.GetRide(form.RideId);
             var price = ride.Price * GetRoutePart(ride.RouteId, form.FromId, form.ToId);
@@ -131,40 +159,51 @@ namespace Server.Controllers
             if (!form.DiscountId.Equals(null))
             {
                 price = _discountService.ApplyDiscount(price, form.DiscountId);
-                price = price < 0 ? 0 : price;
             }
 
             var ticket = new Ticket
             {
                 RideId = ride.Id,
-                Price = price,
+                Price = (int) price,
                 DiscountId = form.DiscountId,
-                UserId = int.Parse(id),
                 FromId = form.FromId,
                 ToId = form.ToId,
-                TrainName = ride.Train.Name,
                 WagonNo = form.WagonNo,
                 SeatNo = form.SeatNo
             };
 
-            return _ticketsService.CreateTicket(ticket);
+            var t = _ticketsService.CreateTicket(ticket, id);
+            
+            return Ok();
         }
 
-        private double GetRoutePart(int routeId, int from, int to)
+        private int GetRoutePart(int routeId, int from, int to)
         {
             var stops = _stopToRouteService.GetStops(routeId);
             var fromNo = stops.Single(s => s.TrainStopId == from).StopNo;
             var toNo = stops.Single(s => s.TrainStopId == to).StopNo;
             var le = stops.Count;
-            return (double) (le - fromNo - (le - toNo)) / le;
+            return (le - fromNo - (le - toNo)) / le;
         }
         
         [Authorize]
         [HttpGet("tickets")]
-        public List<Ticket> GetUserTickets()
+        public List<TicketDTO> GetUserTickets()
         {
             var id = _userManager.GetUserId(User);
-            return _ticketsService.GetUSerTickets(int.Parse(id));
+            var tickets = _ticketsService.GetUserTickets(id);
+            var dtos = tickets.Select(t => new TicketDTO
+            {
+                Id = t.Id,
+                Price = t.Price,
+                Discount = t.Discount.Type,
+                From = t.From.City + "-" + t.From.Name,
+                To = t.To.City + "-" + t.To.Name,
+                TrainName = t.Ride.Train.Name,
+                WagonNo = t.WagonNo,
+                SeatNo = t.SeatNo
+            }).ToList();
+            return dtos;
         }
 
         [Authorize]
@@ -174,7 +213,7 @@ namespace Server.Controllers
             var ticket = _ticketsService.GetTicket(id);
             var userId = _userManager.GetUserId(User);
          
-            if (ticket.UserId.Equals(int.Parse(userId)))
+            if (ticket.UserId.Equals(userId))
             {
                 return Ok(_ticketsService.DeleteTicket(id));
             }

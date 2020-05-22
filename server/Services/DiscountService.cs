@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Server.Models;
@@ -66,7 +67,7 @@ namespace Server.Services
                 switch (dsc.ValueType)
                 {
                     case Discount.DiscountValueTypes.Flat:
-                        return price - dsc.Value;
+                        return Math.Max(price - dsc.Value, 0);
                     case Discount.DiscountValueTypes.Percentage:
                         return price * (100 - dsc.Value);
                 }

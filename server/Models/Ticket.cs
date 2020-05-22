@@ -15,7 +15,7 @@ namespace Server.Models
         public virtual Ride Ride { set; get; }
         
         [Required]
-        public double Price { set; get; }
+        public int Price { set; get; }
         
         [Required]
         public int DiscountId { set; get; }
@@ -24,7 +24,7 @@ namespace Server.Models
         public virtual Discount Discount { set; get; }
         
         [Required]
-        public virtual int UserId { set; get; }
+        public virtual string UserId { set; get; }
 
         [Required]
         public virtual User User { set; get; }
@@ -40,10 +40,7 @@ namespace Server.Models
         
         [Required]
         public virtual TrainStop To { set; get; }
-
-        [Required]
-        public string TrainName { set; get; }
-
+        
         [Required]
         public int WagonNo { set; get; }
 
