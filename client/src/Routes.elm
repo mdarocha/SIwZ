@@ -19,7 +19,7 @@ parser =
     oneOf
         [ map RootRoute top
         , map SearchRoute (s "search" <?> Query.int "from" <?> Query.int "to")
-        , map TicketRoute (s "ticket" <?> Query.int "from" <?> Query.int "to" <?> Query.int "ride" )
+        , map TicketRoute (s "ticket" <?> Query.int "from" <?> Query.int "to" <?> Query.int "ride")
         , map AboutRoute (s "about")
         , map AdminTrainStopsRoute (s "admin" </> s "stops")
         , map LoginRoute (s "login" <?> Query.string "return")

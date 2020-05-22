@@ -61,7 +61,6 @@ type alias Ride =
     , from : Int
     , to : Int
     , stops : List RideStop
-    , startTime : Time.Posix
     , train : RideTrain
     , price : Int
     }
@@ -433,7 +432,7 @@ viewRide ride =
     Card.config [ Card.attrs [ class "mt-5 ride-card" ] ]
         |> Card.headerH4 []
             [ span [ class "oi oi-clock mr-1", style "font-size" "1.2rem" ] []
-            , span [] [ text (niceTime ride.startTime) ]
+            , span [] [ text (niceTime fromStop.arrivalTime) ]
             , span [ class "font-italic float-right" ]
                 [ text <|
                     ride.train.name
@@ -536,12 +535,11 @@ stopsDecoder =
 ridesDecoder : Decode.Decoder (List Ride)
 ridesDecoder =
     Decode.list <|
-        Decode.map7 Ride
+        Decode.map6 Ride
             (Decode.field "id" Decode.int)
             (Decode.field "from" Decode.int)
             (Decode.field "to" Decode.int)
             (Decode.field "trainStops" rideStopDecoder)
-            (Decode.field "startTime" TimeIso.decoder)
             (Decode.field "train" rideTrainDecoder)
             (Decode.field "price" Decode.int)
 

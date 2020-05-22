@@ -32,6 +32,7 @@ type Page
     | Login Login.Model
     | Ticket Ticket.Model
 
+
 type Msg
     = LinkClicked Browser.UrlRequest
     | UrlChanged Url.Url
@@ -41,6 +42,7 @@ type Msg
     | LoginMsg Login.Msg
     | SearchMsg Search.Msg
     | TicketMsg Ticket.Msg
+
 
 main : Program String Model Msg
 main =
@@ -83,6 +85,7 @@ view model =
 
         Ticket ticket ->
             Skeleton.view TicketMsg (Ticket.view ticket) (viewNavbar model)
+
 
 init : String -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init api url key =
@@ -188,6 +191,7 @@ toSession model =
         Ticket m ->
             m.session
 
+
 changeRoute : Maybe Routes.Route -> Model -> ( Model, Cmd Msg )
 changeRoute route model =
     let
@@ -218,6 +222,7 @@ changeRoute route model =
         Just (Routes.TicketRoute from to ride) ->
             stepTicket model (Ticket.init session from to ride)
 
+
 stepAbout : Model -> ( About.Model, Cmd About.Msg ) -> ( Model, Cmd Msg )
 stepAbout model ( about, cmds ) =
     ( { model | page = About about }
@@ -245,11 +250,14 @@ stepSearch model ( search, cmds ) =
     , Cmd.map SearchMsg cmds
     )
 
+
 stepTicket : Model -> ( Ticket.Model, Cmd Ticket.Msg ) -> ( Model, Cmd Msg )
 stepTicket model ( ticket, cmds ) =
     ( { model | page = Ticket ticket }
     , Cmd.map TicketMsg cmds
     )
+
+
 
 -- NAVBAR
 
