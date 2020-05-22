@@ -8,7 +8,7 @@ import Url.Parser.Query as Query
 type Route
     = AdminTrainStopsRoute
     | AboutRoute
-    | SearchRoute
+    | SearchRoute (Maybe Int) (Maybe Int)
     | LoginRoute (Maybe String)
     | RootRoute
 
@@ -17,7 +17,7 @@ parser : Parser (Route -> a) a
 parser =
     oneOf
         [ map RootRoute top
-        , map SearchRoute (s "search")
+        , map SearchRoute (s "search" <?> Query.int "from" <?> Query.int "to" )
         , map AboutRoute (s "about")
         , map AdminTrainStopsRoute (s "admin" </> s "stops")
         , map LoginRoute (s "login" <?> Query.string "return")

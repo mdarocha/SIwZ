@@ -89,6 +89,8 @@ type alias Model =
     { session : Session.Data
     , routeFromSearch : SearchBoxState
     , routeToSearch : SearchBoxState
+    , queryFromId : Maybe Int
+    , queryToId : Maybe Int
     , useDepartureTime : Bool
     , departureTime : String
     , rides : Rides
@@ -112,13 +114,13 @@ type Msg
 -- INIT
 
 
-init : Session.Data -> ( Model, Cmd Msg )
-init session =
+init : Session.Data -> Maybe Int -> Maybe Int -> ( Model, Cmd Msg )
+init session from to =
     let
         newSearchBox =
             SearchBoxState "" Nothing False Loading
     in
-    ( Model session newSearchBox newSearchBox False "" NotStarted, getStopsList session.api )
+    ( Model session newSearchBox newSearchBox from to False "" NotStarted, getStopsList session.api )
 
 
 
@@ -155,8 +157,23 @@ update msg model =
                         oldFromState = model.routeFromSearch
                         oldToState = model.routeToSearch
 
-                        newFromState = { oldFromState | suggestions = Success stops }
-                        newToState = { oldToState | suggestions = Success stops }
+                        fromSuggestions = { oldFromState | suggestions = Success stops }
+                        toSuggestions = { oldToState | suggestions = Success stops }
+
+                        (newFromState, newToState) =
+                            case ( model.queryFromId, model.queryToId ) of
+                                (Just queryFrom, Just queryTo) ->
+                                    let
+                                        maybeFromStop = List.head <| List.filter (\s -> s.id == queryFrom) stops
+                                        maybeToStop = List.head <| List.filter (\s -> s.id == queryTo) stops
+                                    in
+                                        case (maybeFromStop, maybeToStop) of
+                                            (Just from, Just to) ->
+                                                ( { fromSuggestions | selected = Just from }, { toSuggestions | selected = Just to } )
+                                            (_, _) ->
+                                                ( fromSuggestions, toSuggestions )
+                                (_, _) ->
+                                    ( fromSuggestions, toSuggestions )
                     in
                         ( { model |  routeToSearch = newToState, routeFromSearch = newFromState }, Cmd.none )
 
@@ -173,7 +190,16 @@ update msg model =
         SubmitSearch ->
             case ( model.routeFromSearch.selected, model.routeToSearch.selected ) of
                 (Just from, Just to) ->
-                    ( { model | rides = RidesLoading }, getRides model.session.api from to model.useDepartureTime model.departureTime )
+                    let
+                        getCmd = getRides model.session.api from to model.useDepartureTime model.departureTime
+
+                        url = UrlBuilder.absolute [ "search" ]
+                            [ UrlBuilder.int "from" from.id
+                            , UrlBuilder.int "to" to.id
+                            ]
+                        navCmd = Nav.replaceUrl model.session.key url
+                    in
+                        ( { model | rides = RidesLoading }, Cmd.batch [getCmd, navCmd] )
                 (_, _) ->
                     ( model, Cmd.none )
 

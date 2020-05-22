@@ -190,8 +190,8 @@ changeRoute route model =
         Just Routes.AdminTrainStopsRoute ->
             stepAdminTrainStops model (AdminTrainStops.init session)
 
-        Just Routes.SearchRoute ->
-            stepSearch model (Search.init session)
+        Just (Routes.SearchRoute from to) ->
+            stepSearch model (Search.init session from to)
 
         Just Routes.AboutRoute ->
             stepAbout model (About.init session)
@@ -242,7 +242,7 @@ viewNavbar model =
         |> Navbar.dark
         |> Navbar.brand [ href "/" ] [ span [ id "brand-text" ] [ text "SIwZ Trains" ] ]
         |> Navbar.items
-            [ Navbar.itemLink [ href "/search", dynamicActive ( Routes.SearchRoute, model ) ] [ text "Wyszukaj połączenie" ]
+            [ Navbar.itemLink [ href "/search", dynamicActive ( Routes.SearchRoute Nothing Nothing, model ) ] [ text "Wyszukaj połączenie" ]
             , Navbar.itemLink [ href "/about", dynamicActive ( Routes.AboutRoute, model ) ] [ text "O nas" ]
             , Navbar.dropdown
                 { id = "admin-dropdown"
@@ -299,7 +299,7 @@ isActive ( route, page ) =
         ( Routes.LoginRoute _, Login _ ) ->
             True
 
-        ( Routes.SearchRoute, Search _ ) ->
+        ( Routes.SearchRoute _ _, Search _ ) ->
             True
 
         _ ->
