@@ -55,7 +55,7 @@ namespace Server.Controllers
                 return new RideDTO
                 {
                     Id = r.Id,
-                    From = @from,
+                    From = from,
                     To = to,
                     TrainStops = _stopToRouteService.GetStops(r.RouteId).Select(s =>
                     {
@@ -114,7 +114,7 @@ namespace Server.Controllers
         }
 
         [HttpGet("rides/{id}")]
-        public ActionResult<RideDTO> GetRide([FromRoute] int id)
+        public ActionResult<RideDTO> GetRide([FromRoute] int id, [FromQuery] int from, [FromQuery] int to)
         {
             var ride = _rideService.GetRide(id);
             var stops = _stopToRouteService.GetStops(ride.RouteId);
@@ -122,8 +122,8 @@ namespace Server.Controllers
             return Ok(new RideDTO
             {
                 Id = ride.Id,
-                From = stops.First().TrainStopId,
-                To = stops.Last().TrainStopId,
+                From = from,
+                To = to,
                 TrainStops = stops.Select(s =>
                 {
                     startTime = startTime.AddHours(s.HoursDiff).AddMinutes(s.MinutesDiff);
