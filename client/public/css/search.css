@@ -1,0 +1,88 @@
+/* Search suggestion styling */
+.search-box > .error {
+    position: absolute;
+}
+
+.search-box > ul {
+    display: block;
+    left: inherit;
+}
+
+.search-box > ul > li {
+    user-select: none;
+    cursor: pointer;
+}
+
+/* Search button styling */
+.ride-search-button {
+    height: 100%;
+    transition-property: transform, box-shadow;
+    transition-duration: 100ms;
+    transition-timing-function: ease-in-out;
+}
+
+@media(hover: hover) {
+    .ride-search-button:hover {
+        transform: scale(1.1);
+        box-shadow: var(--blue) 0px 0px 10px;
+    }
+}
+
+.ride-search-button:active {
+    transform: scale(0.9);
+}
+
+/* Ride card styling */
+.ride-card > .card-body:last-child {
+    padding-top: 0;
+}
+
+.ride-price > .oi {
+    color: var(--gray);
+    margin-right: 3px;
+}
+
+.ride-price > span:not(.oi) {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-right: 10px;
+}
+
+/* Stops list in ride */
+ul.stops-list > li:not(.stops-list-route-part) {
+    filter: brightness(300%);
+    list-style: circle;
+}
+
+ul.stops-list > li.stops-list-route-part {
+    position: relative;
+    list-style: disc;
+    color: var(--primary);
+}
+
+ul.stops-list > li.stops-list-route-part > span {
+    color: initial;
+}
+
+ul.stops-list > li.stops-list-route-part:before {
+    background-color: var(--primary);
+    width: 2px;
+    content: '';
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    left: -16.5px;
+}
+
+ul.stops-list > li.stops-list-route-part-first:before {
+    top: 15px;
+}
+
+ul.stops-list > li.stops-list-route-part-last:before {
+    height: 15px;
+}
+
+ul.stops-list > li > span.stops-list-time {
+    padding-right: 5px;
+    color: var(--gray-dark);
+}
