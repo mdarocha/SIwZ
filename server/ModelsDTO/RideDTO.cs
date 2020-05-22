@@ -20,7 +20,7 @@ namespace Server.ModelsDTO
 
         public int FreeTickets { set; get; }
         
-        public int Price { set; get; }
+        public double Price { set; get; }
         
     }
 
