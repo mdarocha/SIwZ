@@ -14,7 +14,7 @@ import Json.Decode as Decode
 import Json.Encode as Encode
 import Session
 import Skeleton
-
+import Ports
 
 type alias Model =
     { session : Session.Data
@@ -100,8 +100,13 @@ update msg model =
 
                         newSession =
                             { oldSession | user = Just user }
+
+                        newModel = Model newSession model.redirect Nothing (LoginData "" "") model.register
+
+                        redirectCmd = redirectCommand model.session.key model.redirect
+                        setSessionCmd = Ports.setUserSession <| Session.userEncode user
                     in
-                    ( Model newSession model.redirect Nothing (LoginData "" "") model.register, redirectCommand model.session.key model.redirect )
+                    ( newModel, Cmd.batch [ redirectCmd, setSessionCmd ] )
 
                 Err _ ->
                     ( { model | errorText = Just "Wystąpił błąd" }, Cmd.none )
@@ -158,8 +163,13 @@ update msg model =
 
                         newSession =
                             { oldSession | user = Just user }
+
+                        newModel = Model newSession model.redirect Nothing model.login (RegisterData "" "" "" "")
+
+                        redirectCmd = redirectCommand model.session.key model.redirect
+                        setSessionCmd = Ports.setUserSession <| Session.userEncode user
                     in
-                    ( Model newSession model.redirect Nothing model.login (RegisterData "" "" "" ""), redirectCommand model.session.key model.redirect )
+                    ( newModel, Cmd.batch [ redirectCmd, setSessionCmd ])
 
                 Err _ ->
                     ( { model | errorText = Just "Wystąpił błąd" }, Cmd.none )

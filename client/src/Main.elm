@@ -16,7 +16,8 @@ import Session
 import Skeleton
 import Url exposing (Url)
 import Url.Parser exposing (map)
-
+import Json.Encode as Encode
+import Json.Decode as Decode
 
 type alias Model =
     { page : Page
@@ -44,7 +45,7 @@ type Msg
     | TicketMsg Ticket.Msg
 
 
-main : Program String Model Msg
+main : Program (String, Encode.Value) Model Msg
 main =
     Browser.application
         { init = init
@@ -87,11 +88,15 @@ view model =
             Skeleton.view TicketMsg (Ticket.view ticket) (viewNavbar model)
 
 
-init : String -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
-init api url key =
+init : (String, Encode.Value) -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
+init (api, userValue) url key =
     let
         session =
-            Session.Data api key Nothing
+            case Decode.decodeValue Session.userDecode userValue of
+                Ok user ->
+                    Session.Data api key (Just user)
+                Err _ ->
+                    Session.Data api key Nothing
 
         ( navbarState, navbarCmd ) =
             Navbar.initialState NavbarMsg
