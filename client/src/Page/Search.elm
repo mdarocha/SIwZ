@@ -8,6 +8,7 @@ import Bootstrap.Grid.Col as Col
 import Bootstrap.Spinner as Spinner
 import Bootstrap.Card as Card
 import Bootstrap.Card.Block as Block
+import Bootstrap.Text as Text
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -223,6 +224,18 @@ stopToString : AutocompleteStop -> String
 stopToString stop =
     stop.city ++ " - " ++ stop.name
 
+
+niceTime : Time.Posix -> String
+niceTime time =
+    String.padLeft 2 '0' <| String.fromInt (Time.toHour Time.utc time)
+    ++ ":" ++
+    (String.padLeft 2 '0' <| String.fromInt (Time.toMinute Time.utc time))
+
+rideStopToString : RideStop -> String
+rideStopToString stop =
+    stop.name ++ " - " ++ stop.city
+
+
 -- VIEW
 
 
@@ -304,46 +317,55 @@ viewRides rides =
 viewRide : Ride -> Html Msg
 viewRide ride =
     let
-        toString stop =
-            stop.name ++ " - " ++ stop.city
+        emptyStop = RideStop 0 (Time.millisToPosix 0) 0 "ERROR" "ERROR"
+        escapeMaybe = Maybe.withDefault emptyStop
 
-        niceTime time =
-            String.padLeft 2 '0' <| String.fromInt (Time.toHour Time.utc time)
-            ++ ":" ++
-            (String.padLeft 2 '0' <| String.fromInt (Time.toMinute Time.utc time))
+        fromStop = (List.head <| List.filter (\s -> s.id == ride.from) ride.stops) |> escapeMaybe
+        toStop = (List.head <| List.filter (\s -> s.id == ride.to) ride.stops) |> escapeMaybe
 
-        stopsListStop fromStop toStop stop =
-            li [ classList
-                    [ ("stops-list-route-part", stop.stopNumber >= fromStop.stopNumber && stop.stopNumber <= toStop.stopNumber)
-                    , ("stops-list-route-part-first", stop.stopNumber == fromStop.stopNumber)
-                    , ("stops-list-route-part-last", stop.stopNumber == toStop.stopNumber)
+        firstStop = List.head ride.stops |> escapeMaybe
+        lastStop = (List.head <| List.reverse ride.stops) |> escapeMaybe
+
+        sortedStops = List.sortBy .stopNumber ride.stops
+    in
+        Card.config [ Card.attrs [ class "mt-5 ride-card" ] ]
+            |> Card.headerH4 []
+                [ span [ class "oi oi-clock mr-1", style "font-size" "1.2rem" ] []
+                , span [] [ text (niceTime ride.startTime) ]
+                , span [ class "font-italic float-right" ]
+                    [ text <| ride.train.name ++ " "
+                        ++ firstStop.city ++ " - " ++ lastStop.city
                     ]
                 ]
-                [ span [ class "stops-list-time" ] [ text (niceTime stop.arrivalTime) ]
-                , span [] [ text <| toString stop ]
+            |> Card.block []
+                [ Block.custom <| viewStopList sortedStops fromStop toStop ]
+            |> Card.block [ Block.align Text.alignXsRight ]
+                [ Block.custom <|
+                    div [ class "ride-price" ]
+                        [ span [ class "oi oi-paperclip" ] []
+                        , span [] [ text <| String.fromInt ride.price ++ " zł" ]
+                        , Button.button [ Button.primary, Button.attrs [ class "align-baseline" ] ] [ text "Kup bilet" ]
+                        ]
                 ]
+            |> Card.view
 
-        stopsList stops from to =
-            ul [ class "stops-list" ] <| List.map (stopsListStop from to) stops
+viewStopListStop : RideStop -> RideStop -> RideStop -> Html Msg
+viewStopListStop from to stop =
+    li [ classList
+            [ ("stops-list-route-part", stop.stopNumber >= from.stopNumber && stop.stopNumber <= to.stopNumber)
+            , ("stops-list-route-part-first", stop.stopNumber == from.stopNumber)
+            , ("stops-list-route-part-last", stop.stopNumber == to.stopNumber)
+            ]
+        ]
+        [ span [ class "stops-list-time" ] [ text (niceTime stop.arrivalTime) ]
+        , span [] [ text <| rideStopToString stop ]
+        ]
 
-        maybeFromStop = List.head <| List.filter (\s -> s.id == ride.from) ride.stops
-        maybeToStop   = List.head <| List.filter (\s -> s.id == ride.to) ride.stops
-    in
-        case (maybeFromStop, maybeToStop) of
-            (Just fromStop, Just toStop) ->
-                Card.config [ Card.attrs [ class "mt-5" ] ]
-                    |> Card.headerH4 []
-                        [ span [ class "oi oi-clock mr-1" ] []
-                        , span [] [ text (niceTime ride.startTime) ]
-                        , span [ class "font-italic float-right" ] [ text ride.train.name ]
-                        ]
-                    |> Card.block []
-                        [
-                            Block.custom <| stopsList ride.stops fromStop toStop
-                        ]
-                    |> Card.view
-            (_, _) ->
-                div [] [ text "Wystąpił błąd" ]
+viewStopList : List RideStop -> RideStop -> RideStop -> Html Msg
+viewStopList stops from to =
+    ul [ class "stops-list" ] <| List.map (viewStopListStop from to) stops
+
+
 -- HTTP
 
 

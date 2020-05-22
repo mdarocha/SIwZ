@@ -13,6 +13,22 @@
     cursor: pointer;
 }
 
+/* Ride card styling */
+.ride-card > .card-body:last-child {
+    padding-top: 0;
+}
+
+.ride-price > .oi {
+    color: var(--gray);
+    margin-right: 3px;
+}
+
+.ride-price > span:not(.oi) {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-right: 10px;
+}
+
 /* Stops list in ride */
 ul.stops-list > li:not(.stops-list-route-part) {
     filter: brightness(300%);
