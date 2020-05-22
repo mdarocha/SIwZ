@@ -5,6 +5,9 @@ import Bootstrap.Form.Input as Input
 import Bootstrap.Form.InputGroup as InputGroup
 import Bootstrap.Grid as Grid
 import Bootstrap.Grid.Col as Col
+import Bootstrap.Spinner as Spinner
+import Bootstrap.Card as Card
+import Bootstrap.Card.Block as Block
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -15,6 +18,8 @@ import Session
 import Set
 import Skeleton
 import Url.Builder as UrlBuilder
+import Time
+import Iso8601 as TimeIso
 
 type alias AutocompleteStop =
     { id : Int
@@ -30,7 +35,7 @@ type AutocompleteStops
 
 type alias RideStop =
     { id : Int
-    , arrivalTime : String
+    , arrivalTime : Time.Posix
     , stopNumber : Int
     , name : String
     , city : String
@@ -49,7 +54,7 @@ type alias Ride =
     , from : Int
     , to : Int
     , stops : List RideStop
-    , startTime : String
+    , startTime : Time.Posix
     , train : RideTrain
     , freeTickets : Int
     , price : Int
@@ -118,15 +123,21 @@ update msg model =
             let
                 ( newState, cmds ) =
                     updateSearchBox searchMsg model.routeFromSearch
+                rides = case newState.selected of
+                    Nothing -> NotStarted
+                    _ -> model.rides
             in
-            ( { model | routeFromSearch = newState }, Cmd.map RouteFromUpdate cmds )
+            ( { model | routeFromSearch = newState, rides = rides }, Cmd.map RouteFromUpdate cmds )
 
         RouteToUpdate searchMsg ->
             let
                 ( newState, cmds ) =
                     updateSearchBox searchMsg model.routeToSearch
+                rides = case newState.selected of
+                    Nothing -> NotStarted
+                    _ -> model.rides
             in
-            ( { model | routeToSearch = newState }, Cmd.map RouteToUpdate cmds )
+            ( { model | routeToSearch = newState, rides = rides }, Cmd.map RouteToUpdate cmds )
 
         GotStopsList result ->
             case result of
@@ -153,7 +164,7 @@ update msg model =
         SubmitSearch ->
             case ( model.routeFromSearch.selected, model.routeToSearch.selected ) of
                 (Just from, Just to) ->
-                    ( model, getRides model.session.api from to )
+                    ( { model | rides = RidesLoading }, getRides model.session.api from to )
                 (_, _) ->
                     ( model, Cmd.none )
 
@@ -210,16 +221,14 @@ performSearch suggestions input =
 
 stopToString : AutocompleteStop -> String
 stopToString stop =
-    stop.name ++ " - " ++ stop.city
-
-
+    stop.city ++ " - " ++ stop.name
 
 -- VIEW
 
 
 view : Model -> Skeleton.Details Msg
 view model =
-    { title = "Route search"
+    { title = "Znajdź pociąg"
     , body =
         [ Grid.row []
             [ Grid.col [ Col.md6, Col.attrs [ class "mt-4" ] ] [ Html.map RouteFromUpdate <| viewSearchBox "Od" model.routeFromSearch ]
@@ -229,7 +238,7 @@ view model =
             [ Grid.col [ Col.md6, Col.attrs [ class "mt-4" ] ] [ Input.datetimeLocal [ Input.attrs [ onInput DepartureTimeUpdate ] ] ]
             , Grid.col [ Col.md3, Col.offsetMd3, Col.attrs [ class "mt-4" ] ] [ Button.button [ Button.attrs [ onClick SubmitSearch ], Button.primary, Button.large, Button.block] [ text "Szukaj" ] ]
             ]
-        , viewRides model.rides
+        , div [ class "mt-4" ] [ viewRides model.rides ]
         ]
     }
 
@@ -267,7 +276,7 @@ viewSearchBox label state =
                     div [] []
 
                 Failure ->
-                    div [] [ text "Błąd ładowania podpowiedzi - spróbuj odswieżyć stronę" ]
+                    div [ class "error" ] [ text "Błąd ładowania podpowiedzi - spróbuj odswieżyć stronę" ]
 
           else
             div [] []
@@ -278,17 +287,63 @@ viewRides : Rides -> Html Msg
 viewRides rides =
     case rides of
         RidesLoading ->
-            div [] [ text "Ładowanie" ]
+            div [ class "text-center" ] [ Spinner.spinner [] [] ]
 
         RidesFailure ->
-            div [] [ text "Błąd" ]
+            h5 [ class "text-center" ] [ text "Wystąpił błąd" ]
 
         RidesSuccess rideList ->
-            div [] [ text "Załadowano" ]
+            if List.length rideList == 0 then
+                h4 [ class "text-center" ] [ text "Nie znaleziono pociągów" ]
+            else
+                div [] (List.map viewRide rideList)
 
         NotStarted ->
-            div [] []
+            div [ class "text-center" ] [ text "Rozpocznij wyszukiwanie, wybierając stacje" ]
 
+viewRide : Ride -> Html Msg
+viewRide ride =
+    let
+        toString stop =
+            stop.name ++ " - " ++ stop.city
+
+        niceTime time =
+            String.padLeft 2 '0' <| String.fromInt (Time.toHour Time.utc time)
+            ++ ":" ++
+            (String.padLeft 2 '0' <| String.fromInt (Time.toMinute Time.utc time))
+
+        stopsListStop fromStop toStop stop =
+            li [ classList
+                    [ ("stops-list-route-part", stop.stopNumber >= fromStop.stopNumber && stop.stopNumber <= toStop.stopNumber)
+                    , ("stops-list-route-part-first", stop.stopNumber == fromStop.stopNumber)
+                    , ("stops-list-route-part-last", stop.stopNumber == toStop.stopNumber)
+                    ]
+                ]
+                [ span [ class "stops-list-time" ] [ text (niceTime stop.arrivalTime) ]
+                , span [] [ text <| toString stop ]
+                ]
+
+        stopsList stops from to =
+            ul [ class "stops-list" ] <| List.map (stopsListStop from to) stops
+
+        maybeFromStop = List.head <| List.filter (\s -> s.id == ride.from) ride.stops
+        maybeToStop   = List.head <| List.filter (\s -> s.id == ride.to) ride.stops
+    in
+        case (maybeFromStop, maybeToStop) of
+            (Just fromStop, Just toStop) ->
+                Card.config [ Card.attrs [ class "mt-5" ] ]
+                    |> Card.headerH4 []
+                        [ span [ class "oi oi-clock mr-1" ] []
+                        , span [] [ text (niceTime ride.startTime) ]
+                        , span [ class "font-italic float-right" ] [ text ride.train.name ]
+                        ]
+                    |> Card.block []
+                        [
+                            Block.custom <| stopsList ride.stops fromStop toStop
+                        ]
+                    |> Card.view
+            (_, _) ->
+                div [] [ text "Wystąpił błąd" ]
 -- HTTP
 
 
@@ -323,8 +378,8 @@ stopsDecoder =
     Decode.list <|
         Decode.map3 AutocompleteStop
             (Decode.field "id" Decode.int)
-            (Decode.field "city" Decode.string)
             (Decode.field "name" Decode.string)
+            (Decode.field "city" Decode.string)
 
 ridesDecoder : Decode.Decoder (List Ride)
 ridesDecoder =
@@ -334,7 +389,7 @@ ridesDecoder =
             (Decode.field "from" Decode.int)
             (Decode.field "to" Decode.int)
             (Decode.field "trainStops" rideStopDecoder)
-            (Decode.field "startTime" Decode.string)
+            (Decode.field "startTime" TimeIso.decoder)
             (Decode.field "train" rideTrainDecoder)
             (Decode.field "freeTickets" Decode.int)
             (Decode.field "price" Decode.int)
@@ -344,7 +399,7 @@ rideStopDecoder =
     Decode.list <|
         Decode.map5 RideStop
             (Decode.field "stopId" Decode.int)
-            (Decode.field "arrivalTime" Decode.string)
+            (Decode.field "arrivalTime" TimeIso.decoder)
             (Decode.field "stopNo" Decode.int)
             (Decode.field "name" Decode.string)
             (Decode.field "city" Decode.string)

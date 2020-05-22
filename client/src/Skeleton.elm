@@ -15,7 +15,7 @@ type alias Details msg =
 view : (a -> msg) -> Details a -> Html msg -> Browser.Document msg
 view toMsg details navbar =
     { title =
-        details.title
+        details.title ++ " | SIwZ Trains"
     , body =
         [ navbar
         , Html.map toMsg <| Grid.container [ id "wrap", class "pt-2" ] details.body

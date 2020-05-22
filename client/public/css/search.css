@@ -1,0 +1,53 @@
+/* Search suggestion styling */
+.search-box > .error {
+    position: absolute;
+}
+
+.search-box > ul {
+    display: block;
+    left: inherit;
+}
+
+.search-box > ul > li {
+    user-select: none;
+    cursor: pointer;
+}
+
+/* Stops list in ride */
+ul.stops-list > li:not(.stops-list-route-part) {
+    filter: brightness(300%);
+    list-style: circle;
+}
+
+ul.stops-list > li.stops-list-route-part {
+    position: relative;
+    list-style: disc;
+    color: var(--primary);
+}
+
+ul.stops-list > li.stops-list-route-part > span {
+    color: initial;
+}
+
+ul.stops-list > li.stops-list-route-part:before {
+    background-color: var(--primary);
+    width: 2px;
+    content: '';
+    position: absolute;
+    top: 0px;
+    bottom: 0px;
+    left: -16.5px;
+}
+
+ul.stops-list > li.stops-list-route-part-first:before {
+    top: 15px;
+}
+
+ul.stops-list > li.stops-list-route-part-last:before {
+    height: 15px;
+}
+
+ul.stops-list > li > span.stops-list-time {
+    padding-right: 5px;
+    color: var(--gray-dark);
+}

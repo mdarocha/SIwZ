@@ -1,0 +1,18 @@
+@import "/public/css/search.css";
+
+/* Footer at the bottom */
+#wrap {
+    min-height: calc(100vh - 56px);
+}
+
+footer {
+    padding: 5px;
+}
+
+/* Navbar text branding */
+#brand-text {
+    text-transform: uppercase;
+    font-weight: 500;
+    font-style: italic;
+    font-stretch: ultra-expanded;
+}
