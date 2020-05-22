@@ -17,10 +17,8 @@ namespace Server.ModelsDTO
         public DateTime StartTime { set; get; }
         
         public Train Train { set; get; }
-
-        public int FreeTickets { set; get; }
         
-        public int Price { set; get; }
+        public double Price { set; get; }
         
     }
 

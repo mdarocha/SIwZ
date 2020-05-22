@@ -16,6 +16,9 @@ namespace Server.Services
             _context = context;
         }
 
+        public Ride GetRide(int id) =>
+            _context.Rides.Include(x => x.Train).Include(x => x.Route).Single(r => r.Id == id);
+
         public List<Ride> RideSearch() =>
             _context.Rides.Where(ride => true).ToList();
 
