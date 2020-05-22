@@ -1,28 +1,29 @@
 module Page.Search exposing (Model, Msg, init, update, view)
 
 import Bootstrap.Button as Button
+import Bootstrap.Card as Card
+import Bootstrap.Card.Block as Block
+import Bootstrap.Form.Checkbox as Checkbox
 import Bootstrap.Form.Input as Input
 import Bootstrap.Form.InputGroup as InputGroup
 import Bootstrap.Grid as Grid
 import Bootstrap.Grid.Col as Col
 import Bootstrap.Spinner as Spinner
-import Bootstrap.Card as Card
-import Bootstrap.Card.Block as Block
 import Bootstrap.Text as Text
-import Bootstrap.Form.Checkbox as Checkbox
 import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
+import Iso8601 as TimeIso
 import Json.Decode as Decode
 import Json.Encode as Encode
 import Session
 import Set
 import Skeleton
-import Url.Builder as UrlBuilder
 import Time
-import Iso8601 as TimeIso
+import Url.Builder as UrlBuilder
+
 
 type alias AutocompleteStop =
     { id : Int
@@ -36,6 +37,7 @@ type AutocompleteStops
     | Loading
     | Success (List AutocompleteStop)
 
+
 type alias RideStop =
     { id : Int
     , arrivalTime : Time.Posix
@@ -44,6 +46,7 @@ type alias RideStop =
     , city : String
     }
 
+
 type alias RideTrain =
     { id : Int
     , name : String
@@ -51,6 +54,7 @@ type alias RideTrain =
     , seats : Int
     , wagons : Int
     }
+
 
 type alias Ride =
     { id : Int
@@ -63,11 +67,13 @@ type alias Ride =
     , price : Int
     }
 
+
 type Rides
     = NotStarted
     | RidesFailure
     | RidesLoading
     | RidesSuccess (List Ride)
+
 
 type alias SearchBoxState =
     { text : String
@@ -96,11 +102,13 @@ type alias Model =
     , rides : Rides
     }
 
+
 type alias TicketParams =
     { from : Int
     , to : Int
     , ride : Int
     }
+
 
 type Msg
     = RouteFromUpdate SearchBoxMsg
@@ -110,6 +118,8 @@ type Msg
     | SubmitSearch
     | DepartureTimeUpdate String
     | SubmitRide TicketParams
+
+
 
 -- INIT
 
@@ -134,9 +144,14 @@ update msg model =
             let
                 ( newState, cmds ) =
                     updateSearchBox searchMsg model.routeFromSearch
-                rides = case newState.selected of
-                    Nothing -> NotStarted
-                    _ -> model.rides
+
+                rides =
+                    case newState.selected of
+                        Nothing ->
+                            NotStarted
+
+                        _ ->
+                            model.rides
             in
             ( { model | routeFromSearch = newState, rides = rides }, Cmd.map RouteFromUpdate cmds )
 
@@ -144,9 +159,14 @@ update msg model =
             let
                 ( newState, cmds ) =
                     updateSearchBox searchMsg model.routeToSearch
-                rides = case newState.selected of
-                    Nothing -> NotStarted
-                    _ -> model.rides
+
+                rides =
+                    case newState.selected of
+                        Nothing ->
+                            NotStarted
+
+                        _ ->
+                            model.rides
             in
             ( { model | routeToSearch = newState, rides = rides }, Cmd.map RouteToUpdate cmds )
 
@@ -154,53 +174,75 @@ update msg model =
             case result of
                 Ok stops ->
                     let
-                        oldFromState = model.routeFromSearch
-                        oldToState = model.routeToSearch
+                        oldFromState =
+                            model.routeFromSearch
 
-                        fromSuggestions = { oldFromState | suggestions = Success stops }
-                        toSuggestions = { oldToState | suggestions = Success stops }
+                        oldToState =
+                            model.routeToSearch
 
-                        (newFromState, newToState) =
+                        fromSuggestions =
+                            { oldFromState | suggestions = Success stops }
+
+                        toSuggestions =
+                            { oldToState | suggestions = Success stops }
+
+                        ( newFromState, newToState ) =
                             case ( model.queryFromId, model.queryToId ) of
-                                (Just queryFrom, Just queryTo) ->
+                                ( Just queryFrom, Just queryTo ) ->
                                     let
-                                        maybeFromStop = List.head <| List.filter (\s -> s.id == queryFrom) stops
-                                        maybeToStop = List.head <| List.filter (\s -> s.id == queryTo) stops
+                                        maybeFromStop =
+                                            List.head <| List.filter (\s -> s.id == queryFrom) stops
+
+                                        maybeToStop =
+                                            List.head <| List.filter (\s -> s.id == queryTo) stops
                                     in
-                                        case (maybeFromStop, maybeToStop) of
-                                            (Just from, Just to) ->
-                                                ( { fromSuggestions | selected = Just from }, { toSuggestions | selected = Just to } )
-                                            (_, _) ->
-                                                ( fromSuggestions, toSuggestions )
-                                (_, _) ->
+                                    case ( maybeFromStop, maybeToStop ) of
+                                        ( Just from, Just to ) ->
+                                            ( { fromSuggestions | selected = Just from }, { toSuggestions | selected = Just to } )
+
+                                        ( _, _ ) ->
+                                            ( fromSuggestions, toSuggestions )
+
+                                ( _, _ ) ->
                                     ( fromSuggestions, toSuggestions )
                     in
-                        ( { model |  routeToSearch = newToState, routeFromSearch = newFromState }, Cmd.none )
+                    ( { model | routeToSearch = newToState, routeFromSearch = newFromState }, Cmd.none )
 
                 Err _ ->
                     let
-                        oldFromState = model.routeFromSearch
-                        oldToState = model.routeToSearch
+                        oldFromState =
+                            model.routeFromSearch
 
-                        newFromState = { oldFromState | suggestions = Failure }
-                        newToState = { oldToState | suggestions = Failure }
+                        oldToState =
+                            model.routeToSearch
+
+                        newFromState =
+                            { oldFromState | suggestions = Failure }
+
+                        newToState =
+                            { oldToState | suggestions = Failure }
                     in
-                        ( { model |  routeToSearch = newToState, routeFromSearch = newFromState }, Cmd.none )
+                    ( { model | routeToSearch = newToState, routeFromSearch = newFromState }, Cmd.none )
 
         SubmitSearch ->
             case ( model.routeFromSearch.selected, model.routeToSearch.selected ) of
-                (Just from, Just to) ->
+                ( Just from, Just to ) ->
                     let
-                        getCmd = getRides model.session.api from to model.useDepartureTime model.departureTime
+                        getCmd =
+                            getRides model.session.api from to model.useDepartureTime model.departureTime
 
-                        url = UrlBuilder.absolute [ "search" ]
-                            [ UrlBuilder.int "from" from.id
-                            , UrlBuilder.int "to" to.id
-                            ]
-                        navCmd = Nav.replaceUrl model.session.key url
+                        url =
+                            UrlBuilder.absolute [ "search" ]
+                                [ UrlBuilder.int "from" from.id
+                                , UrlBuilder.int "to" to.id
+                                ]
+
+                        navCmd =
+                            Nav.replaceUrl model.session.key url
                     in
-                        ( { model | rides = RidesLoading }, Cmd.batch [getCmd, navCmd] )
-                (_, _) ->
+                    ( { model | rides = RidesLoading }, Cmd.batch [ getCmd, navCmd ] )
+
+                ( _, _ ) ->
                     ( model, Cmd.none )
 
         DepartureTimeUpdate text ->
@@ -216,13 +258,15 @@ update msg model =
 
         SubmitRide ticketParams ->
             let
-                url = UrlBuilder.absolute [ "ticket" ]
-                    [ UrlBuilder.int "from" ticketParams.from
-                    , UrlBuilder.int "to" ticketParams.to
-                    , UrlBuilder.int "ride" ticketParams.ride
-                    ]
+                url =
+                    UrlBuilder.absolute [ "ticket" ]
+                        [ UrlBuilder.int "from" ticketParams.from
+                        , UrlBuilder.int "to" ticketParams.to
+                        , UrlBuilder.int "ride" ticketParams.ride
+                        ]
             in
             ( model, Nav.pushUrl model.session.key url )
+
 
 updateSearchBox : SearchBoxMsg -> SearchBoxState -> ( SearchBoxState, Cmd SearchBoxMsg )
 updateSearchBox msg model =
@@ -271,13 +315,16 @@ stopToString stop =
 
 niceTime : Time.Posix -> String
 niceTime time =
-    String.padLeft 2 '0' <| String.fromInt (Time.toHour Time.utc time)
-    ++ ":" ++
-    (String.padLeft 2 '0' <| String.fromInt (Time.toMinute Time.utc time))
+    String.padLeft 2 '0' <|
+        String.fromInt (Time.toHour Time.utc time)
+            ++ ":"
+            ++ (String.padLeft 2 '0' <| String.fromInt (Time.toMinute Time.utc time))
+
 
 rideStopToString : RideStop -> String
 rideStopToString stop =
     stop.name ++ " - " ++ stop.city
+
 
 
 -- VIEW
@@ -293,7 +340,7 @@ view model =
             ]
         , Grid.row []
             [ Grid.col [ Col.md6, Col.attrs [ class "mt-4" ] ] [ Checkbox.checkbox [] "Szukaj wg. czasu odjazdu", Input.datetimeLocal [ Input.attrs [ onInput DepartureTimeUpdate ] ] ]
-            , Grid.col [ Col.md3, Col.offsetMd3, Col.attrs [ class "mt-4" ] ] [ Button.button [ Button.attrs [ class "ride-search-button", onClick SubmitSearch ], Button.primary, Button.large, Button.block] [ text "Szukaj" ] ]
+            , Grid.col [ Col.md3, Col.offsetMd3, Col.attrs [ class "mt-4" ] ] [ Button.button [ Button.attrs [ class "ride-search-button", onClick SubmitSearch ], Button.primary, Button.large, Button.block ] [ text "Szukaj" ] ]
             ]
         , div [ class "mt-4" ] [ viewRides model.rides ]
         ]
@@ -352,67 +399,89 @@ viewRides rides =
         RidesSuccess rideList ->
             if List.length rideList == 0 then
                 h4 [ class "text-center" ] [ text "Nie znaleziono pociągów" ]
+
             else
                 div [] (List.map viewRide rideList)
 
         NotStarted ->
             div [ class "text-center" ] [ text "Rozpocznij wyszukiwanie, wybierając stacje" ]
 
+
 viewRide : Ride -> Html Msg
 viewRide ride =
     let
-        emptyStop = RideStop 0 (Time.millisToPosix 0) 0 "ERROR" "ERROR"
-        escapeMaybe = Maybe.withDefault emptyStop
+        emptyStop =
+            RideStop 0 (Time.millisToPosix 0) 0 "ERROR" "ERROR"
 
-        fromStop = (List.head <| List.filter (\s -> s.id == ride.from) ride.stops) |> escapeMaybe
-        toStop = (List.head <| List.filter (\s -> s.id == ride.to) ride.stops) |> escapeMaybe
+        escapeMaybe =
+            Maybe.withDefault emptyStop
 
-        firstStop = List.head ride.stops |> escapeMaybe
-        lastStop = (List.head <| List.reverse ride.stops) |> escapeMaybe
+        fromStop =
+            (List.head <| List.filter (\s -> s.id == ride.from) ride.stops) |> escapeMaybe
 
-        sortedStops = List.sortBy .stopNumber ride.stops
+        toStop =
+            (List.head <| List.filter (\s -> s.id == ride.to) ride.stops) |> escapeMaybe
+
+        firstStop =
+            List.head ride.stops |> escapeMaybe
+
+        lastStop =
+            (List.head <| List.reverse ride.stops) |> escapeMaybe
+
+        sortedStops =
+            List.sortBy .stopNumber ride.stops
     in
-        Card.config [ Card.attrs [ class "mt-5 ride-card" ] ]
-            |> Card.headerH4 []
-                [ span [ class "oi oi-clock mr-1", style "font-size" "1.2rem" ] []
-                , span [] [ text (niceTime ride.startTime) ]
-                , span [ class "font-italic float-right" ]
-                    [ text <| ride.train.name ++ " "
-                        ++ firstStop.city ++ " - " ++ lastStop.city
-                    ]
+    Card.config [ Card.attrs [ class "mt-5 ride-card" ] ]
+        |> Card.headerH4 []
+            [ span [ class "oi oi-clock mr-1", style "font-size" "1.2rem" ] []
+            , span [] [ text (niceTime ride.startTime) ]
+            , span [ class "font-italic float-right" ]
+                [ text <|
+                    ride.train.name
+                        ++ " "
+                        ++ firstStop.city
+                        ++ " - "
+                        ++ lastStop.city
                 ]
-            |> Card.block []
-                [ Block.custom <| viewStopList sortedStops fromStop toStop ]
-            |> Card.block [ Block.align Text.alignXsRight ]
-                [ Block.custom <|
-                    div [ class "ride-price" ]
-                        [ span [ class "oi oi-paperclip" ] []
-                        , span [] [ text <| String.fromInt ride.price ++ " zł" ]
-                        , Button.button [ Button.primary,
-                                Button.attrs
-                                    [ class "align-baseline"
-                                    , onClick (SubmitRide <| TicketParams ride.from ride.to ride.id)
-                                    ]
-                                ] [ text "Kup bilet" ]
+            ]
+        |> Card.block []
+            [ Block.custom <| viewStopList sortedStops fromStop toStop ]
+        |> Card.block [ Block.align Text.alignXsRight ]
+            [ Block.custom <|
+                div [ class "ride-price" ]
+                    [ span [ class "oi oi-paperclip" ] []
+                    , span [] [ text <| String.fromInt ride.price ++ " zł" ]
+                    , Button.button
+                        [ Button.primary
+                        , Button.attrs
+                            [ class "align-baseline"
+                            , onClick (SubmitRide <| TicketParams ride.from ride.to ride.id)
+                            ]
                         ]
-                ]
-            |> Card.view
+                        [ text "Kup bilet" ]
+                    ]
+            ]
+        |> Card.view
+
 
 viewStopListStop : RideStop -> RideStop -> RideStop -> Html Msg
 viewStopListStop from to stop =
-    li [ classList
-            [ ("stops-list-route-part", stop.stopNumber >= from.stopNumber && stop.stopNumber <= to.stopNumber)
-            , ("stops-list-route-part-first", stop.stopNumber == from.stopNumber)
-            , ("stops-list-route-part-last", stop.stopNumber == to.stopNumber)
+    li
+        [ classList
+            [ ( "stops-list-route-part", stop.stopNumber >= from.stopNumber && stop.stopNumber <= to.stopNumber )
+            , ( "stops-list-route-part-first", stop.stopNumber == from.stopNumber )
+            , ( "stops-list-route-part-last", stop.stopNumber == to.stopNumber )
             ]
         ]
         [ span [ class "stops-list-time" ] [ text (niceTime stop.arrivalTime) ]
         , span [] [ text <| rideStopToString stop ]
         ]
 
+
 viewStopList : List RideStop -> RideStop -> RideStop -> Html Msg
 viewStopList stops from to =
     ul [ class "stops-list" ] <| List.map (viewStopListStop from to) stops
+
 
 
 -- HTTP
@@ -425,7 +494,8 @@ getStopsList api =
         , expect = Http.expectJson GotStopsList stopsDecoder
         }
 
-ridesUrl :AutocompleteStop -> AutocompleteStop -> Bool -> String -> String
+
+ridesUrl : AutocompleteStop -> AutocompleteStop -> Bool -> String -> String
 ridesUrl from to useDate date =
     let
         baseQuery =
@@ -436,17 +506,20 @@ ridesUrl from to useDate date =
         query =
             if useDate then
                 List.append baseQuery [ UrlBuilder.string "date" date ]
+
             else
                 baseQuery
     in
-        UrlBuilder.relative [ "rides" ] query
+    UrlBuilder.relative [ "rides" ] query
+
 
 getRides : String -> AutocompleteStop -> AutocompleteStop -> Bool -> String -> Cmd Msg
 getRides api from to useDate date =
     Http.get
-        { url = api ++ (ridesUrl from to useDate date)
+        { url = api ++ ridesUrl from to useDate date
         , expect = Http.expectJson GotRides ridesDecoder
         }
+
 
 
 -- JSON
@@ -459,6 +532,7 @@ stopsDecoder =
             (Decode.field "id" Decode.int)
             (Decode.field "name" Decode.string)
             (Decode.field "city" Decode.string)
+
 
 ridesDecoder : Decode.Decoder (List Ride)
 ridesDecoder =
@@ -473,6 +547,7 @@ ridesDecoder =
             (Decode.field "freeTickets" Decode.int)
             (Decode.field "price" Decode.int)
 
+
 rideStopDecoder : Decode.Decoder (List RideStop)
 rideStopDecoder =
     Decode.list <|
@@ -482,6 +557,7 @@ rideStopDecoder =
             (Decode.field "stopNo" Decode.int)
             (Decode.field "name" Decode.string)
             (Decode.field "city" Decode.string)
+
 
 rideTrainDecoder : Decode.Decoder RideTrain
 rideTrainDecoder =
