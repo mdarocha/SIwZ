@@ -10,6 +10,7 @@ import Page.About as About
 import Page.AdminTrainStops as AdminTrainStops
 import Page.Login as Login
 import Page.Search as Search
+import Page.Ticket as Ticket
 import Routes
 import Session
 import Skeleton
@@ -29,7 +30,7 @@ type Page
     | Search Search.Model
     | AdminTrainStops AdminTrainStops.Model
     | Login Login.Model
-
+    | Ticket Ticket.Model
 
 type Msg
     = LinkClicked Browser.UrlRequest
@@ -39,7 +40,7 @@ type Msg
     | AdminTrainStopsMsg AdminTrainStops.Msg
     | LoginMsg Login.Msg
     | SearchMsg Search.Msg
-
+    | TicketMsg Ticket.Msg
 
 main : Program String Model Msg
 main =
@@ -80,6 +81,8 @@ view model =
         Login login ->
             Skeleton.view LoginMsg (Login.view login) (viewNavbar model)
 
+        Ticket ticket ->
+            Skeleton.view TicketMsg (Ticket.view ticket) (viewNavbar model)
 
 init : String -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init api url key =
@@ -155,6 +158,14 @@ update message model =
                 _ ->
                     ( model, Cmd.none )
 
+        TicketMsg msg ->
+            case model.page of
+                Ticket ticket ->
+                    stepTicket model (Ticket.update msg ticket)
+
+                _ ->
+                    ( model, Cmd.none )
+
 
 toSession : Model -> Session.Data
 toSession model =
@@ -174,6 +185,8 @@ toSession model =
         Login m ->
             m.session
 
+        Ticket m ->
+            m.session
 
 changeRoute : Maybe Routes.Route -> Model -> ( Model, Cmd Msg )
 changeRoute route model =
@@ -197,11 +210,13 @@ changeRoute route model =
             stepAbout model (About.init session)
 
         Just Routes.RootRoute ->
-            ( model, Nav.pushUrl session.key "/search" )
+            ( model, Nav.replaceUrl session.key "/search" )
 
         Just (Routes.LoginRoute redirect) ->
             stepLogin model (Login.init session redirect)
 
+        Just (Routes.TicketRoute from to ride) ->
+            stepTicket model (Ticket.init session from to ride)
 
 stepAbout : Model -> ( About.Model, Cmd About.Msg ) -> ( Model, Cmd Msg )
 stepAbout model ( about, cmds ) =
@@ -230,7 +245,11 @@ stepSearch model ( search, cmds ) =
     , Cmd.map SearchMsg cmds
     )
 
-
+stepTicket : Model -> ( Ticket.Model, Cmd Ticket.Msg ) -> ( Model, Cmd Msg )
+stepTicket model ( ticket, cmds ) =
+    ( { model | page = Ticket ticket }
+    , Cmd.map TicketMsg cmds
+    )
 
 -- NAVBAR
 

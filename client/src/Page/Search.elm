@@ -63,7 +63,6 @@ type alias Ride =
     , stops : List RideStop
     , startTime : Time.Posix
     , train : RideTrain
-    , freeTickets : Int
     , price : Int
     }
 
@@ -537,14 +536,13 @@ stopsDecoder =
 ridesDecoder : Decode.Decoder (List Ride)
 ridesDecoder =
     Decode.list <|
-        Decode.map8 Ride
+        Decode.map7 Ride
             (Decode.field "id" Decode.int)
             (Decode.field "from" Decode.int)
             (Decode.field "to" Decode.int)
             (Decode.field "trainStops" rideStopDecoder)
             (Decode.field "startTime" TimeIso.decoder)
             (Decode.field "train" rideTrainDecoder)
-            (Decode.field "freeTickets" Decode.int)
             (Decode.field "price" Decode.int)
 
 
