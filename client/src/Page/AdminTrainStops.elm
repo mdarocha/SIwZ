@@ -250,7 +250,7 @@ formError error =
 getStops : String -> String -> Cmd Msg
 getStops api token =
     Jwt.Http.get token
-        { url = api ++ "admin/stops/get"
+        { url = api ++ "admin/stops"
         , expect = Http.expectJson GotStops stopsDecoder
         }
 
@@ -260,7 +260,7 @@ addStop api stop token =
     Jwt.Http.post token
         { body = Http.jsonBody (stopEncoder stop)
         , expect = Http.expectWhatever AddStop
-        , url = api ++ "admin/stops/create"
+        , url = api ++ "admin/stops"
         }
 
 

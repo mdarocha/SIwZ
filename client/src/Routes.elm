@@ -9,14 +9,14 @@ type Route
     = AdminTrainStopsRoute
     | AboutRoute
     | SearchRoute
-    | HomeRoute
     | LoginRoute (Maybe String)
+    | RootRoute
 
 
 parser : Parser (Route -> a) a
 parser =
     oneOf
-        [ map HomeRoute top
+        [ map RootRoute top
         , map SearchRoute (s "search")
         , map AboutRoute (s "about")
         , map AdminTrainStopsRoute (s "admin" </> s "stops")
