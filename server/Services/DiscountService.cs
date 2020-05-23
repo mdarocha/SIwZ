@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Server.Models;
@@ -35,7 +36,7 @@ namespace Server.Services
             _context.SaveChanges();
             return discount;
         }
-        
+
         public void Edit(Discount discount)
         {
             var dc = _context.Discounts.Find(discount.Id);
@@ -55,6 +56,24 @@ namespace Server.Services
         {
             _context.Discounts.Remove(discount);
             _context.SaveChanges();
+        }
+
+        public double ApplyDiscount(double price, int discountId)
+        {
+            var dsc = _context.Discounts.Find(discountId);
+            
+            if (dsc != null)
+            {
+                switch (dsc.ValueType)
+                {
+                    case Discount.DiscountValueTypes.Flat:
+                        return Math.Max(price - dsc.Value, 0);
+                    case Discount.DiscountValueTypes.Percentage:
+                        return price * (100 - dsc.Value);
+                }
+            }
+
+            return price;
         }
     }
 }

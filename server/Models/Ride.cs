@@ -20,11 +20,8 @@ namespace Server.Models
         public int TrainId { get; set; }
         
         public virtual Train Train { set; get; }
-
-        [Required]
-        public int FreeTickets { set; get; }
         
         [Required]
-        public int Price { set; get; }
+        public double Price { set; get; }
     }
 }

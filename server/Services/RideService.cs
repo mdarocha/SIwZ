@@ -33,19 +33,10 @@ namespace Server.Services
             _context.SaveChanges();
             return ride;
         }
-        
-        public DateTime? ValidateDate(string date)
-        {
-            DateTime dt;
 
-            if (DateTime.TryParse(date, out dt))
-            {
-                String.Format("{0:yyyy-mm-dd hh-mm}", dt);
-                return dt;
-            }
 
-            return null;
-        }
+        public Ride GetRide(int id) =>
+            _context.Rides.Include(x => x.Train).Include(x => x.Route).Single(r => r.Id == id);
 
         public List<Ride> RideSearch() =>
             _context.Rides.Where(ride => true).ToList();
@@ -56,6 +47,4 @@ namespace Server.Services
         public List<Ride> GetByIdsList(List<int> ids) =>
             _context.Rides.Include(x => x.Train).Where(ride => ids.Contains(ride.Id)).ToList();
     }
-    
-    
 }

@@ -95,19 +95,26 @@ namespace Server.Database
                 new Discount
                 {
                     Id = 1,
+                    Type = "NoDiscount", 
+                    Value = 0, 
+                    ValueType = Discount.DiscountValueTypes.Flat
+                },
+                new Discount
+                {
+                    Id = 2,
                     Type = "ExampleFlat", 
                     Value = 2, 
                     ValueType = Discount.DiscountValueTypes.Flat
                 },
                 new Discount
                 {
-                    Id = 2,
+                    Id = 3,
                     Type = "ExamplePercentage", 
                     Value = 5,
                     ValueType = Discount.DiscountValueTypes.Percentage
                 }
             );
-            modelBuilder.Entity<Discount>().Property(p => p.Id).HasIdentityOptions(startValue: 3);
+            modelBuilder.Entity<Discount>().Property(p => p.Id).HasIdentityOptions(startValue: 4);
             
             modelBuilder.Entity<StopToRoute>().HasData(
                 new StopToRoute
@@ -215,7 +222,6 @@ namespace Server.Database
                     RouteId = 1,
                     StartTime = DateTime.Now,
                     TrainId = 1,
-                    FreeTickets = 300,
                     Price = 100
                 },
                 new Ride
@@ -224,7 +230,6 @@ namespace Server.Database
                     RouteId = 2,
                     StartTime = DateTime.Now,
                     TrainId = 2,
-                    FreeTickets = 400,
                     Price = 50
                 }, 
                 new Ride
@@ -233,7 +238,6 @@ namespace Server.Database
                     RouteId = 3,
                     StartTime = DateTime.Now,
                     TrainId = 3,
-                    FreeTickets = 150,
                     Price = 10
                 }, 
                 new Ride
@@ -242,7 +246,6 @@ namespace Server.Database
                     RouteId = 4,
                     StartTime = DateTime.Now,
                     TrainId = 4,
-                    FreeTickets = 200,
                     Price = 80
                 }
             );
