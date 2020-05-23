@@ -150,8 +150,6 @@ namespace Server.Controllers
         [HttpPost("tickets")]
         public ActionResult<Ticket> BookTicket([FromBody]TicketFormDTO form)
         {
-            
-            
             var id = _userManager.GetUserId(User);
             var ride = _rideService.GetRide(form.RideId);
             var price = ride.Price * GetRoutePart(ride.RouteId, form.FromId, form.ToId);

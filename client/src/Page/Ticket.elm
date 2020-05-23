@@ -15,6 +15,8 @@ import Html.Events exposing (..)
 import Http
 import Iso8601 as TimeIso
 import Json.Decode as Decode
+import Json.Encode as Encode
+import Jwt.Http
 import Session
 import Skeleton
 import Time
@@ -107,6 +109,16 @@ type Discounts
     | DiscountsSuccess (List Discount)
 
 
+type alias Ticket =
+    { rideId : Int
+    , discountId : Int
+    , fromId : Int
+    , toId : Int
+    , wagonNumber : Int
+    , seatNumber : Int
+    }
+
+
 
 -- MSG
 
@@ -119,6 +131,7 @@ type Msg
     | SeatSelected Int
     | DiscountSelected String
     | SubmitTicket
+    | BookedTicket (Result Http.Error ())
 
 
 
@@ -202,12 +215,12 @@ update msg model =
                     model.selectedPlace
 
                 newSelected =
-                    { oldSelected | wagonShown = Just wagon}
+                    { oldSelected | wagonShown = Just wagon }
             in
             ( { model | selectedPlace = newSelected }, Cmd.none )
 
         SeatSelected seat ->
-            case model.selectedPlace.wagonShown of 
+            case model.selectedPlace.wagonShown of
                 Just wagonShown ->
                     let
                         oldSelected =
@@ -217,6 +230,7 @@ update msg model =
                             { oldSelected | selectedSeat = Just seat, selectedWagon = Just wagonShown }
                     in
                     ( { model | selectedPlace = newSelected }, Cmd.none )
+
                 Nothing ->
                     ( model, Cmd.none )
 
@@ -238,7 +252,36 @@ update msg model =
                     ( model, Cmd.none )
 
         SubmitTicket ->
-            ( model, Cmd.none )
+            let
+                ( selectedWagon, selectedSeat ) =
+                    ( model.selectedPlace.selectedWagon, model.selectedPlace.selectedSeat )
+
+                selectedDiscount =
+                    model.selectedDiscount
+            in
+            case ( model.ride, model.session.user ) of
+                ( RideSuccess ride, Just user ) ->
+                    case ( selectedWagon, selectedSeat, selectedDiscount ) of
+                        ( Just wagon, Just seat, Just discount ) ->
+                            let
+                                ticket =
+                                    Ticket ride.id discount.id ride.from ride.to (wagon + 1) (seat + 1)
+                            in
+                            ( model, bookTicket model.session.api user.token ticket )
+
+                        ( _, _, _ ) ->
+                            ( model, Cmd.none )
+
+                (_, _) ->
+                    ( model, Nav.pushUrl model.session.key "/login" )
+
+        BookedTicket result ->
+            case result of
+                Ok _ ->
+                    ( model, Nav.pushUrl model.session.key "/user" )
+
+                Err _ ->
+                    ( model, Cmd.none )
 
 
 
@@ -340,6 +383,30 @@ discountText discount =
 
         Percentage ->
             discount.name ++ " - " ++ String.fromInt discount.value ++ " %"
+
+
+getPrice : RideData -> Maybe Discount -> String
+getPrice rideData discount =
+    case rideData of
+        RideSuccess ride ->
+            let
+                price =
+                    case discount of
+                        Just dis ->
+                            case dis.discountType of
+                                Flat ->
+                                    ride.price - dis.value
+
+                                Percentage ->
+                                    round (toFloat ride.price * (1 - 0.01 * toFloat dis.value))
+
+                        Nothing ->
+                            ride.price
+            in
+            String.fromInt price ++ " zł"
+
+        _ ->
+            "ERROR"
 
 
 
@@ -473,8 +540,10 @@ viewWagonSelector seats selected seatSelected =
                 Just s ->
                     if i == s then
                         Button.primary
+
                     else
                         Button.secondary
+
                 Nothing ->
                     Button.secondary
 
@@ -491,10 +560,11 @@ viewSeatSelector : Maybe (List Bool) -> Maybe Int -> Maybe Int -> Maybe Int -> H
 viewSeatSelector maybeSeats maybeSelected maybeSelectedWagon maybeShownWagon =
     let
         isSelected num =
-            case (maybeSelected, maybeSelectedWagon, maybeShownWagon) of
-                (Just selected, Just selectedWagon, Just shownWagon) ->
+            case ( maybeSelected, maybeSelectedWagon, maybeShownWagon ) of
+                ( Just selected, Just selectedWagon, Just shownWagon ) ->
                     selected == num && selectedWagon == shownWagon
-                (_, _, _) ->
+
+                ( _, _, _ ) ->
                     False
 
         seat num avaible =
@@ -542,8 +612,9 @@ viewNextButton model =
             Button.button
                 [ Button.primary
                 , Button.large
+                , Button.attrs [ onClick SubmitTicket ]
                 ]
-                [ text "Kup" ]
+                [ text <| "Kup - " ++ getPrice model.ride model.selectedDiscount ]
 
         ( _, _, _ ) ->
             div [] []
@@ -593,8 +664,29 @@ getDiscounts api =
         }
 
 
+bookTicket : String -> String -> Ticket -> Cmd Msg
+bookTicket api token ticket =
+    Jwt.Http.post token
+        { body = Http.jsonBody (ticketEncoder ticket)
+        , expect = Http.expectWhatever BookedTicket
+        , url = api ++ "tickets"
+        }
+
+
 
 -- JSON
+
+
+ticketEncoder : Ticket -> Encode.Value
+ticketEncoder ticket =
+    Encode.object
+        [ ( "rideId", Encode.int ticket.rideId )
+        , ( "discountId", Encode.int ticket.discountId )
+        , ( "fromId", Encode.int ticket.fromId )
+        , ( "toId", Encode.int ticket.toId )
+        , ( "wagonNo", Encode.int ticket.wagonNumber )
+        , ( "seatNo", Encode.int ticket.seatNumber )
+        ]
 
 
 rideDecoder : Decode.Decoder Ride
