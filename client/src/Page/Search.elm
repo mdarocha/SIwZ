@@ -430,10 +430,12 @@ viewRide ride =
             List.sortBy .stopNumber ride.stops
     in
     Card.config [ Card.attrs [ class "mt-5 ride-card" ] ]
-        |> Card.headerH4 []
-            [ span [ class "oi oi-clock mr-1", style "font-size" "1.2rem" ] []
-            , span [] [ text (niceTime fromStop.arrivalTime) ]
-            , span [ class "font-italic float-right" ]
+        |> Card.headerH4 [ class "d-flex flex-wrap" ]
+            [ div [ style "flex" "1", style "white-space" "nowrap" ]
+                [ span [ class "oi oi-clock mr-1", style "font-size" "1.2rem" ] []
+                , span [] [ text (niceTime fromStop.arrivalTime) ]
+                ]
+            , span [ class "font-italic" ]
                 [ text <|
                     ride.train.name
                         ++ " "

@@ -15,7 +15,7 @@ import Json.Encode as Encode
 import Ports
 import Session
 import Skeleton
-
+import Bootstrap.Grid.Col as Col
 
 type alias Model =
     { session : Session.Data
@@ -213,8 +213,8 @@ view model =
                 ]
             ]
         , Grid.row []
-            [ Grid.col [] [ h2 [] [ text "Zaloguj się" ], viewLogin model ]
-            , Grid.col [] [ h2 [] [ text "Zarejestruj się" ], viewRegister model ]
+            [ Grid.col [ Col.md6 ] [ h2 [] [ text "Zaloguj się" ], viewLogin model ]
+            , Grid.col [ Col.md6 ] [ h2 [ class "mt-3 mt-md-0" ] [ text "Zarejestruj się" ], viewRegister model ]
             ]
         ]
     }
