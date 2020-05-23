@@ -1,6 +1,8 @@
 module Page.Ticket exposing (Model, Msg, init, update, view)
 
 import Bootstrap.Grid as Grid
+import Bootstrap.Grid.Col as Col
+import Bootstrap.Grid.Row as Row
 import Bootstrap.Spinner as Spinner
 import Browser.Navigation as Nav
 import Html exposing (..)
@@ -13,8 +15,8 @@ import Session
 import Skeleton
 import Time
 import Url.Builder as UrlBuilder
-import Bootstrap.Grid.Col as Col
-import Bootstrap.Grid.Row as Row
+
+
 
 -- MODEL
 
@@ -151,32 +153,32 @@ view model =
                     escapeMaybe =
                         Maybe.withDefault emptyStop
 
-
                     fromStop =
                         (List.head <| List.filter (\s -> s.id == ride.from) ride.stops) |> escapeMaybe
 
                     toStop =
                         (List.head <| List.filter (\s -> s.id == ride.to) ride.stops) |> escapeMaybe
                 in
-                    [ Grid.row [ Row.attrs [ class "mt-1 mt-md-3" ] ]
-                        [ Grid.col []
-                            [ div [ class "d-flex justify-content-center flex-wrap ticket-header" ]
-                                [ div [ class "from-station" ]
-                                    [ span [ class "oi oi-clock" ] []
-                                    , span [] [ text <| niceTime fromStop.arrivalTime ]
-                                    , span [] [ text <| rideStopToString fromStop ]
-                                    ]
-                                , div [ class "text-center ml-1 mr-1 ml-md-3 mr-md-3" ]
-                                    [ span [ class "oi oi-arrow-right" ] [] ]
-                                , div [ class "to-station" ]
-                                    [ span [ class "oi oi-clock" ] []
-                                    , span [] [ text <| niceTime toStop.arrivalTime ]
-                                    , span [] [ text <| rideStopToString toStop ]
-                                    ]
+                [ Grid.row [ Row.attrs [ class "mt-1 mt-md-3" ] ]
+                    [ Grid.col []
+                        [ div [ class "d-flex justify-content-center flex-wrap ticket-header" ]
+                            [ div [ class "from-station" ]
+                                [ span [ class "oi oi-clock" ] []
+                                , span [] [ text <| niceTime fromStop.arrivalTime ]
+                                , span [] [ text <| rideStopToString fromStop ]
+                                ]
+                            , div [ class "text-center ml-1 mr-1 ml-md-3 mr-md-3" ]
+                                [ span [ class "oi oi-arrow-right" ] [] ]
+                            , div [ class "to-station" ]
+                                [ span [ class "oi oi-clock" ] []
+                                , span [] [ text <| niceTime toStop.arrivalTime ]
+                                , span [] [ text <| rideStopToString toStop ]
                                 ]
                             ]
                         ]
                     ]
+                ]
+
             RideLoading ->
                 [ Grid.row []
                     [ Grid.col []
