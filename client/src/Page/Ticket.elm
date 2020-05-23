@@ -130,6 +130,29 @@ niceTime time =
             ++ ":"
             ++ (String.padLeft 2 '0' <| String.fromInt (Time.toMinute Time.utc time))
 
+niceDate : Time.Posix -> String
+niceDate time =
+    String.fromInt (Time.toDay Time.utc time)
+    ++ " "
+    ++ String.toLower (toMonth <| Time.toMonth Time.utc time)
+    ++ " "
+    ++ String.fromInt (Time.toYear Time.utc time)
+
+toMonth : Time.Month -> String
+toMonth month =
+    case month of
+        Time.Jan -> "Styczeń"
+        Time.Feb -> "Luty"
+        Time.Mar -> "Marzec"
+        Time.Apr -> "Kwiecień"
+        Time.May -> "Maj"
+        Time.Jun -> "Czerwiec"
+        Time.Jul -> "Lipiec"
+        Time.Aug -> "Sierpień"
+        Time.Sep -> "Wrzesień"
+        Time.Oct -> "Październik"
+        Time.Nov -> "Listopad"
+        Time.Dec -> "Grudzień"
 
 rideStopToString : RideStop -> String
 rideStopToString stop =
@@ -160,6 +183,9 @@ view model =
                         (List.head <| List.filter (\s -> s.id == ride.to) ride.stops) |> escapeMaybe
                 in
                 [ Grid.row [ Row.attrs [ class "mt-1 mt-md-3" ] ]
+                    [ Grid.col [ Col.attrs [ class "text-center ticket-header-date" ] ]
+                        [ text <| niceDate fromStop.arrivalTime ] ]
+                , Grid.row []
                     [ Grid.col []
                         [ div [ class "d-flex justify-content-center flex-wrap ticket-header" ]
                             [ div [ class "from-station" ]

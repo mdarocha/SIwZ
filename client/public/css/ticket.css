@@ -1,5 +1,10 @@
 .ticket-header {
     font-size: 1.3em;
+    --icon-size: 0.8em;
+}
+
+.ticket-header-date {
+    font-size: 1.2em;
 }
 
 .ticket-header > .from-station {
@@ -15,12 +20,12 @@
 }
 
 .ticket-header > .from-station > span.oi {
-    font-size: 0.9em;
+    font-size: var(--icon-size);
     padding-right: 2px;
 }
 
 .ticket-header > .to-station > span.oi {
-    font-size: 0.9em;
+    font-size: var(--icon-size);
     padding-right: 2px;
 }
 
