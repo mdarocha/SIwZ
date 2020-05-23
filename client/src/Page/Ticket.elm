@@ -1,5 +1,9 @@
 module Page.Ticket exposing (Model, Msg, init, update, view)
 
+import Array exposing (..)
+import Bootstrap.Button as Button
+import Bootstrap.ButtonGroup as ButtonGroup
+import Bootstrap.Form.Select as Select
 import Bootstrap.Grid as Grid
 import Bootstrap.Grid.Col as Col
 import Bootstrap.Grid.Row as Row
@@ -15,9 +19,8 @@ import Session
 import Skeleton
 import Time
 import Url.Builder as UrlBuilder
-import Bootstrap.ButtonGroup as ButtonGroup
-import Bootstrap.Button as Button
-import Array exposing (..)
+
+
 
 -- MODEL
 
@@ -61,22 +64,49 @@ type alias TrainWagon =
     , seats : List Bool
     }
 
+
 type TrainWagons
     = WagonFailure
     | WagonLoading
     | WagonSuccess (Array TrainWagon)
+
 
 type alias Model =
     { session : Session.Data
     , ride : RideData
     , seats : TrainWagons
     , selectedPlace : PlaceSelector
+    , discounts : Discounts
+    , selectedDiscount : Maybe Discount
     }
+
 
 type alias PlaceSelector =
     { selectedWagon : Maybe Int
     , selectedSeat : Maybe Int
+    , wagonShown : Maybe Int
     }
+
+
+type DiscountType
+    = Flat
+    | Percentage
+
+
+type alias Discount =
+    { id : Int
+    , name : String
+    , value : Int
+    , discountType : DiscountType
+    }
+
+
+type Discounts
+    = DiscountsFailure
+    | DiscountsLoading
+    | DiscountsSuccess (List Discount)
+
+
 
 -- MSG
 
@@ -84,8 +114,13 @@ type alias PlaceSelector =
 type Msg
     = GotRide (Result Http.Error Ride)
     | GotFreeSeats (Result Http.Error (Array TrainWagon))
+    | GotDiscounts (Result Http.Error (List Discount))
     | WagonSelected Int
     | SeatSelected Int
+    | DiscountSelected String
+    | SubmitTicket
+
+
 
 -- INIT
 
@@ -94,7 +129,7 @@ init : Session.Data -> Maybe Int -> Maybe Int -> Maybe Int -> ( Model, Cmd Msg )
 init session from to ride =
     let
         model =
-            Model session RideLoading WagonLoading (PlaceSelector Nothing Nothing)
+            Model session RideLoading WagonLoading (PlaceSelector Nothing Nothing Nothing) DiscountsLoading Nothing
     in
     case ( from, to, ride ) of
         ( Just fromId, Just toId, Just rideId ) ->
@@ -103,10 +138,14 @@ init session from to ride =
                     let
                         rideCmd =
                             getRide session.api fromId toId rideId
+
                         seatsCmd =
                             getFreeSeats session.api fromId toId rideId
+
+                        discountsCmd =
+                            getDiscounts session.api
                     in
-                    ( model, Cmd.batch [ rideCmd, seatsCmd ] )
+                    ( model, Cmd.batch [ rideCmd, seatsCmd, discountsCmd ] )
 
                 Nothing ->
                     let
@@ -140,25 +179,69 @@ update msg model =
 
                 Err _ ->
                     ( { model | ride = RideFailure }, Cmd.none )
+
         GotFreeSeats result ->
             case result of
                 Ok seats ->
                     ( { model | seats = WagonSuccess seats }, Cmd.none )
+
                 Err _ ->
                     ( { model | seats = WagonFailure }, Cmd.none )
+
+        GotDiscounts result ->
+            case result of
+                Ok discounts ->
+                    ( { model | discounts = DiscountsSuccess discounts }, Cmd.none )
+
+                Err _ ->
+                    ( { model | discounts = DiscountsFailure }, Cmd.none )
+
         WagonSelected wagon ->
             let
-                oldSelected = model.selectedPlace
-                newSelected = { oldSelected | selectedWagon = Just wagon, selectedSeat = Nothing }
+                oldSelected =
+                    model.selectedPlace
+
+                newSelected =
+                    { oldSelected | wagonShown = Just wagon}
             in
             ( { model | selectedPlace = newSelected }, Cmd.none )
 
         SeatSelected seat ->
-            let
-                oldSelected = model.selectedPlace
-                newSelected = { oldSelected | selectedSeat = Just seat }
-            in
-            ( { model | selectedPlace = newSelected }, Cmd.none )
+            case model.selectedPlace.wagonShown of 
+                Just wagonShown ->
+                    let
+                        oldSelected =
+                            model.selectedPlace
+
+                        newSelected =
+                            { oldSelected | selectedSeat = Just seat, selectedWagon = Just wagonShown }
+                    in
+                    ( { model | selectedPlace = newSelected }, Cmd.none )
+                Nothing ->
+                    ( model, Cmd.none )
+
+        DiscountSelected discountIdString ->
+            case model.discounts of
+                DiscountsSuccess discounts ->
+                    let
+                        discountId =
+                            String.toInt discountIdString
+                                |> Maybe.withDefault -1
+
+                        discount =
+                            List.filter (\d -> d.id == discountId) discounts
+                                |> List.head
+                    in
+                    ( { model | selectedDiscount = discount }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        SubmitTicket ->
+            ( model, Cmd.none )
+
+
+
 -- UTIL
 
 
@@ -223,6 +306,7 @@ rideStopToString : RideStop -> String
 rideStopToString stop =
     stop.name ++ " - " ++ stop.city
 
+
 selectedWagonSeats : Array TrainWagon -> Maybe Int -> Maybe (List Bool)
 selectedWagonSeats wagons selectedWagon =
     case selectedWagon of
@@ -230,10 +314,34 @@ selectedWagonSeats wagons selectedWagon =
             case Array.get selected wagons of
                 Just wagon ->
                     Just wagon.seats
+
                 Nothing ->
                     Nothing
+
         Nothing ->
             Nothing
+
+
+shouldShowDiscountSelector : Model -> Bool
+shouldShowDiscountSelector model =
+    case ( model.selectedPlace.selectedWagon, model.selectedPlace.selectedSeat ) of
+        ( Just _, Just _ ) ->
+            True
+
+        ( _, _ ) ->
+            False
+
+
+discountText : Discount -> String
+discountText discount =
+    case discount.discountType of
+        Flat ->
+            discount.name ++ " - " ++ String.fromInt discount.value ++ " zł"
+
+        Percentage ->
+            discount.name ++ " - " ++ String.fromInt discount.value ++ " %"
+
+
 
 -- VIEW
 
@@ -242,8 +350,8 @@ view : Model -> Skeleton.Details Msg
 view model =
     { title = "Kup bilet"
     , body =
-        case ( model.ride, model.seats ) of
-            ( RideSuccess ride, WagonSuccess seats ) ->
+        case ( model.ride, model.seats, model.discounts ) of
+            ( RideSuccess ride, WagonSuccess seats, DiscountsSuccess discounts ) ->
                 let
                     emptyStop =
                         RideStop 0 (Time.millisToPosix 0) 0 "ERROR" "ERROR"
@@ -260,36 +368,71 @@ view model =
                 [ Grid.row [] [ Grid.col [ Col.attrs [ class "text-center ticket-header" ] ] [ text <| niceDate fromStop.arrivalTime ] ]
                 , Grid.row [] [ Grid.col [ Col.attrs [ class "text-center ticket-header" ] ] [ text ride.train.name ] ]
                 , Grid.row [] [ Grid.col [ Col.attrs [ class "text-center ticket-header ticket-header-last" ] ] [ viewHeaderFromTo fromStop toStop ] ]
-                , Grid.row [] [ Grid.col [ Col.attrs [ class "text-center ticket-info" ] ] [ text "Wybierz miejsce" ] ]
+                , Grid.row [] [ Grid.col [ Col.attrs [ class "text-center ticket-info" ] ] [ viewHelpText model ] ]
                 , Grid.row [ Row.attrs [ class "justify-content-center" ] ]
-                    [ Grid.col [ Col.xsAuto ] [ viewWagonSelector seats model.selectedPlace.selectedWagon ]
+                    [ Grid.col [ Col.xsAuto ] [ viewWagonSelector seats model.selectedPlace.wagonShown model.selectedPlace.selectedWagon ]
                     ]
                 , Grid.row [ Row.attrs [ class "justify-content-center" ] ]
                     [ Grid.col [ Col.xsAuto ]
-                        [ viewSeatSelector (selectedWagonSeats seats model.selectedPlace.selectedWagon) model.selectedPlace.selectedSeat model.selectedPlace.selectedWagon ] ]
+                        [ viewSeatSelector (selectedWagonSeats seats model.selectedPlace.wagonShown) model.selectedPlace.selectedSeat model.selectedPlace.wagonShown model.selectedPlace.selectedWagon ]
+                    ]
+                , Grid.row [ Row.attrs [ class "mt-3 justify-content-center" ] ]
+                    [ Grid.col [ Col.xsAuto ]
+                        [ viewDiscountSelector discounts model.selectedDiscount (shouldShowDiscountSelector model) ]
+                    ]
+                , Grid.row [ Row.attrs [ class "mt-3 justify-content-center" ] ]
+                    [ Grid.col [ Col.xsAuto ]
+                        [ viewNextButton model ]
+                    ]
                 ]
 
-            ( RideFailure, _ ) ->
+            ( RideFailure, _, _ ) ->
                 [ div [ class "text-center" ]
                     [ h2 [] [ text "Wystąpił błąd" ]
                     , h3 [] [ text "Spróbuj odświeżyć stronę" ]
                     ]
                 ]
 
-            ( _, WagonFailure ) ->
+            ( _, WagonFailure, _ ) ->
                 [ div [ class "text-center" ]
                     [ h2 [] [ text "Wystąpił błąd" ]
                     , h3 [] [ text "Spróbuj odświeżyć stronę" ]
                     ]
                 ]
 
-            ( _, _ ) ->
+            ( _, _, DiscountsFailure ) ->
+                [ div [ class "text-center" ]
+                    [ h2 [] [ text "Wystąpił błąd" ]
+                    , h3 [] [ text "Spróbuj odświeżyć stronę" ]
+                    ]
+                ]
+
+            ( _, _, _ ) ->
                 [ Grid.row [ Row.attrs [ class "justify-content-center" ] ]
                     [ Grid.col [ Col.xsAuto ]
                         [ Spinner.spinner [] [] ]
                     ]
                 ]
     }
+
+
+viewHelpText : Model -> Html Msg
+viewHelpText model =
+    case ( model.selectedPlace.wagonShown, model.selectedPlace.selectedSeat, model.selectedDiscount ) of
+        ( Nothing, Nothing, Nothing ) ->
+            text "Wybierz wagon w pociągu"
+
+        ( Just _, Nothing, Nothing ) ->
+            text "Wybierz miejsce w wagonie"
+
+        ( Just _, Just _, Nothing ) ->
+            text "Wybierz zniżkę, jeśli aplikuje się"
+
+        ( Just _, Just _, Just _ ) ->
+            text "Bilet gotowy - potwierdź kupno"
+
+        ( _, _, _ ) ->
+            text "¯\\_(ツ)_/¯"
 
 
 viewHeaderFromTo : RideStop -> RideStop -> Html Msg
@@ -313,48 +456,99 @@ viewHeaderFromTo from to =
             ]
         ]
 
-viewWagonSelector : Array TrainWagon -> Maybe Int -> Html Msg
-viewWagonSelector seats selected =
+
+viewWagonSelector : Array TrainWagon -> Maybe Int -> Maybe Int -> Html Msg
+viewWagonSelector seats selected seatSelected =
     let
         isSelected i =
             case selected of
                 Just s ->
                     i == s
+
                 Nothing ->
                     False
+
+        buttonType i =
+            case seatSelected of
+                Just s ->
+                    if i == s then
+                        Button.primary
+                    else
+                        Button.secondary
+                Nothing ->
+                    Button.secondary
 
         button num _ =
             ButtonGroup.radioButton (isSelected num)
-                [ Button.secondary, Button.attrs [ onClick (WagonSelected num) ] ]
+                [ buttonType num, Button.attrs [ onClick (WagonSelected num) ] ]
                 [ text <| String.fromInt (num + 1) ]
     in
-    ButtonGroup.radioButtonGroup []
-        <| (Array.indexedMap button seats |> Array.toList)
+    ButtonGroup.radioButtonGroup [] <|
+        (Array.indexedMap button seats |> Array.toList)
 
-viewSeatSelector : Maybe (List Bool) -> Maybe Int -> Maybe Int -> Html Msg
-viewSeatSelector maybeSeats maybeSelected maybeSelectedWagon =
+
+viewSeatSelector : Maybe (List Bool) -> Maybe Int -> Maybe Int -> Maybe Int -> Html Msg
+viewSeatSelector maybeSeats maybeSelected maybeSelectedWagon maybeShownWagon =
     let
         isSelected num =
-            case maybeSelected of
-                Just selected ->
-                    selected == num
-                Nothing ->
+            case (maybeSelected, maybeSelectedWagon, maybeShownWagon) of
+                (Just selected, Just selectedWagon, Just shownWagon) ->
+                    selected == num && selectedWagon == shownWagon
+                (_, _, _) ->
                     False
 
         seat num avaible =
-            div [ classList [("enabled", avaible), ("selected", isSelected num)]
+            div
+                [ classList [ ( "enabled", avaible ), ( "selected", isSelected num ) ]
                 , attribute "tabindex" (String.fromInt num)
-                , onClick (SeatSelected num) ]
+                , onClick (SeatSelected num)
+                ]
                 [ text <| String.fromInt (num + 1) ]
     in
-    case (maybeSeats, maybeSelectedWagon) of
-        ( Just seats, Just wagon )->
-            div [ class "seat-selector seat-selector-open"
+    case ( maybeSeats, maybeSelectedWagon ) of
+        ( Just seats, Just wagon ) ->
+            div
+                [ class "seat-selector seat-selector-open"
                 , attribute "data-column-size" <| String.fromInt (List.length seats // 4)
-                , attribute "data-wagon-n" <| String.fromInt (wagon + 1)]
-                <| List.indexedMap seat seats
-        (_, _) ->
-            div [ class "ticket-info text-center mt-3" ] [ text "Wybierz wagon w pociągu" ]
+                , attribute "data-wagon-n" <| String.fromInt (wagon + 1)
+                ]
+            <|
+                List.indexedMap seat seats
+
+        ( _, _ ) ->
+            div [] []
+
+
+viewDiscountSelector : List Discount -> Maybe Discount -> Bool -> Html Msg
+viewDiscountSelector discounts selected shouldShow =
+    case shouldShow of
+        True ->
+            let
+                item discount =
+                    Select.item [ value <| String.fromInt discount.id ]
+                        [ text <| discountText discount ]
+            in
+            Select.select [ Select.onChange DiscountSelected ] <|
+                List.map item discounts
+
+        False ->
+            div [] []
+
+
+viewNextButton : Model -> Html Msg
+viewNextButton model =
+    case ( model.selectedPlace.selectedWagon, model.selectedPlace.selectedSeat, model.selectedDiscount ) of
+        ( Just _, Just _, Just _ ) ->
+            Button.button
+                [ Button.primary
+                , Button.large
+                ]
+                [ text "Kup" ]
+
+        ( _, _, _ ) ->
+            div [] []
+
+
 
 -- HTTP
 
@@ -390,6 +584,16 @@ getFreeSeats api fromId toId rideId =
         , expect = Http.expectJson GotFreeSeats freeSeatsDecoder
         }
 
+
+getDiscounts : String -> Cmd Msg
+getDiscounts api =
+    Http.get
+        { url = api ++ "discounts"
+        , expect = Http.expectJson GotDiscounts discountDecoder
+        }
+
+
+
 -- JSON
 
 
@@ -424,9 +628,37 @@ rideTrainDecoder =
         (Decode.field "seats" Decode.int)
         (Decode.field "wagons" Decode.int)
 
+
 freeSeatsDecoder : Decode.Decoder (Array TrainWagon)
 freeSeatsDecoder =
     Decode.array <|
         Decode.map2 TrainWagon
             (Decode.field "wagonNo" Decode.int)
             (Decode.field "seats" <| Decode.list Decode.bool)
+
+
+discountDecoder : Decode.Decoder (List Discount)
+discountDecoder =
+    Decode.list <|
+        Decode.map4 Discount
+            (Decode.field "id" Decode.int)
+            (Decode.field "type" Decode.string)
+            (Decode.field "value" Decode.int)
+            (Decode.field "valueType" discountTypeDecoder)
+
+
+discountTypeDecoder : Decode.Decoder DiscountType
+discountTypeDecoder =
+    Decode.int
+        |> Decode.andThen
+            (\i ->
+                case i of
+                    0 ->
+                        Decode.succeed Percentage
+
+                    1 ->
+                        Decode.succeed Flat
+
+                    somethingElse ->
+                        Decode.fail <| "Unknown discount type: " ++ String.fromInt somethingElse
+            )

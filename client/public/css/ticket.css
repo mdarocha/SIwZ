@@ -5,11 +5,13 @@
 }
 
 .ticket-header-last {
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 
 .ticket-info {
     font-size: 1.1em;
+    margin-top: 5px;
+    margin-bottom: 15px;
 }
 
 .ticket-from-to span.oi {

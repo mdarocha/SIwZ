@@ -218,6 +218,7 @@ changeRoute route model =
             case model.page of
                 Search _ ->
                     ( model, Cmd.none )
+
                 _ ->
                     stepSearch model (Search.init session from to)
 
