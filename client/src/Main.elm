@@ -215,7 +215,11 @@ changeRoute route model =
             stepAdminTrainStops model (AdminTrainStops.init session)
 
         Just (Routes.SearchRoute from to) ->
-            stepSearch model (Search.init session from to)
+            case model.page of
+                Search _ ->
+                    ( model, Cmd.none )
+                _ ->
+                    stepSearch model (Search.init session from to)
 
         Just Routes.AboutRoute ->
             stepAbout model (About.init session)
