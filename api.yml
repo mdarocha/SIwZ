@@ -326,7 +326,24 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Ride'                          
+                $ref: '#/components/schemas/Ride' 
+    patch:
+      tags:
+        - Ride
+      summary: Modify Ride with given id.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RidePatch'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ride'            
   /admin/rides/{id}:
     parameters:
       - $ref: '#/components/parameters/id'
@@ -337,23 +354,6 @@ paths:
       responses:
         '200':
           description: Ride object.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Ride'
-    patch:
-      tags:
-        - Ride
-      summary: Modify Ride with given id.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RideForm'
-      responses:
-        '200':
-          description: Ok
           content:
             application/json:
               schema:
@@ -691,6 +691,23 @@ components:
           type: integer
         Price:
           type: integer
+        IsEveryDayRide:
+          type: boolean
+    RidePatch:
+      type: object
+      properties:
+        Id:
+          type: integer
+        RouteId:
+          type: integer
+        StartTime:
+          type: string
+        TrainId:
+          type: integer
+        Price:
+          type: integer
+        IsEveryDayRide:
+          type: boolean
     Ticket:
       type: object
       properties:

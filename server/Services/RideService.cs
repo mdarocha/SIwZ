@@ -22,15 +22,41 @@ namespace Server.Services
             return rides;
         }
 
-        public Ride GetById(int id)
-        {
-            return _context.Rides.Find(id);
-        }
+
 
         public Ride Create(Ride ride)
         {
             _context.Rides.Add(ride);
             _context.SaveChanges();
+            return ride;
+        }
+
+        public Ride Edit(Ride ride)
+        {
+            var r = _context.Rides.Find(ride.Id);
+            if (r != null)
+            {
+                r.Id = ride.Id;
+                r.Price = ride.Price;
+                r.Route = ride.Route;
+                r.Train = ride.Train;
+                r.RouteId = ride.RouteId;
+                r.StartTime = ride.StartTime;
+                r.TrainId = ride.TrainId;
+                r.IsEveryDayRide = ride.IsEveryDayRide;
+                
+                _context.Rides.Update(r);
+                _context.SaveChanges();
+            }
+            return r;
+        }
+
+        public Ride Delete(int id)
+        {
+            var ride = _context.Rides.Find(id);
+            _context.Rides.Remove(ride);
+            _context.SaveChanges();
+
             return ride;
         }
 
