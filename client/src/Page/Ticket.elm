@@ -85,6 +85,7 @@ type Msg
     = GotRide (Result Http.Error Ride)
     | GotFreeSeats (Result Http.Error (Array TrainWagon))
     | WagonSelected Int
+    | SeatSelected Int
 
 -- INIT
 
@@ -148,10 +149,16 @@ update msg model =
         WagonSelected wagon ->
             let
                 oldSelected = model.selectedPlace
-                newSelected = { oldSelected | selectedWagon = Just wagon }
+                newSelected = { oldSelected | selectedWagon = Just wagon, selectedSeat = Nothing }
             in
             ( { model | selectedPlace = newSelected }, Cmd.none )
 
+        SeatSelected seat ->
+            let
+                oldSelected = model.selectedPlace
+                newSelected = { oldSelected | selectedSeat = Just seat }
+            in
+            ( { model | selectedPlace = newSelected }, Cmd.none )
 -- UTIL
 
 
@@ -259,7 +266,7 @@ view model =
                     ]
                 , Grid.row [ Row.attrs [ class "justify-content-center" ] ]
                     [ Grid.col [ Col.xsAuto ]
-                        [ viewSeatSelector (selectedWagonSeats seats model.selectedPlace.selectedWagon) model.selectedPlace.selectedSeat ] ]
+                        [ viewSeatSelector (selectedWagonSeats seats model.selectedPlace.selectedWagon) model.selectedPlace.selectedSeat model.selectedPlace.selectedWagon ] ]
                 ]
 
             ( RideFailure, _ ) ->
@@ -324,8 +331,8 @@ viewWagonSelector seats selected =
     ButtonGroup.radioButtonGroup []
         <| (Array.indexedMap button seats |> Array.toList)
 
-viewSeatSelector : Maybe (List Bool) -> Maybe Int -> Html Msg
-viewSeatSelector maybeSeats maybeSelected =
+viewSeatSelector : Maybe (List Bool) -> Maybe Int -> Maybe Int -> Html Msg
+viewSeatSelector maybeSeats maybeSelected maybeSelectedWagon =
     let
         isSelected num =
             case maybeSelected of
@@ -336,15 +343,17 @@ viewSeatSelector maybeSeats maybeSelected =
 
         seat num avaible =
             div [ classList [("enabled", avaible), ("selected", isSelected num)]
-                , attribute "tabindex" (String.fromInt num) ]
+                , attribute "tabindex" (String.fromInt num)
+                , onClick (SeatSelected num) ]
                 [ text <| String.fromInt (num + 1) ]
     in
-    case maybeSeats of
-        Just seats ->
-            div [ class "seat-selector"
-                , attribute "data-column-size" <| String.fromInt (List.length seats // 4) ]
+    case (maybeSeats, maybeSelectedWagon) of
+        ( Just seats, Just wagon )->
+            div [ class "seat-selector seat-selector-open"
+                , attribute "data-column-size" <| String.fromInt (List.length seats // 4)
+                , attribute "data-wagon-n" <| String.fromInt (wagon + 1)]
                 <| List.indexedMap seat seats
-        Nothing ->
+        (_, _) ->
             div [ class "ticket-info text-center mt-3" ] [ text "Wybierz wagon w pociągu" ]
 
 -- HTTP
