@@ -9,6 +9,8 @@ using Server.Services;
 
 namespace Server.Controllers.Admin
 {
+    [Route("/api/admin/users")]
+    [ApiController]
     public class AdminUserController : ControllerBase
     {
         private readonly UserService _userService;
@@ -40,7 +42,8 @@ namespace Server.Controllers.Admin
         [Route("{id}/tickets")]
         public ActionResult<List<User>> GetUserTickets([FromRoute] string id)
         {
-            var tickets = _ticketService.GetUserTickets(id);
+            var user = _userService.GetUser(id);
+            var tickets = _ticketService.GetUserTickets(user.Email);
             return Ok(tickets);
         }
         
@@ -48,7 +51,8 @@ namespace Server.Controllers.Admin
         [Route("{id}/tickets/{ticketId}")]
         public ActionResult<List<User>> GetUserTicket([FromRoute] string id, [FromRoute] int ticketId)
         {
-            var tickets = _ticketService.GetUserTickets(id);
+            var user = _userService.GetUser(id);
+            var tickets = _ticketService.GetUserTickets(user.Email);
             var ticket = _ticketService.GetUserTicket(ticketId, tickets);
             
             return Ok(ticket);
@@ -58,7 +62,8 @@ namespace Server.Controllers.Admin
         [Route("{id}/tickets/{ticketId}")]
         public ActionResult<List<User>> DeleteUserTicket([FromRoute] string id, [FromRoute] int ticketId)
         {
-            var tickets = _ticketService.GetUserTickets(id);
+            var user = _userService.GetUser(id);
+            var tickets = _ticketService.GetUserTickets(user.Email);
             var ticket = _ticketService.GetUserTicket(ticketId, tickets);
             _ticketService.DeleteTicket(ticket.Id);
             
