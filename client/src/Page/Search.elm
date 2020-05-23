@@ -240,8 +240,10 @@ update msg model =
                                 ( Just queryFrom, Just queryTo ) ->
                                     if from.id /= queryFrom || to.id /= queryTo then
                                         Nav.replaceUrl model.session.key url
+
                                     else
                                         Cmd.none
+
                                 ( _, _ ) ->
                                     Nav.replaceUrl model.session.key url
                     in

@@ -5,6 +5,7 @@ import Bootstrap.Button as Button
 import Bootstrap.Form as Form
 import Bootstrap.Form.Input as Input
 import Bootstrap.Grid as Grid
+import Bootstrap.Grid.Col as Col
 import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -15,7 +16,7 @@ import Json.Encode as Encode
 import Ports
 import Session
 import Skeleton
-import Bootstrap.Grid.Col as Col
+
 
 type alias Model =
     { session : Session.Data
