@@ -12,9 +12,10 @@ import Html.Events exposing (onInput)
 import Http
 import Json.Decode as Decode
 import Json.Encode as Encode
+import Ports
 import Session
 import Skeleton
-import Ports
+
 
 type alias Model =
     { session : Session.Data
@@ -101,10 +102,14 @@ update msg model =
                         newSession =
                             { oldSession | user = Just user }
 
-                        newModel = Model newSession model.redirect Nothing (LoginData "" "") model.register
+                        newModel =
+                            Model newSession model.redirect Nothing (LoginData "" "") model.register
 
-                        redirectCmd = redirectCommand model.session.key model.redirect
-                        setSessionCmd = Ports.setUserSession <| Session.userEncode user
+                        redirectCmd =
+                            redirectCommand model.session.key model.redirect
+
+                        setSessionCmd =
+                            Ports.setUserSession <| Session.userEncode user
                     in
                     ( newModel, Cmd.batch [ redirectCmd, setSessionCmd ] )
 
@@ -164,12 +169,16 @@ update msg model =
                         newSession =
                             { oldSession | user = Just user }
 
-                        newModel = Model newSession model.redirect Nothing model.login (RegisterData "" "" "" "")
+                        newModel =
+                            Model newSession model.redirect Nothing model.login (RegisterData "" "" "" "")
 
-                        redirectCmd = redirectCommand model.session.key model.redirect
-                        setSessionCmd = Ports.setUserSession <| Session.userEncode user
+                        redirectCmd =
+                            redirectCommand model.session.key model.redirect
+
+                        setSessionCmd =
+                            Ports.setUserSession <| Session.userEncode user
                     in
-                    ( newModel, Cmd.batch [ redirectCmd, setSessionCmd ])
+                    ( newModel, Cmd.batch [ redirectCmd, setSessionCmd ] )
 
                 Err _ ->
                     ( { model | errorText = Just "Wystąpił błąd" }, Cmd.none )

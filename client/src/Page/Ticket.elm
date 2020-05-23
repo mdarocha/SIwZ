@@ -1,6 +1,11 @@
 module Page.Ticket exposing (Model, Msg, init, update, view)
 
+import Bootstrap.Grid as Grid
+import Bootstrap.Spinner as Spinner
+import Browser.Navigation as Nav
 import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (..)
 import Http
 import Iso8601 as TimeIso
 import Json.Decode as Decode
@@ -8,8 +13,8 @@ import Session
 import Skeleton
 import Time
 import Url.Builder as UrlBuilder
-import Browser.Navigation as Nav
-
+import Bootstrap.Grid.Col as Col
+import Bootstrap.Grid.Row as Row
 
 -- MODEL
 
@@ -50,6 +55,7 @@ type RideData
 
 type alias Model =
     { session : Session.Data
+    , ride : RideData
     }
 
 
@@ -67,23 +73,33 @@ type Msg
 
 init : Session.Data -> Maybe Int -> Maybe Int -> Maybe Int -> ( Model, Cmd Msg )
 init session from to ride =
+    let
+        model =
+            Model session RideLoading
+    in
     case ( from, to, ride ) of
-        (Just fromId, Just toId, Just rideId ) ->
+        ( Just fromId, Just toId, Just rideId ) ->
             case session.user of
-                Just user ->
-                    ( Model session, getRide session.api fromId toId rideId )
+                Just _ ->
+                    ( model, getRide session.api fromId toId rideId )
+
                 Nothing ->
                     let
-                        returnUrl = UrlBuilder.relative [ "ticket" ]
-                            [ UrlBuilder.int "from" fromId
-                            , UrlBuilder.int "to" toId
-                            , UrlBuilder.int "ride" rideId
-                            ]
-                        url = UrlBuilder.absolute [ "login" ] [ UrlBuilder.string "return" returnUrl ]
+                        returnUrl =
+                            UrlBuilder.relative [ "ticket" ]
+                                [ UrlBuilder.int "from" fromId
+                                , UrlBuilder.int "to" toId
+                                , UrlBuilder.int "ride" rideId
+                                ]
+
+                        url =
+                            UrlBuilder.absolute [ "login" ] [ UrlBuilder.string "return" returnUrl ]
                     in
-                        ( Model session, Nav.pushUrl session.key url )
-        (_, _, _) ->
-            ( Model session, Nav.pushUrl session.key "/" )
+                    ( model, Nav.pushUrl session.key url )
+
+        ( _, _, _ ) ->
+            ( model, Nav.pushUrl session.key "/" )
+
 
 
 -- UPDATE
@@ -93,7 +109,29 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         GotRide result ->
-            ( model, Cmd.none )
+            case result of
+                Ok ride ->
+                    ( { model | ride = RideSuccess ride }, Cmd.none )
+
+                Err _ ->
+                    ( { model | ride = RideFailure }, Cmd.none )
+
+
+
+-- UTIL
+
+
+niceTime : Time.Posix -> String
+niceTime time =
+    String.padLeft 2 '0' <|
+        String.fromInt (Time.toHour Time.utc time)
+            ++ ":"
+            ++ (String.padLeft 2 '0' <| String.fromInt (Time.toMinute Time.utc time))
+
+
+rideStopToString : RideStop -> String
+rideStopToString stop =
+    stop.name ++ " - " ++ stop.city
 
 
 
@@ -103,7 +141,55 @@ update msg model =
 view : Model -> Skeleton.Details Msg
 view model =
     { title = "Kup bilet"
-    , body = [ text "ticket" ]
+    , body =
+        case model.ride of
+            RideSuccess ride ->
+                let
+                    emptyStop =
+                        RideStop 0 (Time.millisToPosix 0) 0 "ERROR" "ERROR"
+
+                    escapeMaybe =
+                        Maybe.withDefault emptyStop
+
+
+                    fromStop =
+                        (List.head <| List.filter (\s -> s.id == ride.from) ride.stops) |> escapeMaybe
+
+                    toStop =
+                        (List.head <| List.filter (\s -> s.id == ride.to) ride.stops) |> escapeMaybe
+                in
+                    [ Grid.row [ Row.attrs [ class "mt-1 mt-md-3" ] ]
+                        [ Grid.col []
+                            [ div [ class "d-flex justify-content-center flex-wrap ticket-header" ]
+                                [ div [ class "from-station" ]
+                                    [ span [ class "oi oi-clock" ] []
+                                    , span [] [ text <| niceTime fromStop.arrivalTime ]
+                                    , span [] [ text <| rideStopToString fromStop ]
+                                    ]
+                                , div [ class "text-center ml-1 mr-1 ml-md-3 mr-md-3" ]
+                                    [ span [ class "oi oi-arrow-right" ] [] ]
+                                , div [ class "to-station" ]
+                                    [ span [ class "oi oi-clock" ] []
+                                    , span [] [ text <| niceTime toStop.arrivalTime ]
+                                    , span [] [ text <| rideStopToString toStop ]
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
+            RideLoading ->
+                [ Grid.row []
+                    [ Grid.col []
+                        [ Spinner.spinner [ Spinner.attrs [ class "text-center" ] ] [] ]
+                    ]
+                ]
+
+            RideFailure ->
+                [ div [ class "text-center" ]
+                    [ h2 [] [ text "Wystąpił błąd" ]
+                    , h3 [] [ text "Spróbuj odświeżyć stronę" ]
+                    ]
+                ]
     }
 
 

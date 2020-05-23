@@ -1,0 +1,34 @@
+.ticket-header {
+    font-size: 1.3em;
+}
+
+.ticket-header > .from-station {
+    flex: 1;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.ticket-header > .to-station {
+    flex: 1;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.ticket-header > .from-station > span.oi {
+    font-size: 0.9em;
+    padding-right: 2px;
+}
+
+.ticket-header > .to-station > span.oi {
+    font-size: 0.9em;
+    padding-right: 2px;
+}
+
+.ticket-header > .from-station > span:last-child {
+    padding-left: 5px;
+}
+
+.ticket-header > .to-station > span:last-child {
+    padding-left: 5px;
+    wrap: nowrap;
+}

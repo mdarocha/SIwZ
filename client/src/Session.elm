@@ -1,8 +1,9 @@
-module Session exposing (Data, User, userEncode, userDecode)
+module Session exposing (Data, User, userDecode, userEncode)
 
 import Browser.Navigation as Nav
 import Json.Decode as Decode
 import Json.Encode as Encode
+
 
 type alias User =
     { id : String
@@ -12,15 +13,17 @@ type alias User =
     , token : String
     }
 
+
 userEncode : User -> Encode.Value
 userEncode user =
     Encode.object
-        [ ("id", Encode.string user.id)
-        , ("email", Encode.string user.email)
-        , ("name", Encode.string user.name)
-        , ("surname", Encode.string user.surname)
-        , ("token", Encode.string user.token)
+        [ ( "id", Encode.string user.id )
+        , ( "email", Encode.string user.email )
+        , ( "name", Encode.string user.name )
+        , ( "surname", Encode.string user.surname )
+        , ( "token", Encode.string user.token )
         ]
+
 
 userDecode : Decode.Decoder User
 userDecode =
@@ -30,6 +33,7 @@ userDecode =
         (Decode.field "name" Decode.string)
         (Decode.field "surname" Decode.string)
         (Decode.field "token" Decode.string)
+
 
 type alias Data =
     { api : String
