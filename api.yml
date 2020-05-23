@@ -438,9 +438,11 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Route'
-  /tickets/ride/{id}:
+  /rides/{id}/freeSeats:
     parameters:
       - $ref: '#/components/parameters/id'
+      - $ref: '#/components/parameters/from'
+      - $ref: '#/components/parameters/to'
     get:
       tags: 
         - TicketsBooking
@@ -453,6 +455,33 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Seat'       
+  /tickets:
+    post:
+      tags:
+        - TicketsBooking
+      description: Creates a ticket for logged in user [AUTHENTICATED]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TicketForm'
+      responses:
+        '200':
+          description: Ticket booked successfully 
+    get:
+      tags:
+        - TicketsBooking
+      description: asd
+      responses:
+        '200':
+          description: list of user tickets
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Ticket' 
 components:
   parameters:
     id:
@@ -488,6 +517,21 @@ components:
       schema:
         type: string
   schemas:
+    TicketForm:
+      type: object
+      properties:
+        RideId:
+          type: integer
+        DiscountId:
+          type: integer
+        FromId:
+          type: integer
+        ToId:
+          type: integer
+        WagonNo:
+          type: integer
+        SeatNo:
+          type: integer
     Seat:
       type: object
       properties:
@@ -648,11 +692,11 @@ components:
         UserId:
           type: integer
         From:
-          $ref: '#/components/schemas/Stop'
+          type: string
         To:
-          $ref: '#/components/schemas/Stop'
-        Train:
-          $ref: '#/components/schemas/Train'
+          type: string
+        TrainName:
+          type: string
         WagonNo:
           type: integer
         SeatNo:

@@ -5,6 +5,7 @@ import Bootstrap.Button as Button
 import Bootstrap.Form as Form
 import Bootstrap.Form.Input as Input
 import Bootstrap.Grid as Grid
+import Bootstrap.Grid.Col as Col
 import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -12,6 +13,7 @@ import Html.Events exposing (onInput)
 import Http
 import Json.Decode as Decode
 import Json.Encode as Encode
+import Ports
 import Session
 import Skeleton
 
@@ -100,8 +102,17 @@ update msg model =
 
                         newSession =
                             { oldSession | user = Just user }
+
+                        newModel =
+                            Model newSession model.redirect Nothing (LoginData "" "") model.register
+
+                        redirectCmd =
+                            redirectCommand model.session.key model.redirect
+
+                        setSessionCmd =
+                            Ports.setUserSession <| Session.userEncode user
                     in
-                    ( Model newSession model.redirect Nothing (LoginData "" "") model.register, redirectCommand model.session.key model.redirect )
+                    ( newModel, Cmd.batch [ redirectCmd, setSessionCmd ] )
 
                 Err _ ->
                     ( { model | errorText = Just "Wystąpił błąd" }, Cmd.none )
@@ -158,8 +169,17 @@ update msg model =
 
                         newSession =
                             { oldSession | user = Just user }
+
+                        newModel =
+                            Model newSession model.redirect Nothing model.login (RegisterData "" "" "" "")
+
+                        redirectCmd =
+                            redirectCommand model.session.key model.redirect
+
+                        setSessionCmd =
+                            Ports.setUserSession <| Session.userEncode user
                     in
-                    ( Model newSession model.redirect Nothing model.login (RegisterData "" "" "" ""), redirectCommand model.session.key model.redirect )
+                    ( newModel, Cmd.batch [ redirectCmd, setSessionCmd ] )
 
                 Err _ ->
                     ( { model | errorText = Just "Wystąpił błąd" }, Cmd.none )
@@ -194,8 +214,8 @@ view model =
                 ]
             ]
         , Grid.row []
-            [ Grid.col [] [ h2 [] [ text "Zaloguj się" ], viewLogin model ]
-            , Grid.col [] [ h2 [] [ text "Zarejestruj się" ], viewRegister model ]
+            [ Grid.col [ Col.md6 ] [ h2 [] [ text "Zaloguj się" ], viewLogin model ]
+            , Grid.col [ Col.md6 ] [ h2 [ class "mt-3 mt-md-0" ] [ text "Zarejestruj się" ], viewRegister model ]
             ]
         ]
     }

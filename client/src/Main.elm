@@ -6,10 +6,13 @@ import Browser
 import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Json.Decode as Decode
+import Json.Encode as Encode
 import Page.About as About
 import Page.AdminTrainStops as AdminTrainStops
 import Page.Login as Login
 import Page.Search as Search
+import Page.Ticket as Ticket
 import Routes
 import Session
 import Skeleton
@@ -29,6 +32,7 @@ type Page
     | Search Search.Model
     | AdminTrainStops AdminTrainStops.Model
     | Login Login.Model
+    | Ticket Ticket.Model
 
 
 type Msg
@@ -39,9 +43,10 @@ type Msg
     | AdminTrainStopsMsg AdminTrainStops.Msg
     | LoginMsg Login.Msg
     | SearchMsg Search.Msg
+    | TicketMsg Ticket.Msg
 
 
-main : Program String Model Msg
+main : Program ( String, Encode.Value ) Model Msg
 main =
     Browser.application
         { init = init
@@ -80,12 +85,20 @@ view model =
         Login login ->
             Skeleton.view LoginMsg (Login.view login) (viewNavbar model)
 
+        Ticket ticket ->
+            Skeleton.view TicketMsg (Ticket.view ticket) (viewNavbar model)
 
-init : String -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
-init api url key =
+
+init : ( String, Encode.Value ) -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
+init ( api, userValue ) url key =
     let
         session =
-            Session.Data api key Nothing
+            case Decode.decodeValue Session.userDecode userValue of
+                Ok user ->
+                    Session.Data api key (Just user)
+
+                Err _ ->
+                    Session.Data api key Nothing
 
         ( navbarState, navbarCmd ) =
             Navbar.initialState NavbarMsg
@@ -155,6 +168,14 @@ update message model =
                 _ ->
                     ( model, Cmd.none )
 
+        TicketMsg msg ->
+            case model.page of
+                Ticket ticket ->
+                    stepTicket model (Ticket.update msg ticket)
+
+                _ ->
+                    ( model, Cmd.none )
+
 
 toSession : Model -> Session.Data
 toSession model =
@@ -174,6 +195,9 @@ toSession model =
         Login m ->
             m.session
 
+        Ticket m ->
+            m.session
+
 
 changeRoute : Maybe Routes.Route -> Model -> ( Model, Cmd Msg )
 changeRoute route model =
@@ -190,17 +214,25 @@ changeRoute route model =
         Just Routes.AdminTrainStopsRoute ->
             stepAdminTrainStops model (AdminTrainStops.init session)
 
-        Just Routes.SearchRoute ->
-            stepSearch model (Search.init session)
+        Just (Routes.SearchRoute from to) ->
+            case model.page of
+                Search _ ->
+                    ( model, Cmd.none )
+
+                _ ->
+                    stepSearch model (Search.init session from to)
 
         Just Routes.AboutRoute ->
             stepAbout model (About.init session)
 
         Just Routes.RootRoute ->
-            ( model, Nav.pushUrl session.key "/search" )
+            ( model, Nav.replaceUrl session.key "/search" )
 
         Just (Routes.LoginRoute redirect) ->
             stepLogin model (Login.init session redirect)
+
+        Just (Routes.TicketRoute from to ride) ->
+            stepTicket model (Ticket.init session from to ride)
 
 
 stepAbout : Model -> ( About.Model, Cmd About.Msg ) -> ( Model, Cmd Msg )
@@ -231,6 +263,13 @@ stepSearch model ( search, cmds ) =
     )
 
 
+stepTicket : Model -> ( Ticket.Model, Cmd Ticket.Msg ) -> ( Model, Cmd Msg )
+stepTicket model ( ticket, cmds ) =
+    ( { model | page = Ticket ticket }
+    , Cmd.map TicketMsg cmds
+    )
+
+
 
 -- NAVBAR
 
@@ -242,7 +281,7 @@ viewNavbar model =
         |> Navbar.dark
         |> Navbar.brand [ href "/" ] [ span [ id "brand-text" ] [ text "SIwZ Trains" ] ]
         |> Navbar.items
-            [ Navbar.itemLink [ href "/search", dynamicActive ( Routes.SearchRoute, model ) ] [ text "Wyszukaj połączenie" ]
+            [ Navbar.itemLink [ href "/search", dynamicActive ( Routes.SearchRoute Nothing Nothing, model ) ] [ text "Wyszukaj połączenie" ]
             , Navbar.itemLink [ href "/about", dynamicActive ( Routes.AboutRoute, model ) ] [ text "O nas" ]
             , Navbar.dropdown
                 { id = "admin-dropdown"
@@ -299,7 +338,7 @@ isActive ( route, page ) =
         ( Routes.LoginRoute _, Login _ ) ->
             True
 
-        ( Routes.SearchRoute, Search _ ) ->
+        ( Routes.SearchRoute _ _, Search _ ) ->
             True
 
         _ ->

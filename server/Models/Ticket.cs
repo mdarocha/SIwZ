@@ -9,26 +9,38 @@ namespace Server.Models
         public int Id { set; get; }
         
         [Required]
+        public int RideId { get; set; }
+        
+        [Required]
         public virtual Ride Ride { set; get; }
         
         [Required]
         public int Price { set; get; }
+        
+        [Required]
+        public int DiscountId { set; get; }
 
         [Required]
         public virtual Discount Discount { set; get; }
+        
+        [Required]
+        public virtual string UserId { set; get; }
 
         [Required]
         public virtual User User { set; get; }
 
         [Required]
+        public int FromId { set; get; } 
+            
+        [Required]
         public virtual TrainStop From { set; get; }
 
         [Required]
-        public virtual TrainStop To { set; get; }
-
+        public int ToId { set; get; }
+        
         [Required]
-        public string TrainName { set; get; }
-
+        public virtual TrainStop To { set; get; }
+        
         [Required]
         public int WagonNo { set; get; }
 
