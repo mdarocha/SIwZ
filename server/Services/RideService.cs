@@ -16,6 +16,37 @@ namespace Server.Services
             _context = context;
         }
 
+        public List<Ride> GetAll()
+        {
+            var rides = _context.Rides.Where(x => true).ToList();
+            return rides;
+        }
+
+        public Ride GetById(int id)
+        {
+            return _context.Rides.Find(id);
+        }
+
+        public Ride Create(Ride ride)
+        {
+            _context.Rides.Add(ride);
+            _context.SaveChanges();
+            return ride;
+        }
+        
+        public DateTime? ValidateDate(string date)
+        {
+            DateTime dt;
+
+            if (DateTime.TryParse(date, out dt))
+            {
+                String.Format("{0:yyyy-mm-dd hh-mm}", dt);
+                return dt;
+            }
+
+            return null;
+        }
+
         public List<Ride> RideSearch() =>
             _context.Rides.Where(ride => true).ToList();
 
@@ -25,4 +56,6 @@ namespace Server.Services
         public List<Ride> GetByIdsList(List<int> ids) =>
             _context.Rides.Include(x => x.Train).Where(ride => ids.Contains(ride.Id)).ToList();
     }
+    
+    
 }
