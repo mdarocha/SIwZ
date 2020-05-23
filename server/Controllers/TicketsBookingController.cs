@@ -96,11 +96,11 @@ namespace Server.Controllers
             });
 
             // all seats for given ride
-            var seats = Enumerable.Range(1, ride.Train.Wagons + 1).Select(i =>
+            var seats = Enumerable.Range(1, ride.Train.Wagons).Select(i =>
                 new Wagon
                 {
                     wagonNo = i,
-                    seats = Enumerable.Range(1, ride.Train.Seats + 1).Select(j =>
+                    seats = Enumerable.Range(1, ride.Train.Seats).Select(j =>
                     {
                         if (!rideTickets.Any())
                             return true;
