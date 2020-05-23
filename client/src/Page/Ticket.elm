@@ -571,7 +571,7 @@ viewSeatSelector maybeSeats maybeSelected maybeSelectedWagon maybeShownWagon =
             div
                 [ classList [ ( "enabled", avaible ), ( "selected", isSelected num ) ]
                 , attribute "tabindex" (String.fromInt num)
-                , onClick (SeatSelected num)
+                , if avaible then onClick (SeatSelected num) else class ""
                 ]
                 [ text <| String.fromInt (num + 1) ]
     in

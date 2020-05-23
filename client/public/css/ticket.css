@@ -117,6 +117,11 @@
     transition-duration: 100ms;
 }
 
+.seat-selector > div:not(.enabled) {
+    background-color: var(--gray);
+    border-color: var(--gray);
+}
+
 @media(hover: hover) {
     .seat-selector > div.enabled:hover {
         box-shadow: 4px 4px 7px 2px #0000006b
