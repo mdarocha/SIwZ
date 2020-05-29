@@ -20,3 +20,8 @@ services:
             - CONFIG_VARS=API_URL
         ports:
             - 80:80
+
+    watchtower:
+        image: containrrr/watchtower
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
