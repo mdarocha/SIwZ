@@ -177,6 +177,9 @@ namespace server.Migrations
                         .HasAnnotation("Npgsql:IdentitySequenceOptions", "'5', '1', '', '', 'False', '1'")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
+                    b.Property<bool>("IsEveryDayRide")
+                        .HasColumnType("boolean");
+
                     b.Property<double>("Price")
                         .HasColumnType("double precision");
 
@@ -201,33 +204,37 @@ namespace server.Migrations
                         new
                         {
                             Id = 1,
+                            IsEveryDayRide = false,
                             Price = 100.0,
                             RouteId = 1,
-                            StartTime = new DateTime(2020, 5, 29, 12, 18, 7, 805, DateTimeKind.Local).AddTicks(1254),
+                            StartTime = new DateTime(2020, 6, 12, 19, 14, 51, 391, DateTimeKind.Local).AddTicks(6030),
                             TrainId = 1
                         },
                         new
                         {
                             Id = 2,
+                            IsEveryDayRide = false,
                             Price = 50.0,
                             RouteId = 2,
-                            StartTime = new DateTime(2020, 5, 29, 12, 18, 7, 811, DateTimeKind.Local).AddTicks(6563),
+                            StartTime = new DateTime(2020, 6, 12, 19, 14, 51, 396, DateTimeKind.Local).AddTicks(4297),
                             TrainId = 2
                         },
                         new
                         {
                             Id = 3,
+                            IsEveryDayRide = false,
                             Price = 10.0,
                             RouteId = 3,
-                            StartTime = new DateTime(2020, 5, 29, 12, 18, 7, 811, DateTimeKind.Local).AddTicks(6651),
+                            StartTime = new DateTime(2020, 6, 12, 19, 14, 51, 396, DateTimeKind.Local).AddTicks(4359),
                             TrainId = 3
                         },
                         new
                         {
                             Id = 4,
+                            IsEveryDayRide = false,
                             Price = 80.0,
                             RouteId = 4,
-                            StartTime = new DateTime(2020, 5, 29, 12, 18, 7, 811, DateTimeKind.Local).AddTicks(6661),
+                            StartTime = new DateTime(2020, 6, 12, 19, 14, 51, 396, DateTimeKind.Local).AddTicks(4366),
                             TrainId = 4
                         });
                 });
@@ -434,6 +441,9 @@ namespace server.Migrations
 
                     b.Property<int>("Price")
                         .HasColumnType("integer");
+
+                    b.Property<DateTime>("RideDate")
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("RideId")
                         .HasColumnType("integer");
