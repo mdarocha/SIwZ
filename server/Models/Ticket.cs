@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -46,5 +47,8 @@ namespace Server.Models
 
         [Required]
         public int SeatNo { set; get; }
+        
+        [Required]
+        public DateTime RideDate { set; get; }
     }
 }

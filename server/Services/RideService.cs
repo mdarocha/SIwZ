@@ -16,6 +16,51 @@ namespace Server.Services
             _context = context;
         }
 
+        public List<Ride> GetAll()
+        {
+            var rides = _context.Rides.Where(x => true).ToList();
+            return rides;
+        }
+
+
+
+        public Ride Create(Ride ride)
+        {
+            _context.Rides.Add(ride);
+            _context.SaveChanges();
+            return ride;
+        }
+
+        public Ride Edit(Ride ride)
+        {
+            var r = _context.Rides.Find(ride.Id);
+            if (r != null)
+            {
+                r.Id = ride.Id;
+                r.Price = ride.Price;
+                r.Route = ride.Route;
+                r.Train = ride.Train;
+                r.RouteId = ride.RouteId;
+                r.StartTime = ride.StartTime;
+                r.TrainId = ride.TrainId;
+                r.IsEveryDayRide = ride.IsEveryDayRide;
+                
+                _context.Rides.Update(r);
+                _context.SaveChanges();
+            }
+            return r;
+        }
+
+        public Ride Delete(int id)
+        {
+            var ride = _context.Rides.Find(id);
+            _context.Rides.Remove(ride);
+            _context.SaveChanges();
+
+            return ride;
+        }
+
+
         public Ride GetRide(int id) =>
             _context.Rides.Include(x => x.Train).Include(x => x.Route).Single(r => r.Id == id);
 

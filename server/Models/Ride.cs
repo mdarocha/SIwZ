@@ -21,6 +21,8 @@ namespace Server.Models
         
         public virtual Train Train { set; get; }
         
+        public bool IsEveryDayRide { set; get; }
+        
         [Required]
         public double Price { set; get; }
     }
