@@ -307,9 +307,4 @@ registerEncoder register =
 
 userDecoder : Decode.Decoder Session.User
 userDecoder =
-    Decode.map5 Session.User
-        (Decode.field "id" Decode.string)
-        (Decode.field "email" Decode.string)
-        (Decode.field "name" Decode.string)
-        (Decode.field "surname" Decode.string)
-        (Decode.field "token" Decode.string)
+    Session.userDecode

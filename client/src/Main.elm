@@ -304,8 +304,23 @@ stepUser model ( user, cmds ) =
 viewNavbar : Model -> Html Msg
 viewNavbar model =
     let
-        ( userText, userLink, isUserLinkActive ) =
-            dynamicUserTextLink model
+        session = toSession model
+        adminLinks =
+            if Session.isUserAdmin session.user then
+                Navbar.dropdown
+                    { id = "admin-dropdown"
+                    , toggle = Navbar.dropdownToggle [] [ text "Panel admina" ]
+                    , items =
+                        [ Navbar.dropdownItem [ href "/admin/users" ] [ text "Użytkownicy" ]
+                        , Navbar.dropdownItem [ href "/admin/train" ] [ text "Pociągi" ]
+                        , Navbar.dropdownItem [ href "/admin/stops", dynamicActive ( Routes.AdminTrainStopsRoute, model ) ] [ text "Przystanki" ]
+                        , Navbar.dropdownItem [ href "/admin/routes" ] [ text "Trasy" ]
+                        , Navbar.dropdownItem [ href "/admin/tickets" ] [ text "Bilety" ]
+                        , Navbar.dropdownItem [ href "/admin/discounts" ] [ text "Zniżki" ]
+                        ]
+                    }
+            else
+                Navbar.itemLink [ style "display" "none" ] []
     in
     Navbar.config NavbarMsg
         |> Navbar.withAnimation
@@ -314,19 +329,8 @@ viewNavbar model =
         |> Navbar.items
             [ Navbar.itemLink [ href "/search", dynamicActive ( Routes.SearchRoute Nothing Nothing, model ) ] [ text "Wyszukaj połączenie" ]
             , Navbar.itemLink [ href "/about", dynamicActive ( Routes.AboutRoute, model ) ] [ text "O nas" ]
-            , Navbar.dropdown
-                { id = "admin-dropdown"
-                , toggle = Navbar.dropdownToggle [] [ text "Panel admina" ]
-                , items =
-                    [ Navbar.dropdownItem [ href "/admin/users" ] [ text "Użytkownicy" ]
-                    , Navbar.dropdownItem [ href "/admin/train" ] [ text "Pociągi" ]
-                    , Navbar.dropdownItem [ href "/admin/stops", dynamicActive ( Routes.AdminTrainStopsRoute, model ) ] [ text "Przystanki" ]
-                    , Navbar.dropdownItem [ href "/admin/routes" ] [ text "Trasy" ]
-                    , Navbar.dropdownItem [ href "/admin/tickets" ] [ text "Bilety" ]
-                    , Navbar.dropdownItem [ href "/admin/discounts" ] [ text "Zniżki" ]
-                    ]
-                }
-            , Navbar.itemLink [ href userLink, classList [ ( "active", isUserLinkActive ) ] ] [ text userText ]
+            , adminLinks
+            , dynamicUserLink model
             ]
         |> Navbar.view model.navbarState
 
@@ -335,8 +339,8 @@ viewNavbar model =
 -- UTILS
 
 
-dynamicUserTextLink : Model -> ( String, String, Bool )
-dynamicUserTextLink model =
+dynamicUserLink : Model -> Navbar.Item Msg
+dynamicUserLink model =
     let
         session =
             toSession model
@@ -346,10 +350,9 @@ dynamicUserTextLink model =
     in
     case user of
         Just u ->
-            ( u.name ++ " " ++ u.surname, "/user", isActive ( Routes.UserRoute, model.page ) )
-
+            Navbar.itemLink [ href "/user", dynamicActive ( Routes.UserRoute, model ) ] [ text (u.name ++ " " ++ u.surname) ]
         Nothing ->
-            ( "Zaloguj się", "/login", isActive ( Routes.LoginRoute Nothing, model.page ) )
+            Navbar.itemLink [ href "/login", dynamicActive ( Routes.LoginRoute Nothing, model ) ] [ text "Zaloguj się" ]
 
 
 dynamicActive : ( Routes.Route, Model ) -> Html.Attribute msg
