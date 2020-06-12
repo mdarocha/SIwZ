@@ -395,7 +395,7 @@ paths:
       responses:
         '200':
           description: Ok
-  /ride:
+  /rides:
     get:
       tags: 
         - TicketsBooking
@@ -403,7 +403,6 @@ paths:
         - $ref: '#/components/parameters/from'
         - $ref: '#/components/parameters/to'
         - $ref: '#/components/parameters/date'
-        - $ref: '#/components/parameters/routeId'
       responses:
         '200':
           description: List of matching Rides
@@ -426,19 +425,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Stop'
-  /routes:
-    get:
-      tags: 
-        - TicketsBooking
-      responses:
-        '200':
-          description: List of all routes
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Route'
   /rides/{id}/freeSeats:
     parameters:
       - $ref: '#/components/parameters/id'
@@ -473,7 +459,7 @@ paths:
     get:
       tags:
         - TicketsBooking
-      description: asd
+      description: Returns all logged user tickets
       responses:
         '200':
           description: list of user tickets
