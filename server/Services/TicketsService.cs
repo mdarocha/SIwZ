@@ -41,6 +41,12 @@ namespace Server.Services
                 .Include(x => x.Ride.Train)
                 .Where(t => t.UserId == user.Id).ToList();
         }
+
+        public Ticket GetUserTicket(int id, List<Ticket> userTickets)
+        {
+            var ticket = userTickets.Find(x => x.Id == id);
+            return ticket;
+        }
             
 
         public Ticket GetTicket(int id) =>

@@ -46,17 +46,31 @@ namespace Server.Controllers
         [HttpGet("rides")]
         public ActionResult<List<RideDTO>> GetRides([FromQuery] int from, [FromQuery] int to, [FromQuery] DateTime date)
         {
+            if (date < DateTime.Today)
+            {
+                return BadRequest("We cannot travel back in time");
+            }
+            
             var routes = _stopToRouteService.GetRoutes(from, to);
             var rides = _rideService.GetByIdsList(routes.Select(r => r.Id).ToList());
 
-            var rideDTOs = rides.Where(r => r.StartTime > date).Select(r =>
+            var rideDTOs = rides.Where(
+                r => (r.StartTime.Date == date.Date && r.StartTime.TimeOfDay > date.TimeOfDay) ||
+                                            (date.Date > DateTime.Today && r.IsEveryDayRide)
+                                            ).Select(r =>
             {
-                var startTime = r.StartTime;
+                DateTime startTime;
+                if (r.IsEveryDayRide && date.Date > DateTime.Today)
+                    startTime = ToRideDate(date, r.StartTime);
+                else
+                    startTime = r.StartTime;
+                
                 return new RideDTO
                 {
                     Id = r.Id,
                     From = from,
                     To = to,
+                    StartTime = startTime,
                     TrainStops = _stopToRouteService.GetStops(r.RouteId).Select(s =>
                     {
                         startTime = startTime.AddHours(s.HoursDiff).AddMinutes(s.MinutesDiff);
@@ -69,7 +83,6 @@ namespace Server.Controllers
                             ArrivalTime = startTime
                         };
                     }).ToList(),
-                    StartTime = r.StartTime,
                     Train = r.Train,
                     Price = r.Price
                 };
@@ -79,16 +92,17 @@ namespace Server.Controllers
         }
 
         [HttpGet("rides/{id}/freeSeats")]
-        public ActionResult<List<Wagon>> GetFreeSeats([FromRoute] int id, [FromQuery] int from, [FromQuery] int to)
+        public ActionResult<List<Wagon>> GetFreeSeats([FromRoute] int rideId, [FromQuery] int from, [FromQuery] int to, [FromQuery] DateTime date)
         {
-            var ride = _rideService.GetRide(id);
+            var ride = _rideService.GetRide(rideId);
             var route = _stopToRouteService.GetStops(ride.RouteId);
 
             var fromNo = route.Where(x => x.TrainStopId == from).Select(x => x.StopNo).Single();
             var toNo = route.Where(x => x.TrainStopId == to).Select(x => x.StopNo).Single();
 
             // all tickets for given ride on given route section
-            var rideTickets = _ticketsService.GetRideTickets(id).Where(t =>
+            var rideTickets = _ticketsService.GetRideTickets(rideId)
+                .Where( t => t.RideDate.Date == date.Date).Where(t =>
             {
                 var ticketFromNo = route.Where(x => x.TrainStopId == t.FromId).Select(x => x.StopNo).Single();
                 var ticketToNo = route.Where(x => x.TrainStopId == t.ToId).Select(x => x.StopNo).Single();
@@ -148,7 +162,7 @@ namespace Server.Controllers
 
         [Authorize]
         [HttpPost("tickets")]
-        public ActionResult<Ticket> BookTicket([FromBody]TicketFormDTO form)
+        public ActionResult<Ticket> BookTicket([FromBody] TicketFormDTO form)
         {
             var id = _userManager.GetUserId(User);
             var ride = _rideService.GetRide(form.RideId);
@@ -159,6 +173,10 @@ namespace Server.Controllers
                 price = _discountService.ApplyDiscount(price, form.DiscountId);
             }
 
+            var firstStop = _stopToRouteService.GetStops(ride.RouteId).Single(str => str.TrainStopId == form.FromId);
+
+            var rideDate = ToRideDate(form.RideDate, ride.StartTime).AddHours(firstStop.HoursDiff).AddMinutes(firstStop.MinutesDiff); 
+
             var ticket = new Ticket
             {
                 RideId = ride.Id,
@@ -167,23 +185,15 @@ namespace Server.Controllers
                 FromId = form.FromId,
                 ToId = form.ToId,
                 WagonNo = form.WagonNo,
-                SeatNo = form.SeatNo
+                SeatNo = form.SeatNo,
+                RideDate = rideDate
             };
 
             var t = _ticketsService.CreateTicket(ticket, id);
-            
+
             return Ok();
         }
 
-        private int GetRoutePart(int routeId, int from, int to)
-        {
-            var stops = _stopToRouteService.GetStops(routeId);
-            var fromNo = stops.Single(s => s.TrainStopId == from).StopNo;
-            var toNo = stops.Single(s => s.TrainStopId == to).StopNo;
-            var le = stops.Count;
-            return (le - fromNo - (le - toNo)) / le;
-        }
-        
         [Authorize]
         [HttpGet("tickets")]
         public List<TicketDTO> GetUserTickets()
@@ -195,28 +205,50 @@ namespace Server.Controllers
                 Id = t.Id,
                 Price = t.Price,
                 Discount = t.Discount.Type,
-                From = t.From.City + "-" + t.From.Name,
-                To = t.To.City + "-" + t.To.Name,
+                From = t.From,
+                To = t.To,
                 TrainName = t.Ride.Train.Name,
                 WagonNo = t.WagonNo,
-                SeatNo = t.SeatNo
+                SeatNo = t.SeatNo,
+                RideDate = t.RideDate
             }).ToList();
             return dtos;
         }
 
         [Authorize]
-        [HttpGet("tickets/{id}")]
+        [HttpDelete("tickets/{id}")]
         public ActionResult RevokeTicket([FromRoute] int id)
         {
             var ticket = _ticketsService.GetTicket(id);
             var userId = _userManager.GetUserId(User);
-         
+
             if (ticket.UserId.Equals(userId))
             {
                 return Ok(_ticketsService.DeleteTicket(id));
             }
 
             return Forbid();
+        }
+        
+        private int GetRoutePart(int routeId, int from, int to)
+        {
+            var stops = _stopToRouteService.GetStops(routeId);
+            var fromNo = stops.Single(s => s.TrainStopId == from).StopNo;
+            var toNo = stops.Single(s => s.TrainStopId == to).StopNo;
+            var le = stops.Count;
+            return (le - fromNo - (le - toNo)) / le;
+        }
+        
+        private DateTime ToRideDate(DateTime formTime, DateTime rideTime)
+        {
+            return new DateTime(
+                formTime.Year,
+                formTime.Month,
+                formTime.Day,
+                rideTime.Hour,
+                rideTime.Minute,
+                0
+            );
         }
     }
 }

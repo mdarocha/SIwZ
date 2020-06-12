@@ -43,6 +43,7 @@ namespace Server
             services.AddTransient<RouteService>();
             services.AddTransient<StopToRouteService>();
             services.AddTransient<TicketsService>();
+            services.AddTransient<UserService>();
 
             services.AddScoped<JwtService>();
             

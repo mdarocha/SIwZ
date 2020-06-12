@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -13,7 +14,7 @@ namespace Server.Controllers
     {
         private readonly JwtService _jwtService;
 
-        public UserController(JwtService jwtService)
+        public UserController(JwtService jwtService, UserService userService)
         {
             _jwtService = jwtService;
         }

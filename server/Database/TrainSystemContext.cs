@@ -222,7 +222,8 @@ namespace Server.Database
                     RouteId = 1,
                     StartTime = DateTime.Now,
                     TrainId = 1,
-                    Price = 100
+                    Price = 100,
+                    IsEveryDayRide = false
                 },
                 new Ride
                 {
@@ -230,7 +231,8 @@ namespace Server.Database
                     RouteId = 2,
                     StartTime = DateTime.Now,
                     TrainId = 2,
-                    Price = 50
+                    Price = 50,
+                    IsEveryDayRide = true,
                 }, 
                 new Ride
                 {
@@ -238,7 +240,9 @@ namespace Server.Database
                     RouteId = 3,
                     StartTime = DateTime.Now,
                     TrainId = 3,
-                    Price = 10
+                    Price = 10,
+                    IsEveryDayRide = false
+                    
                 }, 
                 new Ride
                 {
@@ -246,7 +250,8 @@ namespace Server.Database
                     RouteId = 4,
                     StartTime = DateTime.Now,
                     TrainId = 4,
-                    Price = 80
+                    Price = 80,
+                    IsEveryDayRide = true
                 }
             );
             modelBuilder.Entity<Ride>().Property(p => p.Id).HasIdentityOptions(startValue: 5);

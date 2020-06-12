@@ -326,7 +326,24 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Ride'                          
+                $ref: '#/components/schemas/Ride' 
+    patch:
+      tags:
+        - Ride
+      summary: Modify Ride with given id.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RidePatch'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ride'            
   /admin/rides/{id}:
     parameters:
       - $ref: '#/components/parameters/id'
@@ -337,23 +354,6 @@ paths:
       responses:
         '200':
           description: Ride object.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Ride'
-    patch:
-      tags:
-        - Ride
-      summary: Modify Ride with given id.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RideForm'
-      responses:
-        '200':
-          description: Ok
           content:
             application/json:
               schema:
@@ -425,19 +425,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Stop'
-  /routes:
-    get:
-      tags: 
-        - TicketsBooking
-      responses:
-        '200':
-          description: List of all routes
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Route'
   /rides/{id}/freeSeats:
     parameters:
       - $ref: '#/components/parameters/id'
@@ -472,7 +459,7 @@ paths:
     get:
       tags:
         - TicketsBooking
-      description: asd
+      description: Returns all logged user tickets
       responses:
         '200':
           description: list of user tickets
@@ -488,6 +475,13 @@ components:
       name: id
       in: path
       description: Numeric ID of related object
+      required: true
+      schema:
+        type: integer
+    routeId:
+      name: route
+      in: path
+      description: Route id
       required: true
       schema:
         type: integer
@@ -670,6 +664,8 @@ components:
           $ref: '#/components/schemas/Train'
         FreeTickets:
           type: integer
+        Price:
+          type: integer
     RideForm:
       type: object
       properties:
@@ -679,6 +675,25 @@ components:
           type: string
         TrainId:
           type: integer
+        Price:
+          type: integer
+        IsEveryDayRide:
+          type: boolean
+    RidePatch:
+      type: object
+      properties:
+        Id:
+          type: integer
+        RouteId:
+          type: integer
+        StartTime:
+          type: string
+        TrainId:
+          type: integer
+        Price:
+          type: integer
+        IsEveryDayRide:
+          type: boolean
     Ticket:
       type: object
       properties:
