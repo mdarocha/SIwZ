@@ -207,16 +207,16 @@ namespace server.Migrations
                             IsEveryDayRide = false,
                             Price = 100.0,
                             RouteId = 1,
-                            StartTime = new DateTime(2020, 6, 12, 19, 14, 51, 391, DateTimeKind.Local).AddTicks(6030),
+                            StartTime = new DateTime(2020, 6, 12, 20, 1, 17, 822, DateTimeKind.Local).AddTicks(8220),
                             TrainId = 1
                         },
                         new
                         {
                             Id = 2,
-                            IsEveryDayRide = false,
+                            IsEveryDayRide = true,
                             Price = 50.0,
                             RouteId = 2,
-                            StartTime = new DateTime(2020, 6, 12, 19, 14, 51, 396, DateTimeKind.Local).AddTicks(4297),
+                            StartTime = new DateTime(2020, 6, 12, 20, 1, 17, 827, DateTimeKind.Local).AddTicks(6512),
                             TrainId = 2
                         },
                         new
@@ -225,16 +225,16 @@ namespace server.Migrations
                             IsEveryDayRide = false,
                             Price = 10.0,
                             RouteId = 3,
-                            StartTime = new DateTime(2020, 6, 12, 19, 14, 51, 396, DateTimeKind.Local).AddTicks(4359),
+                            StartTime = new DateTime(2020, 6, 12, 20, 1, 17, 827, DateTimeKind.Local).AddTicks(6582),
                             TrainId = 3
                         },
                         new
                         {
                             Id = 4,
-                            IsEveryDayRide = false,
+                            IsEveryDayRide = true,
                             Price = 80.0,
                             RouteId = 4,
-                            StartTime = new DateTime(2020, 6, 12, 19, 14, 51, 396, DateTimeKind.Local).AddTicks(4366),
+                            StartTime = new DateTime(2020, 6, 12, 20, 1, 17, 827, DateTimeKind.Local).AddTicks(6589),
                             TrainId = 4
                         });
                 });
