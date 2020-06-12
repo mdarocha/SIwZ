@@ -87,7 +87,7 @@ namespace Server.Controllers
         }
 
         [HttpGet("rides/{id}/freeSeats")]
-        public ActionResult<List<Wagon>> GetFreeSeats([FromRoute] int rideId, [FromQuery] int from, [FromQuery] int to)
+        public ActionResult<List<Wagon>> GetFreeSeats([FromRoute] int rideId, [FromQuery] int from, [FromQuery] int to, [FromQuery] DateTime date)
         {
             var ride = _rideService.GetRide(rideId);
             var route = _stopToRouteService.GetStops(ride.RouteId);
@@ -96,7 +96,8 @@ namespace Server.Controllers
             var toNo = route.Where(x => x.TrainStopId == to).Select(x => x.StopNo).Single();
 
             // all tickets for given ride on given route section
-            var rideTickets = _ticketsService.GetRideTickets(rideId).Where(t =>
+            var rideTickets = _ticketsService.GetRideTickets(rideId)
+                .Where( t => t.RideDate.Date == date.Date).Where(t =>
             {
                 var ticketFromNo = route.Where(x => x.TrainStopId == t.FromId).Select(x => x.StopNo).Single();
                 var ticketToNo = route.Where(x => x.TrainStopId == t.ToId).Select(x => x.StopNo).Single();
@@ -167,6 +168,17 @@ namespace Server.Controllers
                 price = _discountService.ApplyDiscount(price, form.DiscountId);
             }
 
+            var firstStop = _stopToRouteService.GetStops(ride.RouteId).Single(str => str.TrainStopId == form.FromId);
+
+            var rideDate = new DateTime(
+                form.RideDate.Year,
+                form.RideDate.Month,
+                form.RideDate.Day,
+                ride.StartTime.Hour + firstStop.HoursDiff,
+                ride.StartTime.Minute + firstStop.MinutesDiff,
+                0
+                );
+
             var ticket = new Ticket
             {
                 RideId = ride.Id,
@@ -175,7 +187,8 @@ namespace Server.Controllers
                 FromId = form.FromId,
                 ToId = form.ToId,
                 WagonNo = form.WagonNo,
-                SeatNo = form.SeatNo
+                SeatNo = form.SeatNo,
+                RideDate = rideDate
             };
 
             var t = _ticketsService.CreateTicket(ticket, id);
@@ -213,7 +226,7 @@ namespace Server.Controllers
         }
 
         [Authorize]
-        [HttpGet("tickets/{id}")]
+        [HttpDelete("tickets/{id}")]
         public ActionResult RevokeTicket([FromRoute] int id)
         {
             var ticket = _ticketsService.GetTicket(id);
