@@ -19,5 +19,7 @@ namespace Server.ModelsDTO
         public int WagonNo { set; get; }
 
         public int SeatNo { set; get; }
+        
+        public DateTime RideDate { set; get; }
     }
 }
