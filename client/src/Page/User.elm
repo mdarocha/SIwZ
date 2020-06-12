@@ -29,14 +29,20 @@ type alias Model =
     , openCancelQuestions : Set Int
     }
 
+type alias Stop =
+    { city : String
+    , name : String
+    }
+
 type alias Ticket =
     { id : Int
-    , from : String
-    , to : String
+    , from : Stop
+    , to : Stop
     , train : String
     , price : Int
     , wagon : Int
     , seat : Int
+    , time : TimeIso.Time
     }
 
 
@@ -158,16 +164,23 @@ viewTicketsList model =
             div [ class "mt-4 text-center" ] [ Spinner.spinner [] [] ]
 
         Success tickets ->
-            div [] <| List.map (viewTicket model) tickets
+            if List.length tickets == 0 then
+                h4 [ class "text-center mt-4" ] [ text "Brak biletów" ]
+            else
+                div [] <| List.map (viewTicket model) tickets
 
 
 viewTicket : Model -> Ticket -> Html Msg
 viewTicket model ticket =
+    let
+        stopName stop =
+            stop.name ++ " " ++ stop.city
+    in
     Card.config [ Card.attrs [ class "mt-5 ticket-card" ] ]
         |> Card.headerH4 [ class "d-flex flex-wrap" ]
             [ div []
                 [ span [ class "font-italic pr-2" ] [ text ticket.train ]
-                , span [] [ text (ticket.from ++ " > " ++ ticket.to) ]
+                , span [] [ text (stopName ticket.from ++ " > " ++ stopName ticket.to) ]
                 ]
             ]
         |> Card.block [ Block.attrs [ class "seat-info" ] ]
@@ -225,11 +238,18 @@ revokeTicket api token id =
 ticketsDecoder : Decode.Decoder (List Ticket)
 ticketsDecoder =
     Decode.list <|
-        Decode.map7 Ticket
+        Decode.map8 Ticket
             (Decode.field "id" Decode.int)
-            (Decode.field "from" Decode.string)
-            (Decode.field "to" Decode.string)
+            (Decode.field "from" stopDecoder)
+            (Decode.field "to" stopDecoder)
             (Decode.field "trainName" Decode.string)
             (Decode.field "price" Decode.int)
             (Decode.field "wagonNo" Decode.int)
             (Decode.field "seatNo" Decode.int)
+            (Decode.field "rideDate" TimeIso.decode)
+
+stopDecoder : Decode.Decoder Stop
+stopDecoder =
+    Decode.map2 Stop
+        (Decode.field "city" Decode.string)
+        (Decode.field "name" Decode.string)

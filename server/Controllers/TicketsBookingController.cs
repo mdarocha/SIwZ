@@ -220,11 +220,11 @@ namespace Server.Controllers
         public ActionResult RevokeTicket([FromRoute] int id)
         {
             var ticket = _ticketsService.GetTicket(id);
-            var userId = _userManager.GetUserId(User);
+            var userEmail = _userManager.GetUserId(User);
 
-            if (ticket.UserId.Equals(userId))
+            if (_ticketsService.RevokeTicket(ticket, userEmail))
             {
-                return Ok(_ticketsService.DeleteTicket(id));
+                return Ok();
             }
 
             return Forbid();
