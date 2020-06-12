@@ -59,7 +59,12 @@ namespace Server.Controllers
                                             (date.Date > DateTime.Today && r.IsEveryDayRide)
                                             ).Select(r =>
             {
-                var startTime = r.StartTime;
+                DateTime startTime;
+                if (r.IsEveryDayRide && date.Date > DateTime.Today)
+                    startTime = ToRideDate(date, r.StartTime);
+                else
+                    startTime = r.StartTime;
+                
                 return new RideDTO
                 {
                     Id = r.Id,
@@ -170,14 +175,7 @@ namespace Server.Controllers
 
             var firstStop = _stopToRouteService.GetStops(ride.RouteId).Single(str => str.TrainStopId == form.FromId);
 
-            var rideDate = new DateTime(
-                form.RideDate.Year,
-                form.RideDate.Month,
-                form.RideDate.Day,
-                ride.StartTime.Hour + firstStop.HoursDiff,
-                ride.StartTime.Minute + firstStop.MinutesDiff,
-                0
-                );
+            var rideDate = ToRideDate(form.RideDate, ride.StartTime).AddHours(firstStop.HoursDiff).AddMinutes(firstStop.MinutesDiff); 
 
             var ticket = new Ticket
             {
@@ -196,15 +194,6 @@ namespace Server.Controllers
             return Ok();
         }
 
-        private int GetRoutePart(int routeId, int from, int to)
-        {
-            var stops = _stopToRouteService.GetStops(routeId);
-            var fromNo = stops.Single(s => s.TrainStopId == from).StopNo;
-            var toNo = stops.Single(s => s.TrainStopId == to).StopNo;
-            var le = stops.Count;
-            return (le - fromNo - (le - toNo)) / le;
-        }
-
         [Authorize]
         [HttpGet("tickets")]
         public List<TicketDTO> GetUserTickets()
@@ -216,11 +205,12 @@ namespace Server.Controllers
                 Id = t.Id,
                 Price = t.Price,
                 Discount = t.Discount.Type,
-                From = t.From.City + "-" + t.From.Name,
-                To = t.To.City + "-" + t.To.Name,
+                From = t.From,
+                To = t.To,
                 TrainName = t.Ride.Train.Name,
                 WagonNo = t.WagonNo,
-                SeatNo = t.SeatNo
+                SeatNo = t.SeatNo,
+                RideDate = t.RideDate
             }).ToList();
             return dtos;
         }
@@ -238,6 +228,27 @@ namespace Server.Controllers
             }
 
             return Forbid();
+        }
+        
+        private int GetRoutePart(int routeId, int from, int to)
+        {
+            var stops = _stopToRouteService.GetStops(routeId);
+            var fromNo = stops.Single(s => s.TrainStopId == from).StopNo;
+            var toNo = stops.Single(s => s.TrainStopId == to).StopNo;
+            var le = stops.Count;
+            return (le - fromNo - (le - toNo)) / le;
+        }
+        
+        private DateTime ToRideDate(DateTime formTime, DateTime rideTime)
+        {
+            return new DateTime(
+                formTime.Year,
+                formTime.Month,
+                formTime.Day,
+                rideTime.Hour,
+                rideTime.Minute,
+                0
+            );
         }
     }
 }
