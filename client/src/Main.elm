@@ -248,8 +248,8 @@ changeRoute route model =
         Just (Routes.LoginRoute redirect) ->
             stepLogin model (Login.init session redirect)
 
-        Just (Routes.TicketRoute from to ride) ->
-            stepTicket model (Ticket.init session from to ride)
+        Just (Routes.TicketRoute from to ride date) ->
+            stepTicket model (Ticket.init session from to ride date)
 
         Just Routes.UserRoute ->
             stepUser model (UserPage.init session)

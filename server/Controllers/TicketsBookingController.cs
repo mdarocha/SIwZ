@@ -92,16 +92,16 @@ namespace Server.Controllers
         }
 
         [HttpGet("rides/{id}/freeSeats")]
-        public ActionResult<List<Wagon>> GetFreeSeats([FromRoute] int rideId, [FromQuery] int from, [FromQuery] int to, [FromQuery] DateTime date)
+        public ActionResult<List<Wagon>> GetFreeSeats([FromRoute] int id, [FromQuery] int from, [FromQuery] int to, [FromQuery] DateTime date)
         {
-            var ride = _rideService.GetRide(rideId);
+            var ride = _rideService.GetRide(id);
             var route = _stopToRouteService.GetStops(ride.RouteId);
 
             var fromNo = route.Where(x => x.TrainStopId == from).Select(x => x.StopNo).Single();
             var toNo = route.Where(x => x.TrainStopId == to).Select(x => x.StopNo).Single();
 
             // all tickets for given ride on given route section
-            var rideTickets = _ticketsService.GetRideTickets(rideId)
+            var rideTickets = _ticketsService.GetRideTickets(id)
                 .Where( t => t.RideDate.Date == date.Date).Where(t =>
             {
                 var ticketFromNo = route.Where(x => x.TrainStopId == t.FromId).Select(x => x.StopNo).Single();

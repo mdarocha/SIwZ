@@ -12,7 +12,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http
-import Iso8601 as TimeIso
+import ISO8601 as TimeIso
 import Json.Decode as Decode
 import Jwt.Http
 import Ports
@@ -28,12 +28,6 @@ type alias Model =
     , tickets : Tickets
     , openCancelQuestions : Set Int
     }
-
-
-type alias Ride =
-    { startTime : Time.Posix
-    }
-
 
 type alias Ticket =
     { id : Int
