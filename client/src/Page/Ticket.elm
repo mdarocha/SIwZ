@@ -13,7 +13,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
-import Iso8601 as TimeIso
+import ISO8601 as TimeIso
 import Json.Decode as Decode
 import Json.Encode as Encode
 import Jwt.Http
@@ -29,7 +29,7 @@ import Url.Builder as UrlBuilder
 
 type alias RideStop =
     { id : Int
-    , arrivalTime : Time.Posix
+    , arrivalTime : TimeIso.Time
     , stopNumber : Int
     , name : String
     , city : String
@@ -80,6 +80,7 @@ type alias Model =
     , selectedPlace : PlaceSelector
     , discounts : Discounts
     , selectedDiscount : Maybe Discount
+    , date : TimeIso.Time
     }
 
 
@@ -116,6 +117,7 @@ type alias Ticket =
     , toId : Int
     , wagonNumber : Int
     , seatNumber : Int
+    , date : TimeIso.Time
     }
 
 
@@ -138,29 +140,38 @@ type Msg
 -- INIT
 
 
-init : Session.Data -> Maybe Int -> Maybe Int -> Maybe Int -> ( Model, Cmd Msg )
-init session from to ride =
+init : Session.Data -> Maybe Int -> Maybe Int -> Maybe Int -> Maybe String -> ( Model, Cmd Msg )
+init session from to ride date =
     let
         model =
             Model session RideLoading WagonLoading (PlaceSelector Nothing Nothing Nothing) DiscountsLoading Nothing
+
+        emptyModel =
+            model (TimeIso.fromPosix (Time.millisToPosix 0))
     in
     case ( from, to, ride ) of
         ( Just fromId, Just toId, Just rideId ) ->
-            case session.user of
-                Just _ ->
-                    let
-                        rideCmd =
-                            getRide session.api fromId toId rideId
+            case ( session.user, date ) of
+                ( Just _, Just rideDate ) ->
+                    case TimeIso.fromString rideDate of
+                        Ok time ->
+                            let
+                                rideCmd =
+                                    getRide session.api fromId toId rideId
 
-                        seatsCmd =
-                            getFreeSeats session.api fromId toId rideId
+                                seatsCmd =
+                                    getFreeSeats session.api fromId toId rideId time
 
-                        discountsCmd =
-                            getDiscounts session.api
-                    in
-                    ( model, Cmd.batch [ rideCmd, seatsCmd, discountsCmd ] )
+                                discountsCmd =
+                                    getDiscounts session.api
+                            in
+                            ( model time, Cmd.batch [ rideCmd, seatsCmd, discountsCmd ] )
+                        Err _ ->
+                            ( emptyModel, Nav.pushUrl session.key "/error" )
+                ( Just _, Nothing ) ->
+                    ( emptyModel, Nav.pushUrl session.key "/error" )
 
-                Nothing ->
+                ( Nothing, _ ) ->
                     let
                         returnUrl =
                             UrlBuilder.relative [ "ticket" ]
@@ -172,10 +183,10 @@ init session from to ride =
                         url =
                             UrlBuilder.absolute [ "login" ] [ UrlBuilder.string "return" returnUrl ]
                     in
-                    ( model, Nav.pushUrl session.key url )
+                    ( emptyModel, Nav.pushUrl session.key url )
 
         ( _, _, _ ) ->
-            ( model, Nav.pushUrl session.key "/" )
+            ( emptyModel, Nav.pushUrl session.key "/error" )
 
 
 
@@ -265,14 +276,14 @@ update msg model =
                         ( Just wagon, Just seat, Just discount ) ->
                             let
                                 ticket =
-                                    Ticket ride.id discount.id ride.from ride.to (wagon + 1) (seat + 1)
+                                    Ticket ride.id discount.id ride.from ride.to (wagon + 1) (seat + 1) model.date
                             in
-                            ( model, bookTicket model.session.api user.token ticket )
+                            ( model, bookTicket model.session.api user.token ticket)
 
                         ( _, _, _ ) ->
                             ( model, Cmd.none )
 
-                (_, _) ->
+                ( _, _ ) ->
                     ( model, Nav.pushUrl model.session.key "/login" )
 
         BookedTicket result ->
@@ -421,7 +432,7 @@ view model =
             ( RideSuccess ride, WagonSuccess seats, DiscountsSuccess discounts ) ->
                 let
                     emptyStop =
-                        RideStop 0 (Time.millisToPosix 0) 0 "ERROR" "ERROR"
+                        RideStop 0 (TimeIso.fromPosix (Time.millisToPosix 0)) 0 "ERROR" "ERROR"
 
                     escapeMaybe =
                         Maybe.withDefault emptyStop
@@ -432,7 +443,7 @@ view model =
                     toStop =
                         (List.head <| List.filter (\s -> s.id == ride.to) ride.stops) |> escapeMaybe
                 in
-                [ Grid.row [] [ Grid.col [ Col.attrs [ class "text-center ticket-header" ] ] [ text <| niceDate fromStop.arrivalTime ] ]
+                [ Grid.row [] [ Grid.col [ Col.attrs [ class "text-center ticket-header" ] ] [ text <| niceDate (TimeIso.toPosix fromStop.arrivalTime) ] ]
                 , Grid.row [] [ Grid.col [ Col.attrs [ class "text-center ticket-header" ] ] [ text ride.train.name ] ]
                 , Grid.row [] [ Grid.col [ Col.attrs [ class "text-center ticket-header ticket-header-last" ] ] [ viewHeaderFromTo fromStop toStop ] ]
                 , Grid.row [] [ Grid.col [ Col.attrs [ class "text-center ticket-info" ] ] [ viewHelpText model ] ]
@@ -508,7 +519,7 @@ viewHeaderFromTo from to =
         [ div [ class "from-station" ]
             [ div [ class "station-time" ]
                 [ span [ class "oi oi-clock" ] []
-                , span [] [ text <| niceTime from.arrivalTime ]
+                , span [] [ text <| niceTime (TimeIso.toPosix from.arrivalTime) ]
                 ]
             , span [] [ text <| rideStopToString from ]
             ]
@@ -517,7 +528,7 @@ viewHeaderFromTo from to =
         , div [ class "to-station" ]
             [ div [ class "station-time" ]
                 [ span [ class "oi oi-clock" ] []
-                , span [] [ text <| niceTime to.arrivalTime ]
+                , span [] [ text <| niceTime (TimeIso.toPosix to.arrivalTime) ]
                 ]
             , span [] [ text <| rideStopToString to ]
             ]
@@ -571,7 +582,11 @@ viewSeatSelector maybeSeats maybeSelected maybeSelectedWagon maybeShownWagon =
             div
                 [ classList [ ( "enabled", avaible ), ( "selected", isSelected num ) ]
                 , attribute "tabindex" (String.fromInt num)
-                , if avaible then onClick (SeatSelected num) else class ""
+                , if avaible then
+                    onClick (SeatSelected num)
+
+                  else
+                    class ""
                 ]
                 [ text <| String.fromInt (num + 1) ]
     in
@@ -640,14 +655,15 @@ getRide api fromId toId rideId =
         }
 
 
-getFreeSeats : String -> Int -> Int -> Int -> Cmd Msg
-getFreeSeats api fromId toId rideId =
+getFreeSeats : String -> Int -> Int -> Int -> TimeIso.Time -> Cmd Msg
+getFreeSeats api fromId toId rideId date =
     let
         url =
             UrlBuilder.relative
                 [ "rides", String.fromInt rideId, "freeSeats" ]
                 [ UrlBuilder.int "from" fromId
                 , UrlBuilder.int "to" toId
+                , UrlBuilder.string "date" (TimeIso.toString date)
                 ]
     in
     Http.get
@@ -686,8 +702,12 @@ ticketEncoder ticket =
         , ( "toId", Encode.int ticket.toId )
         , ( "wagonNo", Encode.int ticket.wagonNumber )
         , ( "seatNo", Encode.int ticket.seatNumber )
+        , ( "rideDate", encodeTime ticket.date )
         ]
 
+encodeTime : TimeIso.Time -> Encode.Value
+encodeTime =
+    TimeIso.toString >> Encode.string
 
 rideDecoder : Decode.Decoder Ride
 rideDecoder =
@@ -705,7 +725,7 @@ rideStopDecoder =
     Decode.list <|
         Decode.map5 RideStop
             (Decode.field "stopId" Decode.int)
-            (Decode.field "arrivalTime" TimeIso.decoder)
+            (Decode.field "arrivalTime" TimeIso.decode)
             (Decode.field "stopNo" Decode.int)
             (Decode.field "name" Decode.string)
             (Decode.field "city" Decode.string)

@@ -1,0 +1,15 @@
+.ticket-card > .seat-info {
+    font-size: 1.2rem;
+}
+
+.ticket-card > .seat-info > p {
+    margin-bottom : 0.2rem;
+}
+
+.ticket-question > span {
+    margin-right: 5px;
+}
+
+.ticket-question > button {
+    margin-left: 5px;
+}

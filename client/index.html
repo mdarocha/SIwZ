@@ -38,6 +38,10 @@
             app.ports.setUserSession.subscribe((user) => {
                 sessionStorage.setItem('user', JSON.stringify(user));
             });
+
+            app.ports.clearUserSession.subscribe(() => {
+                sessionStorage.setItem('user', JSON.stringify({}));
+            });
         </script>
     </body>
 </html>

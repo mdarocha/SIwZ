@@ -1,8 +1,9 @@
-module Session exposing (Data, User, userDecode, userEncode)
+module Session exposing (Data, User, isUserAdmin, userDecode, userEncode)
 
 import Browser.Navigation as Nav
 import Json.Decode as Decode
 import Json.Encode as Encode
+import Jwt
 
 
 type alias User =
@@ -12,6 +13,32 @@ type alias User =
     , surname : String
     , token : String
     }
+
+
+type alias UserToken =
+    { isAdmin : Bool
+    }
+
+
+isUserAdmin : Maybe User -> Bool
+isUserAdmin maybeUser =
+    case maybeUser of
+        Just user ->
+            case Jwt.decodeToken userTokenDecoder user.token of
+                Ok decodedToken ->
+                    decodedToken.isAdmin
+
+                _ ->
+                    False
+
+        Nothing ->
+            False
+
+
+userTokenDecoder : Decode.Decoder UserToken
+userTokenDecoder =
+    Decode.map UserToken
+        (Decode.field "IsAdmin" Decode.bool)
 
 
 userEncode : User -> Encode.Value

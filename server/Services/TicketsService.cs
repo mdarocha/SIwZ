@@ -52,13 +52,24 @@ namespace Server.Services
         public Ticket GetTicket(int id) =>
             _context.Tickets.Find(id);
 
-        public Ticket DeleteTicket(int id)
+        public bool DeleteTicket(int id)
         {
             var ticket = GetTicket(id);
             _context.Tickets.Remove(ticket);
             _context.SaveChanges();
 
-            return ticket;
+            return true;
+        }
+
+        public bool RevokeTicket(Ticket ticket, string email)
+        {
+            var usr = _context.Users.Single(u => u.Email == email);
+            if (!usr.Id.Equals(ticket.UserId))
+            {
+                return false;
+            }
+
+            return DeleteTicket(ticket.Id);
         }
     }
 }

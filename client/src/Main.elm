@@ -13,6 +13,7 @@ import Page.AdminTrainStops as AdminTrainStops
 import Page.Login as Login
 import Page.Search as Search
 import Page.Ticket as Ticket
+import Page.User as UserPage
 import Routes
 import Session
 import Skeleton
@@ -33,6 +34,7 @@ type Page
     | AdminTrainStops AdminTrainStops.Model
     | Login Login.Model
     | Ticket Ticket.Model
+    | User UserPage.Model
 
 
 type Msg
@@ -44,6 +46,7 @@ type Msg
     | LoginMsg Login.Msg
     | SearchMsg Search.Msg
     | TicketMsg Ticket.Msg
+    | UserMsg UserPage.Msg
 
 
 main : Program ( String, Encode.Value ) Model Msg
@@ -87,6 +90,9 @@ view model =
 
         Ticket ticket ->
             Skeleton.view TicketMsg (Ticket.view ticket) (viewNavbar model)
+
+        User user ->
+            Skeleton.view UserMsg (UserPage.view user) (viewNavbar model)
 
 
 init : ( String, Encode.Value ) -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
@@ -176,6 +182,14 @@ update message model =
                 _ ->
                     ( model, Cmd.none )
 
+        UserMsg msg ->
+            case model.page of
+                User user ->
+                    stepUser model (UserPage.update msg user)
+
+                _ ->
+                    ( model, Cmd.none )
+
 
 toSession : Model -> Session.Data
 toSession model =
@@ -196,6 +210,9 @@ toSession model =
             m.session
 
         Ticket m ->
+            m.session
+
+        User m ->
             m.session
 
 
@@ -231,8 +248,11 @@ changeRoute route model =
         Just (Routes.LoginRoute redirect) ->
             stepLogin model (Login.init session redirect)
 
-        Just (Routes.TicketRoute from to ride) ->
-            stepTicket model (Ticket.init session from to ride)
+        Just (Routes.TicketRoute from to ride date) ->
+            stepTicket model (Ticket.init session from to ride date)
+
+        Just Routes.UserRoute ->
+            stepUser model (UserPage.init session)
 
 
 stepAbout : Model -> ( About.Model, Cmd About.Msg ) -> ( Model, Cmd Msg )
@@ -270,12 +290,41 @@ stepTicket model ( ticket, cmds ) =
     )
 
 
+stepUser : Model -> ( UserPage.Model, Cmd UserPage.Msg ) -> ( Model, Cmd Msg )
+stepUser model ( user, cmds ) =
+    ( { model | page = User user }
+    , Cmd.map UserMsg cmds
+    )
+
+
 
 -- NAVBAR
 
 
 viewNavbar : Model -> Html Msg
 viewNavbar model =
+    let
+        session =
+            toSession model
+
+        adminLinks =
+            if Session.isUserAdmin session.user then
+                Navbar.dropdown
+                    { id = "admin-dropdown"
+                    , toggle = Navbar.dropdownToggle [] [ text "Panel admina" ]
+                    , items =
+                        [ Navbar.dropdownItem [ href "/admin/users" ] [ text "Użytkownicy" ]
+                        , Navbar.dropdownItem [ href "/admin/train" ] [ text "Pociągi" ]
+                        , Navbar.dropdownItem [ href "/admin/stops", dynamicActive ( Routes.AdminTrainStopsRoute, model ) ] [ text "Przystanki" ]
+                        , Navbar.dropdownItem [ href "/admin/routes" ] [ text "Trasy" ]
+                        , Navbar.dropdownItem [ href "/admin/tickets" ] [ text "Bilety" ]
+                        , Navbar.dropdownItem [ href "/admin/discounts" ] [ text "Zniżki" ]
+                        ]
+                    }
+
+            else
+                Navbar.itemLink [ style "display" "none" ] []
+    in
     Navbar.config NavbarMsg
         |> Navbar.withAnimation
         |> Navbar.dark
@@ -283,19 +332,8 @@ viewNavbar model =
         |> Navbar.items
             [ Navbar.itemLink [ href "/search", dynamicActive ( Routes.SearchRoute Nothing Nothing, model ) ] [ text "Wyszukaj połączenie" ]
             , Navbar.itemLink [ href "/about", dynamicActive ( Routes.AboutRoute, model ) ] [ text "O nas" ]
-            , Navbar.dropdown
-                { id = "admin-dropdown"
-                , toggle = Navbar.dropdownToggle [] [ text "Panel admina" ]
-                , items =
-                    [ Navbar.dropdownItem [ href "/admin/users" ] [ text "Użytkownicy" ]
-                    , Navbar.dropdownItem [ href "/admin/train" ] [ text "Pociągi" ]
-                    , Navbar.dropdownItem [ href "/admin/stops", dynamicActive ( Routes.AdminTrainStopsRoute, model ) ] [ text "Przystanki" ]
-                    , Navbar.dropdownItem [ href "/admin/routes" ] [ text "Trasy" ]
-                    , Navbar.dropdownItem [ href "/admin/tickets" ] [ text "Bilety" ]
-                    , Navbar.dropdownItem [ href "/admin/discounts" ] [ text "Zniżki" ]
-                    ]
-                }
-            , Navbar.itemLink [ href "/login", dynamicActive ( Routes.LoginRoute Nothing, model ) ] [ text (dynamicUserText model) ]
+            , adminLinks
+            , dynamicUserLink model
             ]
         |> Navbar.view model.navbarState
 
@@ -304,8 +342,8 @@ viewNavbar model =
 -- UTILS
 
 
-dynamicUserText : Model -> String
-dynamicUserText model =
+dynamicUserLink : Model -> Navbar.Item Msg
+dynamicUserLink model =
     let
         session =
             toSession model
@@ -315,10 +353,10 @@ dynamicUserText model =
     in
     case user of
         Just u ->
-            u.name ++ " " ++ u.surname
+            Navbar.itemLink [ href "/user", dynamicActive ( Routes.UserRoute, model ) ] [ text (u.name ++ " " ++ u.surname) ]
 
         Nothing ->
-            "Zaloguj się"
+            Navbar.itemLink [ href "/login", dynamicActive ( Routes.LoginRoute Nothing, model ) ] [ text "Zaloguj się" ]
 
 
 dynamicActive : ( Routes.Route, Model ) -> Html.Attribute msg
@@ -339,6 +377,9 @@ isActive ( route, page ) =
             True
 
         ( Routes.SearchRoute _ _, Search _ ) ->
+            True
+
+        ( Routes.UserRoute, User _ ) ->
             True
 
         _ ->

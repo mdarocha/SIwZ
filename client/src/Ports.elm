@@ -4,3 +4,6 @@ import Json.Encode as Encode
 
 
 port setUserSession : Encode.Value -> Cmd msg
+
+
+port clearUserSession : () -> Cmd msg

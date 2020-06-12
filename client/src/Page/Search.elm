@@ -15,7 +15,8 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
-import Iso8601 as TimeIso
+import ISO8601 as TimeIso
+import Iso8601 as DateTimeIso
 import Json.Decode as Decode
 import Json.Encode as Encode
 import Session
@@ -23,6 +24,8 @@ import Set
 import Skeleton
 import Time
 import Url.Builder as UrlBuilder
+import Utils exposing (..)
+import Task
 
 
 type alias AutocompleteStop =
@@ -40,7 +43,7 @@ type AutocompleteStops
 
 type alias RideStop =
     { id : Int
-    , arrivalTime : Time.Posix
+    , arrivalTime : TimeIso.Time
     , stopNumber : Int
     , name : String
     , city : String
@@ -95,8 +98,7 @@ type alias Model =
     , routeToSearch : SearchBoxState
     , queryFromId : Maybe Int
     , queryToId : Maybe Int
-    , useDepartureTime : Bool
-    , departureTime : String
+    , departureTime : TimeIso.Time
     , rides : Rides
     }
 
@@ -105,6 +107,7 @@ type alias TicketParams =
     { from : Int
     , to : Int
     , ride : Int
+    , date : TimeIso.Time
     }
 
 
@@ -115,6 +118,7 @@ type Msg
     | GotRides (Result Http.Error (List Ride))
     | SubmitSearch
     | DepartureTimeUpdate String
+    | CurrentTime Time.Posix
     | SubmitRide TicketParams
 
 
@@ -127,8 +131,14 @@ init session from to =
     let
         newSearchBox =
             SearchBoxState "" Nothing False Loading
+
+        getStops =
+            getStopsList session.api
+
+        currentTime =
+            Task.perform CurrentTime Time.now
     in
-    ( Model session newSearchBox newSearchBox from to False "" NotStarted, getStopsList session.api )
+    ( Model session newSearchBox newSearchBox from to (TimeIso.fromPosix (Time.millisToPosix 0)) NotStarted, Cmd.batch [ getStops, currentTime ] )
 
 
 
@@ -227,7 +237,7 @@ update msg model =
                 ( Just from, Just to ) ->
                     let
                         getCmd =
-                            getRides model.session.api from to model.useDepartureTime model.departureTime
+                            getRides model.session.api from to model.departureTime
 
                         url =
                             UrlBuilder.absolute [ "search" ]
@@ -253,7 +263,17 @@ update msg model =
                     ( model, Cmd.none )
 
         DepartureTimeUpdate text ->
-            ( { model | departureTime = text }, Cmd.none )
+            let
+                time = TimeIso.fromString text
+            in
+            case time of
+                Ok t ->
+                    ( { model | departureTime = t }, Cmd.none )
+                Err _ ->
+                    ( model, Cmd.none )
+
+        CurrentTime time ->
+            ( { model | departureTime = (TimeIso.fromPosix time) }, Cmd.none )
 
         GotRides result ->
             case result of
@@ -270,6 +290,7 @@ update msg model =
                         [ UrlBuilder.int "from" ticketParams.from
                         , UrlBuilder.int "to" ticketParams.to
                         , UrlBuilder.int "ride" ticketParams.ride
+                        , UrlBuilder.string "date" (TimeIso.toString ticketParams.date)
                         ]
             in
             ( model, Nav.pushUrl model.session.key url )
@@ -320,14 +341,6 @@ stopToString stop =
     stop.city ++ " - " ++ stop.name
 
 
-niceTime : Time.Posix -> String
-niceTime time =
-    String.padLeft 2 '0' <|
-        String.fromInt (Time.toHour Time.utc time)
-            ++ ":"
-            ++ (String.padLeft 2 '0' <| String.fromInt (Time.toMinute Time.utc time))
-
-
 rideStopToString : RideStop -> String
 rideStopToString stop =
     stop.name ++ " - " ++ stop.city
@@ -346,7 +359,7 @@ view model =
             , Grid.col [ Col.md6, Col.attrs [ class "mt-4" ] ] [ Html.map RouteToUpdate <| viewSearchBox "Do" model.routeToSearch ]
             ]
         , Grid.row []
-            [ Grid.col [ Col.md6, Col.attrs [ class "mt-4" ] ] [ Checkbox.checkbox [] "Szukaj wg. czasu odjazdu", Input.datetimeLocal [ Input.attrs [ onInput DepartureTimeUpdate ] ] ]
+            [ Grid.col [ Col.md6, Col.attrs [ class "mt-4" ] ] [ Input.datetimeLocal [ Input.attrs [ onInput DepartureTimeUpdate ], Input.value (DateTimeIso.toUtcDateTimeString <| (TimeIso.toPosix model.departureTime)) ] ]
             , Grid.col [ Col.md3, Col.offsetMd3, Col.attrs [ class "mt-4" ] ] [ Button.button [ Button.attrs [ class "ride-search-button", onClick SubmitSearch ], Button.primary, Button.large, Button.block ] [ text "Szukaj" ] ]
             ]
         , div [ class "mt-4" ] [ viewRides model.rides ]
@@ -418,7 +431,7 @@ viewRide : Ride -> Html Msg
 viewRide ride =
     let
         emptyStop =
-            RideStop 0 (Time.millisToPosix 0) 0 "ERROR" "ERROR"
+            RideStop 0 (TimeIso.fromPosix (Time.millisToPosix 0)) 0 "ERROR" "ERROR"
 
         escapeMaybe =
             Maybe.withDefault emptyStop
@@ -442,7 +455,7 @@ viewRide ride =
         |> Card.headerH4 [ class "d-flex flex-wrap" ]
             [ div [ style "flex" "1", style "white-space" "nowrap" ]
                 [ span [ class "oi oi-clock mr-1", style "font-size" "1.2rem" ] []
-                , span [] [ text (niceTime fromStop.arrivalTime) ]
+                , span [] [ text (niceTime (TimeIso.toPosix fromStop.arrivalTime)) ]
                 ]
             , span [ class "font-italic" ]
                 [ text <|
@@ -464,7 +477,7 @@ viewRide ride =
                         [ Button.primary
                         , Button.attrs
                             [ class "align-baseline"
-                            , onClick (SubmitRide <| TicketParams ride.from ride.to ride.id)
+                            , onClick (SubmitRide <| TicketParams ride.from ride.to ride.id fromStop.arrivalTime)
                             ]
                         ]
                         [ text "Kup bilet" ]
@@ -482,7 +495,7 @@ viewStopListStop from to stop =
             , ( "stops-list-route-part-last", stop.stopNumber == to.stopNumber )
             ]
         ]
-        [ span [ class "stops-list-time" ] [ text (niceTime stop.arrivalTime) ]
+        [ span [ class "stops-list-time" ] [ text (niceTime (TimeIso.toPosix stop.arrivalTime)) ]
         , span [] [ text <| rideStopToString stop ]
         ]
 
@@ -504,28 +517,22 @@ getStopsList api =
         }
 
 
-ridesUrl : AutocompleteStop -> AutocompleteStop -> Bool -> String -> String
-ridesUrl from to useDate date =
+ridesUrl : AutocompleteStop -> AutocompleteStop -> String -> String
+ridesUrl from to date =
     let
-        baseQuery =
+        query =
             [ UrlBuilder.int "from" from.id
             , UrlBuilder.int "to" to.id
+            , UrlBuilder.string "date" date 
             ]
-
-        query =
-            if useDate then
-                List.append baseQuery [ UrlBuilder.string "date" date ]
-
-            else
-                baseQuery
     in
     UrlBuilder.relative [ "rides" ] query
 
 
-getRides : String -> AutocompleteStop -> AutocompleteStop -> Bool -> String -> Cmd Msg
-getRides api from to useDate date =
+getRides : String -> AutocompleteStop -> AutocompleteStop -> TimeIso.Time -> Cmd Msg
+getRides api from to date =
     Http.get
-        { url = api ++ ridesUrl from to useDate date
+        { url = api ++ ridesUrl from to (TimeIso.toString date)
         , expect = Http.expectJson GotRides ridesDecoder
         }
 
@@ -560,7 +567,7 @@ rideStopDecoder =
     Decode.list <|
         Decode.map5 RideStop
             (Decode.field "stopId" Decode.int)
-            (Decode.field "arrivalTime" TimeIso.decoder)
+            (Decode.field "arrivalTime" TimeIso.decode)
             (Decode.field "stopNo" Decode.int)
             (Decode.field "name" Decode.string)
             (Decode.field "city" Decode.string)
