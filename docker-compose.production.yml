@@ -1,0 +1,27 @@
+version: "3.0"
+services:
+    server:
+        image: docker.pkg.github.com/zygmuntdzwigon/siwz/server:master
+        ports:
+            - 5000:5000
+        restart: always
+        environment:
+            - TRAINS_DB=${DB_CONN}
+            - TRAINS_JWT_SECRET=${JWT}
+            - ASPNETCORE_URLS=http://+:5000
+            - ASPNETCORE_ENVIRONMENT=Production
+    client:
+        depends_on:
+            - server
+        image: docker.pkg.github.com/zygmuntdzwigon/siwz/client:master
+        restart: always
+        environment:
+            - API_URL=http://siwz.mdarocha.pl:5000/api/
+            - CONFIG_VARS=API_URL
+        ports:
+            - 80:80
+
+    watchtower:
+        image: containrrr/watchtower
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock

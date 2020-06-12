@@ -63,7 +63,7 @@ namespace Server.Controllers
                 return new RideDTO
                 {
                     Id = r.Id,
-                    From = @from,
+                    From = from,
                     To = to,
                     TrainStops = _stopToRouteService.GetStops(r.RouteId).Select(s =>
                     {
@@ -105,11 +105,11 @@ namespace Server.Controllers
             });
 
             // all seats for given ride
-            var seats = Enumerable.Range(1, ride.Train.Wagons + 1).Select(i =>
+            var seats = Enumerable.Range(1, ride.Train.Wagons).Select(i =>
                 new Wagon
                 {
                     wagonNo = i,
-                    seats = Enumerable.Range(1, ride.Train.Seats + 1).Select(j =>
+                    seats = Enumerable.Range(1, ride.Train.Seats).Select(j =>
                     {
                         if (!rideTickets.Any())
                             return true;
@@ -123,7 +123,7 @@ namespace Server.Controllers
         }
 
         [HttpGet("rides/{id}")]
-        public ActionResult<RideDTO> GetRide([FromRoute] int id)
+        public ActionResult<RideDTO> GetRide([FromRoute] int id, [FromQuery] int from, [FromQuery] int to)
         {
             var ride = _rideService.GetRide(id);
             var stops = _stopToRouteService.GetStops(ride.RouteId);
@@ -131,8 +131,8 @@ namespace Server.Controllers
             return Ok(new RideDTO
             {
                 Id = ride.Id,
-                From = stops.First().TrainStopId,
-                To = stops.Last().TrainStopId,
+                From = from,
+                To = to,
                 TrainStops = stops.Select(s =>
                 {
                     startTime = startTime.AddHours(s.HoursDiff).AddMinutes(s.MinutesDiff);

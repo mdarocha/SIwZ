@@ -22,14 +22,21 @@
     <body>
         <script>
             let api_url = null;
-            if(window.__env && __env.api_url) {
+            if(window.__env && __env.API_URL) {
                 api_url = __env.API_URL;
             } else {
                 api_url = "http://localhost:5000/api/";
             }
 
+            let storedUser = sessionStorage.getItem('user');
+            let user = storedUser ? JSON.parse(storedUser) : null;
+
             let app = Elm.Main.init({
-                flags: api_url
+                flags: [ api_url, user ]
+            });
+
+            app.ports.setUserSession.subscribe((user) => {
+                sessionStorage.setItem('user', JSON.stringify(user));
             });
         </script>
     </body>
