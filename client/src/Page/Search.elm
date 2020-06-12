@@ -23,6 +23,7 @@ import Set
 import Skeleton
 import Time
 import Url.Builder as UrlBuilder
+import Utils exposing (..)
 
 
 type alias AutocompleteStop =
@@ -318,14 +319,6 @@ performSearch suggestions input =
 stopToString : AutocompleteStop -> String
 stopToString stop =
     stop.city ++ " - " ++ stop.name
-
-
-niceTime : Time.Posix -> String
-niceTime time =
-    String.padLeft 2 '0' <|
-        String.fromInt (Time.toHour Time.utc time)
-            ++ ":"
-            ++ (String.padLeft 2 '0' <| String.fromInt (Time.toMinute Time.utc time))
 
 
 rideStopToString : RideStop -> String

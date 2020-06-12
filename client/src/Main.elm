@@ -304,7 +304,9 @@ stepUser model ( user, cmds ) =
 viewNavbar : Model -> Html Msg
 viewNavbar model =
     let
-        session = toSession model
+        session =
+            toSession model
+
         adminLinks =
             if Session.isUserAdmin session.user then
                 Navbar.dropdown
@@ -319,6 +321,7 @@ viewNavbar model =
                         , Navbar.dropdownItem [ href "/admin/discounts" ] [ text "Zniżki" ]
                         ]
                     }
+
             else
                 Navbar.itemLink [ style "display" "none" ] []
     in
@@ -351,6 +354,7 @@ dynamicUserLink model =
     case user of
         Just u ->
             Navbar.itemLink [ href "/user", dynamicActive ( Routes.UserRoute, model ) ] [ text (u.name ++ " " ++ u.surname) ]
+
         Nothing ->
             Navbar.itemLink [ href "/login", dynamicActive ( Routes.LoginRoute Nothing, model ) ] [ text "Zaloguj się" ]
 
@@ -373,6 +377,9 @@ isActive ( route, page ) =
             True
 
         ( Routes.SearchRoute _ _, Search _ ) ->
+            True
+
+        ( Routes.UserRoute, User _ ) ->
             True
 
         _ ->

@@ -192,7 +192,7 @@ redirectCommand key redirect =
             Nav.pushUrl key ("/" ++ url)
 
         Nothing ->
-            Cmd.none
+            Nav.pushUrl key "/user"
 
 
 
