@@ -46,10 +46,18 @@ namespace Server.Controllers
         [HttpGet("rides")]
         public ActionResult<List<RideDTO>> GetRides([FromQuery] int from, [FromQuery] int to, [FromQuery] DateTime date)
         {
+            if (date < DateTime.Now)
+            {
+                return BadRequest("We cannot travel back in time");
+            }
+            
             var routes = _stopToRouteService.GetRoutes(from, to);
             var rides = _rideService.GetByIdsList(routes.Select(r => r.Id).ToList());
 
-            var rideDTOs = rides.Where(r => r.StartTime > date).Select(r =>
+            var rideDTOs = rides.Where(
+                r => (r.StartTime.Date == date.Date && r.StartTime.TimeOfDay > date.TimeOfDay) ||
+                                            (date.Date > DateTime.Today && r.IsEveryDayRide)
+                                            ).Select(r =>
             {
                 var startTime = r.StartTime;
                 return new RideDTO
@@ -79,16 +87,16 @@ namespace Server.Controllers
         }
 
         [HttpGet("rides/{id}/freeSeats")]
-        public ActionResult<List<Wagon>> GetFreeSeats([FromRoute] int id, [FromQuery] int from, [FromQuery] int to)
+        public ActionResult<List<Wagon>> GetFreeSeats([FromRoute] int rideId, [FromQuery] int from, [FromQuery] int to)
         {
-            var ride = _rideService.GetRide(id);
+            var ride = _rideService.GetRide(rideId);
             var route = _stopToRouteService.GetStops(ride.RouteId);
 
             var fromNo = route.Where(x => x.TrainStopId == from).Select(x => x.StopNo).Single();
             var toNo = route.Where(x => x.TrainStopId == to).Select(x => x.StopNo).Single();
 
             // all tickets for given ride on given route section
-            var rideTickets = _ticketsService.GetRideTickets(id).Where(t =>
+            var rideTickets = _ticketsService.GetRideTickets(rideId).Where(t =>
             {
                 var ticketFromNo = route.Where(x => x.TrainStopId == t.FromId).Select(x => x.StopNo).Single();
                 var ticketToNo = route.Where(x => x.TrainStopId == t.ToId).Select(x => x.StopNo).Single();
@@ -148,10 +156,8 @@ namespace Server.Controllers
 
         [Authorize]
         [HttpPost("tickets")]
-        public ActionResult<Ticket> BookTicket([FromBody]TicketFormDTO form)
+        public ActionResult<Ticket> BookTicket([FromBody] TicketFormDTO form)
         {
-            
-            
             var id = _userManager.GetUserId(User);
             var ride = _rideService.GetRide(form.RideId);
             var price = ride.Price * GetRoutePart(ride.RouteId, form.FromId, form.ToId);
@@ -173,7 +179,7 @@ namespace Server.Controllers
             };
 
             var t = _ticketsService.CreateTicket(ticket, id);
-            
+
             return Ok();
         }
 
@@ -185,7 +191,7 @@ namespace Server.Controllers
             var le = stops.Count;
             return (le - fromNo - (le - toNo)) / le;
         }
-        
+
         [Authorize]
         [HttpGet("tickets")]
         public List<TicketDTO> GetUserTickets()
@@ -212,7 +218,7 @@ namespace Server.Controllers
         {
             var ticket = _ticketsService.GetTicket(id);
             var userId = _userManager.GetUserId(User);
-         
+
             if (ticket.UserId.Equals(userId))
             {
                 return Ok(_ticketsService.DeleteTicket(id));
