@@ -46,7 +46,7 @@ namespace Server.Controllers
         [HttpGet("rides")]
         public ActionResult<List<RideDTO>> GetRides([FromQuery] int from, [FromQuery] int to, [FromQuery] DateTime date)
         {
-            if (date < DateTime.Now)
+            if (date < DateTime.Today)
             {
                 return BadRequest("We cannot travel back in time");
             }
@@ -70,6 +70,7 @@ namespace Server.Controllers
                     Id = r.Id,
                     From = from,
                     To = to,
+                    StartTime = startTime,
                     TrainStops = _stopToRouteService.GetStops(r.RouteId).Select(s =>
                     {
                         startTime = startTime.AddHours(s.HoursDiff).AddMinutes(s.MinutesDiff);
@@ -82,7 +83,6 @@ namespace Server.Controllers
                             ArrivalTime = startTime
                         };
                     }).ToList(),
-                    StartTime = r.StartTime,
                     Train = r.Train,
                     Price = r.Price
                 };
