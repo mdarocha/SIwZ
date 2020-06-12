@@ -272,7 +272,7 @@ update msg model =
                         ( _, _, _ ) ->
                             ( model, Cmd.none )
 
-                (_, _) ->
+                ( _, _ ) ->
                     ( model, Nav.pushUrl model.session.key "/login" )
 
         BookedTicket result ->
@@ -571,7 +571,11 @@ viewSeatSelector maybeSeats maybeSelected maybeSelectedWagon maybeShownWagon =
             div
                 [ classList [ ( "enabled", avaible ), ( "selected", isSelected num ) ]
                 , attribute "tabindex" (String.fromInt num)
-                , if avaible then onClick (SeatSelected num) else class ""
+                , if avaible then
+                    onClick (SeatSelected num)
+
+                  else
+                    class ""
                 ]
                 [ text <| String.fromInt (num + 1) ]
     in

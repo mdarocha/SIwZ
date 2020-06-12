@@ -11,6 +11,7 @@ type Route
     | SearchRoute (Maybe Int) (Maybe Int)
     | TicketRoute (Maybe Int) (Maybe Int) (Maybe Int)
     | LoginRoute (Maybe String)
+    | UserRoute
     | RootRoute
 
 
@@ -23,6 +24,7 @@ parser =
         , map AboutRoute (s "about")
         , map AdminTrainStopsRoute (s "admin" </> s "stops")
         , map LoginRoute (s "login" <?> Query.string "return")
+        , map UserRoute (s "user")
         ]
 
 
