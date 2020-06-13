@@ -4,7 +4,6 @@ using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Server.Models;
 using Server.ModelsDTO;
 using Server.Services;
@@ -56,8 +55,7 @@ namespace Server.Controllers
 
             var rideDTOs = rides.Where(
                 r => (r.StartTime.Date == date.Date && r.StartTime.TimeOfDay > date.TimeOfDay) ||
-                                            (date.Date > DateTime.Today && r.IsEveryDayRide)
-                                            ).Select(r =>
+                     (date.Date > r.StartTime.Date && r.IsEveryDayRide)).Select(r =>
             {
                 DateTime startTime;
                 if (r.IsEveryDayRide && date.Date > DateTime.Today)
@@ -167,11 +165,8 @@ namespace Server.Controllers
             var id = _userManager.GetUserId(User);
             var ride = _rideService.GetRide(form.RideId);
             var price = ride.Price * GetRoutePart(ride.RouteId, form.FromId, form.ToId);
-
-            if (!form.DiscountId.Equals(null))
-            {
-                price = _discountService.ApplyDiscount(price, form.DiscountId);
-            }
+            price = _discountService.ApplyDiscount(price, form.DiscountId);
+            
 
             var firstStop = _stopToRouteService.GetStops(ride.RouteId).Single(str => str.TrainStopId == form.FromId);
 
@@ -230,13 +225,13 @@ namespace Server.Controllers
             return Forbid();
         }
         
-        private int GetRoutePart(int routeId, int from, int to)
+        private double GetRoutePart(int routeId, int from, int to)
         {
             var stops = _stopToRouteService.GetStops(routeId);
             var fromNo = stops.Single(s => s.TrainStopId == from).StopNo;
             var toNo = stops.Single(s => s.TrainStopId == to).StopNo;
             var le = stops.Count;
-            return (le - fromNo - (le - toNo)) / le;
+            return (double)(toNo - fromNo) / (le - 1);
         }
         
         private DateTime ToRideDate(DateTime formTime, DateTime rideTime)

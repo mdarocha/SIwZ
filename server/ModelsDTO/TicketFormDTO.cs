@@ -10,7 +10,6 @@ namespace Server.ModelsDTO
         public int ToId { set; get; }
         public int WagonNo { set; get; }
         public int SeatNo { set; get; }
-        
         public DateTime RideDate { set; get; }
     }
 }

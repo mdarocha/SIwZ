@@ -430,6 +430,7 @@ paths:
       - $ref: '#/components/parameters/id'
       - $ref: '#/components/parameters/from'
       - $ref: '#/components/parameters/to'
+      - $ref: '#/components/parameters/date'
     get:
       tags: 
         - TicketsBooking
