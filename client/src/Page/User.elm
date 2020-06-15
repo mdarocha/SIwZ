@@ -17,9 +17,9 @@ import Json.Decode as Decode
 import Jwt.Http
 import Ports
 import Session
+import Set exposing (Set)
 import Skeleton
 import Time
-import Set exposing (Set)
 
 
 type alias Model =
@@ -29,10 +29,12 @@ type alias Model =
     , openCancelQuestions : Set Int
     }
 
+
 type alias Stop =
     { city : String
     , name : String
     }
+
 
 type alias Ticket =
     { id : Int
@@ -59,6 +61,7 @@ type Msg
     | CancelTicketQuestion Int
     | CloseQuestion Int
     | RevokedTicket (Result Http.Error ())
+
 
 
 -- INIT
@@ -111,16 +114,17 @@ update msg model =
         CancelTicket id ->
             ( model, revokeTicket model.session.api model.user.token id )
 
-
         CancelTicketQuestion id ->
             let
-                newSet = Set.insert id model.openCancelQuestions
+                newSet =
+                    Set.insert id model.openCancelQuestions
             in
             ( { model | openCancelQuestions = newSet }, Cmd.none )
 
         CloseQuestion id ->
             let
-                newSet = Set.remove id model.openCancelQuestions
+                newSet =
+                    Set.remove id model.openCancelQuestions
             in
             ( { model | openCancelQuestions = newSet }, Cmd.none )
 
@@ -131,6 +135,7 @@ update msg model =
 
                 Err _ ->
                     ( { model | tickets = Error }, Cmd.none )
+
 
 
 -- VIEW
@@ -166,6 +171,7 @@ viewTicketsList model =
         Success tickets ->
             if List.length tickets == 0 then
                 h4 [ class "text-center mt-4" ] [ text "Brak biletów" ]
+
             else
                 div [] <| List.map (viewTicket model) tickets
 
@@ -202,16 +208,18 @@ viewCancelForm model ticket =
             , Button.button [ Button.outlineSecondary, Button.attrs [ class "align-baseline", onClick (CloseQuestion ticket.id) ] ]
                 [ text "Nie" ]
             ]
+
     else
         div [ class "ride-price" ]
             [ span [ class "oi oi-paperclip" ] []
             , span [] [ text <| String.fromInt ticket.price ++ " zł" ]
             , Button.button
                 [ Button.danger
-                , Button.attrs [ class "align-baseline" , onClick (CancelTicketQuestion ticket.id) ]
+                , Button.attrs [ class "align-baseline", onClick (CancelTicketQuestion ticket.id) ]
                 ]
                 [ text "Anuluj bilet" ]
             ]
+
 
 
 -- HTTP
@@ -228,9 +236,11 @@ getTickets api token =
 revokeTicket : String -> String -> Int -> Cmd Msg
 revokeTicket api token id =
     Jwt.Http.delete token
-        { url = api ++ "tickets/" ++ (String.fromInt id)
+        { url = api ++ "tickets/" ++ String.fromInt id
         , expect = Http.expectWhatever RevokedTicket
         }
+
+
 
 -- JSON
 
@@ -247,6 +257,7 @@ ticketsDecoder =
             (Decode.field "wagonNo" Decode.int)
             (Decode.field "seatNo" Decode.int)
             (Decode.field "rideDate" TimeIso.decode)
+
 
 stopDecoder : Decode.Decoder Stop
 stopDecoder =

@@ -157,7 +157,7 @@ init session from to ride date =
                         Ok time ->
                             let
                                 rideCmd =
-                                    getRide session.api fromId toId rideId
+                                    getRide session.api fromId toId rideId time
 
                                 seatsCmd =
                                     getFreeSeats session.api fromId toId rideId time
@@ -166,24 +166,32 @@ init session from to ride date =
                                     getDiscounts session.api
                             in
                             ( model time, Cmd.batch [ rideCmd, seatsCmd, discountsCmd ] )
+
                         Err _ ->
                             ( emptyModel, Nav.pushUrl session.key "/error" )
-                ( Just _, Nothing ) ->
+
+                ( Nothing, Just rideDate ) ->
+                    case TimeIso.fromString rideDate of
+                        Ok time ->
+                            let
+                                returnUrl =
+                                    UrlBuilder.relative [ "ticket" ]
+                                        [ UrlBuilder.int "from" fromId
+                                        , UrlBuilder.int "to" toId
+                                        , UrlBuilder.int "ride" rideId
+                                        , UrlBuilder.string "date" (TimeIso.toString time)
+                                        ]
+
+                                url =
+                                    UrlBuilder.absolute [ "login" ] [ UrlBuilder.string "return" returnUrl ]
+                            in
+                            ( emptyModel, Nav.pushUrl session.key url )
+
+                        Err _ ->
+                            ( emptyModel, Nav.pushUrl session.key "/error" )
+
+                ( _, _ ) ->
                     ( emptyModel, Nav.pushUrl session.key "/error" )
-
-                ( Nothing, _ ) ->
-                    let
-                        returnUrl =
-                            UrlBuilder.relative [ "ticket" ]
-                                [ UrlBuilder.int "from" fromId
-                                , UrlBuilder.int "to" toId
-                                , UrlBuilder.int "ride" rideId
-                                ]
-
-                        url =
-                            UrlBuilder.absolute [ "login" ] [ UrlBuilder.string "return" returnUrl ]
-                    in
-                    ( emptyModel, Nav.pushUrl session.key url )
 
         ( _, _, _ ) ->
             ( emptyModel, Nav.pushUrl session.key "/error" )
@@ -215,7 +223,10 @@ update msg model =
         GotDiscounts result ->
             case result of
                 Ok discounts ->
-                    ( { model | discounts = DiscountsSuccess discounts }, Cmd.none )
+                    let
+                        firstDiscount = List.head discounts
+                    in
+                    ( { model | discounts = DiscountsSuccess discounts, selectedDiscount = firstDiscount }, Cmd.none )
 
                 Err _ ->
                     ( { model | discounts = DiscountsFailure }, Cmd.none )
@@ -278,7 +289,7 @@ update msg model =
                                 ticket =
                                     Ticket ride.id discount.id ride.from ride.to (wagon + 1) (seat + 1) model.date
                             in
-                            ( model, bookTicket model.session.api user.token ticket)
+                            ( model, bookTicket model.session.api user.token ticket )
 
                         ( _, _, _ ) ->
                             ( model, Cmd.none )
@@ -497,17 +508,17 @@ view model =
 viewHelpText : Model -> Html Msg
 viewHelpText model =
     case ( model.selectedPlace.wagonShown, model.selectedPlace.selectedSeat, model.selectedDiscount ) of
-        ( Nothing, Nothing, Nothing ) ->
+        ( Nothing, Nothing, _ ) ->
             text "Wybierz wagon w pociągu"
 
-        ( Just _, Nothing, Nothing ) ->
+        ( Just _, Nothing, _ ) ->
             text "Wybierz miejsce w wagonie"
 
         ( Just _, Just _, Nothing ) ->
             text "Wybierz zniżkę, jeśli aplikuje się"
 
         ( Just _, Just _, Just _ ) ->
-            text "Bilet gotowy - potwierdź kupno"
+            text "Bilet gotowy - wybierz zniżke, jeśli się aplikuje i potwierdź kupno"
 
         ( _, _, _ ) ->
             text "¯\\_(ツ)_/¯"
@@ -639,14 +650,15 @@ viewNextButton model =
 -- HTTP
 
 
-getRide : String -> Int -> Int -> Int -> Cmd Msg
-getRide api fromId toId rideId =
+getRide : String -> Int -> Int -> Int -> TimeIso.Time -> Cmd Msg
+getRide api fromId toId rideId date =
     let
         url =
             UrlBuilder.relative
                 [ "rides", String.fromInt rideId ]
                 [ UrlBuilder.int "from" fromId
                 , UrlBuilder.int "to" toId
+                , UrlBuilder.string "date" (TimeIso.toString date)
                 ]
     in
     Http.get
@@ -705,9 +717,11 @@ ticketEncoder ticket =
         , ( "rideDate", encodeTime ticket.date )
         ]
 
+
 encodeTime : TimeIso.Time -> Encode.Value
 encodeTime =
     TimeIso.toString >> Encode.string
+
 
 rideDecoder : Decode.Decoder Ride
 rideDecoder =
