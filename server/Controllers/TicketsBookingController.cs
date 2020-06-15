@@ -58,8 +58,10 @@ namespace Server.Controllers
                      (date.Date > r.StartTime.Date && r.IsEveryDayRide)).Select(r =>
             {
                 DateTime startTime;
-                if (r.IsEveryDayRide && date.Date > DateTime.Today)
-                    startTime = ToRideDate(date, r.StartTime);
+                if (r.IsEveryDayRide)
+                {
+                    startTime = r.StartTime.Date == DateTime.Today ? r.StartTime : ToRideDate(date, r.StartTime);
+                }
                 else
                     startTime = r.StartTime;
                 
