@@ -26,4 +26,4 @@ view toMsg details navbar =
 
 viewFooter : Html msg
 viewFooter =
-    footer [] [ text "© 2137 lololololol" ]
+    footer [] [ text "© 2020 Politechnika Krakowska" ]
