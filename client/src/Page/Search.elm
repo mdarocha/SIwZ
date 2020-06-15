@@ -22,10 +22,10 @@ import Json.Encode as Encode
 import Session
 import Set
 import Skeleton
+import Task
 import Time
 import Url.Builder as UrlBuilder
 import Utils exposing (..)
-import Task
 
 
 type alias AutocompleteStop =
@@ -264,16 +264,18 @@ update msg model =
 
         DepartureTimeUpdate text ->
             let
-                time = TimeIso.fromString text
+                time =
+                    TimeIso.fromString text
             in
             case time of
                 Ok t ->
                     ( { model | departureTime = t }, Cmd.none )
+
                 Err _ ->
                     ( model, Cmd.none )
 
         CurrentTime time ->
-            ( { model | departureTime = (TimeIso.fromPosix time) }, Cmd.none )
+            ( { model | departureTime = TimeIso.fromPosix time }, Cmd.none )
 
         GotRides result ->
             case result of
@@ -359,7 +361,7 @@ view model =
             , Grid.col [ Col.md6, Col.attrs [ class "mt-4" ] ] [ Html.map RouteToUpdate <| viewSearchBox "Do" model.routeToSearch ]
             ]
         , Grid.row []
-            [ Grid.col [ Col.md6, Col.attrs [ class "mt-4" ] ] [ Input.datetimeLocal [ Input.attrs [ onInput DepartureTimeUpdate ], Input.value (DateTimeIso.toUtcDateTimeString <| (TimeIso.toPosix model.departureTime)) ] ]
+            [ Grid.col [ Col.md6, Col.attrs [ class "mt-4" ] ] [ Input.datetimeLocal [ Input.attrs [ onInput DepartureTimeUpdate ], Input.value (DateTimeIso.toUtcDateTimeString <| TimeIso.toPosix model.departureTime) ] ]
             , Grid.col [ Col.md3, Col.offsetMd3, Col.attrs [ class "mt-4" ] ] [ Button.button [ Button.attrs [ class "ride-search-button", onClick SubmitSearch ], Button.primary, Button.large, Button.block ] [ text "Szukaj" ] ]
             ]
         , div [ class "mt-4" ] [ viewRides model.rides ]
@@ -523,7 +525,7 @@ ridesUrl from to date =
         query =
             [ UrlBuilder.int "from" from.id
             , UrlBuilder.int "to" to.id
-            , UrlBuilder.string "date" date 
+            , UrlBuilder.string "date" date
             ]
     in
     UrlBuilder.relative [ "rides" ] query
